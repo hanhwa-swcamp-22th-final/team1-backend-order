@@ -17,8 +17,8 @@ public class Order {
   private final LocalDate orderDate;
 
   /*
-   * - 주문 일자
-   *   생성 이후 cancel(), markOutboundCompleted() 같은 도메인 행위에 의해 바뀐다.
+   * - 주문 상태
+   *   생성 이후 cancelOrder(), markOutboundCompleted() 같은 도메인 행위에 의해 바뀐다.
    * */
   private OrderStatus status;
 
@@ -32,12 +32,23 @@ public class Order {
     this.orderNo = orderNo;
     this.orderDate = orderDate;
     this.status = status;
+  }
 
+  /**
+   * - 주문 생성
+   *   새 주문은 항상 출고 대기 상태로 시작한다는 규칙을 표현한다.
+   *
+   * @param orderNo   주문번호
+   * @param orderDate 주문일자
+   * @return Order
+   */
+  public static Order create(String orderNo, LocalDate orderDate) {
+    return new Order(orderNo, orderDate, OrderStatus.PENDING_OUTBOUND);
   }
 
   /*
-   * - 주문 생성 팩토리 메서드
-   *   새 주문은 하상 출고 대기 상태로 시작한다는 규칙을 표현한다.
+   * 출고 대기 여부를 반환한다.
+   * 출고 처리나 통계 집계 시 대상 주문을 필터링하는 데 사용된다.
    * */
   public boolean isPendingOutbound() {
     return status == OrderStatus.PENDING_OUTBOUND;
@@ -58,37 +69,46 @@ public class Order {
 
   /*
    * 주문을 취소 상태로 변경한다.
-   *
-   * 현재는 단순히 상태만 바꾸지만,
-   * 이후 정책에 따라 "이미 출고 완료된 주문은 취소 불가" 같은 규칙을 추가할 수 있다.
+   * 단, 이미 출고 완료된 주문은 취소할 수 없다.
    * */
-  public void cancel() {
+  public void cancelOrder() {
+    if (status == OrderStatus.OUTBOUND_COMPLETED) {
+      throw new IllegalStateException("Completed order cannot be canceled.");
+    }
     this.status = OrderStatus.CANCELED;
   }
 
   /*
    * 테스트 검증용 getter.
-   * 현재 단계에서는 도메인 상태를확인하기 위해 최소한으로 열어둔다.
+   * 현재 단계에서는 도메인 상태를 확인하기 위해 최소한으로 열어둔다.
    * */
-  public String getOrderNo() {
-    return orderNo;
-  }
+  public String getOrderNo() { return orderNo; }
+  public LocalDate getOrderDate() { return orderDate; }
+  public OrderStatus getStatus() { return status; }
 
-  public LocalDate getOrderDate() {
-    return orderDate;
-  }
-
-  public OrderStatus getStatus() {
-    return status;
-  }
-
-  /*
+  /**
+   * - 주문번호
    * 주문 번호 필수 값 검증
-   * */
+   *
+   * @param orderNo 주문번호
+   */
   private void validateOrderNo(String orderNo) {
     if (orderNo == null || orderNo.isBlank()) {
       throw new IllegalArgumentException("Order number is required.");
     }
   }
+
+  /**
+   * - 주문일자
+   * 도메인 규칙상 주문일자는 필수값
+   *
+   * @param orderDate 주문일자
+   */
+  private void validateOrderDate(LocalDate orderDate) {
+    if (orderDate == null) {
+      throw new IllegalArgumentException("Order date is required.");
+    }
+  }
+
 
 }

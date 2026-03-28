@@ -11,10 +11,10 @@ public class OrderTest {
 
   @Test
   void createCreatesPendingOutboundOrder() {
-    Order order = Order.create("ORD-20260327-001", LocalDate.of (2026, 3, 27));
+    Order order = Order.create("ORD-20260327-001", LocalDate.of(2026, 3, 27));
 
     assertThat(order.getOrderNo()).isEqualTo("ORD-20260327-001");
-    assertThat(order.getOrderDate()).isEqualTo(Locaate.of(2026, 3, 27));
+    assertThat(order.getOrderDate()).isEqualTo(LocalDate.of(2026, 3, 27));
     assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING_OUTBOUND);
   }
 
@@ -33,11 +33,35 @@ public class OrderTest {
   @Test
   void canceledOrderCannotBeMarkedAsOutboundCompleted() {
     Order order = Order.create("ORD-20260327-001", LocalDate.of(2026, 3, 27));
-    order.cancel();
+    order.cancelOrder();
 
-    assertThatThrownBy(order::markOutboundCompleted())
+    assertThatThrownBy(order::markOutboundCompleted)
         .isInstanceOf(IllegalStateException.class)
         .hasMessage("Canceled order cannot be completed.");
   }
+  @Test
+  void createFailsWhenOrderNoIsBlank() {
+    assertThatThrownBy(() -> Order.create(" ", LocalDate.of(2026, 3, 27)))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Order number is required.");
+  }
 
+  @Test
+  void createFailsWhenOrderDateIsNull() {
+    assertThatThrownBy(() -> Order.create("ORD-20260327-001", null))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Order date is required.");
+  }
+
+  @Test
+  void completedOrderCannotBeCanceled() {
+    Order order = Order.create("ORD-20260327-001", LocalDate.of(2026, 3, 27));
+    order.markOutboundCompleted();
+
+    assertThatThrownBy(order::cancelOrder)
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessage("Completed order cannot be canceled.");
+  }
 }
+
+
