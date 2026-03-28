@@ -17,7 +17,7 @@ public class Order {
   private final LocalDate orderDate;
 
   /*
-   * - 주문 일자
+   * - 주문 상태
    *   생성 이후 cancel(), markOutboundCompleted() 같은 도메인 행위에 의해 바뀐다.
    * */
   private OrderStatus status;
@@ -32,7 +32,18 @@ public class Order {
     this.orderNo = orderNo;
     this.orderDate = orderDate;
     this.status = status;
+  }
 
+  /**
+   * - 주문 생성
+   * 새 주문은 기본적으로 PENDING_OUTBOUND 상태로 시작한다.
+   *
+   * @param orderNo   주문번호
+   * @param orderDate 주문일자
+   * @return
+   */
+  public static Order create(String orderNo, LocalDate orderDate) {
+    return new Order(orderNo, orderDate, OrderStatus.PENDING_OUTBOUND);
   }
 
   /*
@@ -82,13 +93,27 @@ public class Order {
     return status;
   }
 
-  /*
+  /**
+   * - 주문번호
    * 주문 번호 필수 값 검증
-   * */
+   *
+   * @param orderNo
+   */
   private void validateOrderNo(String orderNo) {
     if (orderNo == null || orderNo.isBlank()) {
       throw new IllegalArgumentException("Order number is required.");
     }
   }
 
+  /**
+   * - 주문일자
+   * 도메인 규칙상 주문일자는 필수값
+   *
+   * @param orderDate 주문일자
+   */
+  private void validateOrderDate(LocalDate orderDate) {
+    if (orderDate == null) {
+      throw new IllegalArgumentException("Order date is required");
+    }
+  }
 }

@@ -14,7 +14,7 @@ public class OrderTest {
     Order order = Order.create("ORD-20260327-001", LocalDate.of (2026, 3, 27));
 
     assertThat(order.getOrderNo()).isEqualTo("ORD-20260327-001");
-    assertThat(order.getOrderDate()).isEqualTo(Locaate.of(2026, 3, 27));
+    assertThat(order.getOrderDate()).isEqualTo(LocalDate.of(2026, 3, 27));
     assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING_OUTBOUND);
   }
 
@@ -35,7 +35,7 @@ public class OrderTest {
     Order order = Order.create("ORD-20260327-001", LocalDate.of(2026, 3, 27));
     order.cancel();
 
-    assertThatThrownBy(order::markOutboundCompleted())
+    assertThatThrownBy(order::markOutboundCompleted)
         .isInstanceOf(IllegalStateException.class)
         .hasMessage("Canceled order cannot be completed.");
   }
