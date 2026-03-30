@@ -1,5 +1,6 @@
 package com.conk.order.command.domain.aggregate;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 
 /*
@@ -9,9 +10,21 @@ import lombok.Getter;
  * 현재 단계에서는 SKU와 수량만 최소 필드로 둔다.
  *   */
 @Getter
+@Entity
 public class OrderItem {
-  private final String sku;
-  private final int quantity;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "order_no")
+  private Order order;
+
+  private String sku;
+  private int quantity;
+
+  protected OrderItem() {}
 
   private OrderItem(String sku, int quantity) {
     validateSku(sku);
@@ -22,6 +35,10 @@ public class OrderItem {
 
   public static OrderItem create(String sku, int quantity) {
     return new OrderItem(sku, quantity);
+  }
+
+  void assignOrder(Order order) {
+    this.order = order;
   }
 
   private void validateSku(String sku) {

@@ -1,5 +1,7 @@
 package com.conk.order.command.domain.aggregate;
 
+
+import jakarta.persistence.Embeddable;
 import lombok.Getter;
 
 /*
@@ -9,13 +11,16 @@ import lombok.Getter;
  *   현재 단계에서는 필수 주소 정보 최소한으로 검증한다.
  * */
 @Getter
+@Embeddable
 public class ShippingAddress {
 
-  private final String address1;
-  private final String address2;
-  private final String city;
-  private final String state;
-  private final String zipCode;
+  private String address1;
+  private String address2;
+  private String city;
+  private String state;
+  private String zipCode;
+
+  protected ShippingAddress() {}
 
   private ShippingAddress(String address1, String address2, String city, String state, String zipCode) {
     validateAddress1(address1);

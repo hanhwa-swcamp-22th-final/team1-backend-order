@@ -1,20 +1,32 @@
 package com.conk.order.command.domain.aggregate;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.Getter;
-
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Entity
+@Table(name = "orders")
 public class Order {
 
-  private final String orderNo;
-  private final LocalDate orderDate;
-  private OrderStatus status;
-  private final List<OrderItem> items;
-  private final ShippingAddress shippingAddress;
+  @Id
+  private String orderNo;
 
+  private LocalDate orderDate;
+
+  @Enumerated(EnumType.STRING)
+  private OrderStatus status;
+
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<OrderItem> items = new ArrayList<>();
+
+  @Embedded
+  private ShippingAddress shippingAddress;
+
+
+  protected Order(){}
   /*
    * 외부에서 직접 생성자를 호출하지 못하게 막고,
    * create() 팩토리 메서드를 통해 생성 규칙을 강제한다.
@@ -32,9 +44,12 @@ public class Order {
     validateShippingAddress(shippingAddress);
     this.orderNo = orderNo;
     this.orderDate = orderDate;
-    this.items = items;
     this.shippingAddress = shippingAddress;
     this.status = status;
+
+    for (OrderItem item : items) {
+      addItem(item);
+    }
   }
 
   /**
@@ -92,6 +107,11 @@ public class Order {
       throw new IllegalStateException("Completed order cannot be canceled.");
     }
     this.status = OrderStatus.CANCELED;
+  }
+
+  private void addItem(OrderItem item) {
+    item.assignOrder(this);
+    this.items.add(item);
   }
 
   /**
