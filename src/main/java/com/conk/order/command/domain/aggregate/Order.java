@@ -1,49 +1,65 @@
 package com.conk.order.command.domain.aggregate;
 
-import java.time.LocalDate;
+import jakarta.persistence.Entity;
+import lombok.Getter;
 
+import java.time.LocalDate;
+import java.util.List;
+
+@Getter
 public class Order {
 
-  /*
-   * - 주문번호
-   *   주문을 식별하는 핵심 값이므로 null 또는 blank 를 허용하지 않는다.
-   * */
   private final String orderNo;
-
-  /*
-   * - 주문일자
-   *   통계나 조회 기준이 되는 값이므로 null을 허용하지 않는다.
-   * */
   private final LocalDate orderDate;
-
-  /*
-   * - 주문 상태
-   *   생성 이후 cancelOrder(), markOutboundCompleted() 같은 도메인 행위에 의해 바뀐다.
-   * */
   private OrderStatus status;
+  private final List<OrderItem> items;
+  private final ShippingAddress shippingAddress;
 
   /*
    * 외부에서 직접 생성자를 호출하지 못하게 막고,
    * create() 팩토리 메서드를 통해 생성 규칙을 강제한다.
    * */
-  private Order(String orderNo, LocalDate orderDate, OrderStatus status) {
+  private Order(
+      String orderNo,
+      LocalDate orderDate,
+      List<OrderItem> items,
+      ShippingAddress shippingAddress,
+      OrderStatus status
+  ) {
     validateOrderNo(orderNo);
     validateOrderDate(orderDate);
+    validateItems(items);
+    validateShippingAddress(shippingAddress);
     this.orderNo = orderNo;
     this.orderDate = orderDate;
+    this.items = items;
+    this.shippingAddress = shippingAddress;
     this.status = status;
   }
 
   /**
-   * - 주문 생성
-   *   새 주문은 항상 출고 대기 상태로 시작한다는 규칙을 표현한다.
+   *  - 주문 생성
+   *    새 주문은 항상 출고 대기 상태로 시작한다는 규칙을 표현한다.
    *
-   * @param orderNo   주문번호
-   * @param orderDate 주문일자
+   * @param orderNo 주문번호
+   * @param orderDate 주문날짜
+   * @param items 주문 항목 목록
+   * @param shippingAddress 배송지
+   *
    * @return Order
    */
-  public static Order create(String orderNo, LocalDate orderDate) {
-    return new Order(orderNo, orderDate, OrderStatus.PENDING_OUTBOUND);
+  public static Order create(
+      String orderNo,
+      LocalDate orderDate,
+      List<OrderItem> items,
+      ShippingAddress shippingAddress
+  ) {
+    return new Order(
+        orderNo,
+        orderDate,
+        items,
+        shippingAddress,
+        OrderStatus.PENDING_OUTBOUND);
   }
 
   /*
@@ -78,14 +94,6 @@ public class Order {
     this.status = OrderStatus.CANCELED;
   }
 
-  /*
-   * 테스트 검증용 getter.
-   * 현재 단계에서는 도메인 상태를 확인하기 위해 최소한으로 열어둔다.
-   * */
-  public String getOrderNo() { return orderNo; }
-  public LocalDate getOrderDate() { return orderDate; }
-  public OrderStatus getStatus() { return status; }
-
   /**
    * - 주문번호
    * 주문 번호 필수 값 검증
@@ -110,5 +118,15 @@ public class Order {
     }
   }
 
+  private void validateItems(List<OrderItem> items) {
+    if (items == null || items.isEmpty()) {
+      throw new IllegalArgumentException("Order items are required.");
+    }
+  }
 
+  private void validateShippingAddress(ShippingAddress shippingAddress) {
+    if (shippingAddress == null) {
+      throw new IllegalArgumentException("Shipping address is required.");
+    }
+  }
 }
