@@ -23,11 +23,11 @@ public class ShippingAddressTest {
         "06236"
     );
 
-  assertThat(shippingAddress.getAddress1()).isEqualTo("서울시 강남구 테헤란로 123");
-  assertThat(shippingAddress.getAddress2()).isEqualTo("101동 202호");
-  assertThat(shippingAddress.getCity()).isEqualTo("Seoul");
-  assertThat(shippingAddress.getState()).isEqualTo("Seoul");
-  assertThat(shippingAddress.getZipCode()).isEqualTo("06236");
+    assertThat(shippingAddress.getAddress1()).isEqualTo("서울시 강남구 테헤란로 123");
+    assertThat(shippingAddress.getAddress2()).isEqualTo("101동 202호");
+    assertThat(shippingAddress.getCity()).isEqualTo("Seoul");
+    assertThat(shippingAddress.getState()).isEqualTo("Seoul");
+    assertThat(shippingAddress.getZipCode()).isEqualTo("06236");
   }
 
   /* 기본 주소가 비어 있으면 생성할 수 없는지 확인한다. */
