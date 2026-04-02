@@ -1,29 +1,11 @@
 spring:
   application:
-    name:
-      team1-backend-order
-  jpa:
-    hibernate:
-      ddl-auto: create
-    properties:
-      hibernate:
-        format_sql: true
+    name: team1-backend-order
   profiles:
     active: dev
 
-mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.conk.order
-  configuration:
-    map-underscore-to-camel-case: true
-
-jwt:
-  secret: ${JWT_SECRET}
-
-logging:
-  level:
-    org.hibernate.SQL: debug
-    org.hibernate.type: trace
-
-server:
-  port: 7001  # integration ??? ?? ?? ? ??? ??
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true

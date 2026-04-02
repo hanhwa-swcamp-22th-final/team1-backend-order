@@ -36,4 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
-src/main/resources/application-dev.yml
+AGENTS.md
+docs/
+
+
+### Secrets ###
+**/application-dev.yml
