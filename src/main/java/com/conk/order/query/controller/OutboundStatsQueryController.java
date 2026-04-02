@@ -12,14 +12,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/orders")  // 모든 메서드의 기본 경로가 /orders
 public class OutboundStatsQueryController {
 
+  // 필드 선언
   private final OutboundStatsQueryService outboundStatsQueryService;
 
+  // 메서드
   public OutboundStatsQueryController(OutboundStatsQueryService outboundStatsQueryService) {
+    // 생성자
     this.outboundStatsQueryService = outboundStatsQueryService;
   }
 
-  @GetMapping("/outbound/stats")
+  @GetMapping("/outbound/stats") // GET /orders/outbound/stats 에 반응
+  // 응답을 { success: true, data: ... } 형식으로 포장
   public ApiResponse<OutboundStatsResponse> getOutboundStats() {
+    // 실제 계산은 서비스에 위임
     return ApiResponse.success(outboundStatsQueryService.getOutboundStats());
   }
 }

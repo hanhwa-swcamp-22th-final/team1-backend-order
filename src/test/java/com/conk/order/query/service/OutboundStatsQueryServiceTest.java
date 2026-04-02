@@ -67,9 +67,8 @@ public class OutboundStatsQueryServiceTest {
   /* 화~금 평일에 전날과 동일하면 trend 는 "0", trendType 은 "flat" 이다. */
   @Test
   void getOutboundStats_weekdayNoChange_returnsTrendFlat() {
-    OutboundStatsQueryService service = createService(TUE, Map.of(
-        TUE, 4,
-        TUE.minusDays(1), 4
+    OutboundStatsQueryService service = createService(
+        TUE, Map.of(TUE, 4, TUE.minusDays(1), 4
     ));
 
     OutboundStatsResponse response = service.getOutboundStats();

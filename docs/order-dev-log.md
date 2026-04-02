@@ -305,3 +305,39 @@
 
 ### 마지막 커밋 내용 :
 - 아직 기록 전
+
+## 2026-04-03
+
+### 현재단계 :
+- Phase 0 도메인 정비 완료 후 ORD-001 컨트롤러 구현과 통합 테스트를 마무리하는 단계였다.
+- trendLabel 명칭 확정, 코드 리뷰 지적 사항 수정, 컨트롤러/통합 테스트 추가로 ORD-001을 완전히 닫는 작업을 진행했다.
+
+### 작업 브랜치 :
+- `feat/order-outbound-stats`
+
+### 구현 시 바뀌는 점 :
+- `GET /orders/outbound/stats` 가 실제 HTTP 요청을 받아 응답을 반환하는 전체 흐름이 완성됐다.
+- trendLabel 이 "전 영업일 대비"로 확정됐다 (월요일 포함 모든 평일 동일 표기).
+- 컨트롤러 단위 테스트(`@WebMvcTest`)와 전체 스택 통합 테스트(`@SpringBootTest`)가 모두 추가됐다.
+- `cancelOrder()` 취소 가능 범위가 `RECEIVED`, `ALLOCATED` 상태만 허용하도록 수정됐다.
+- `Order.orderNo` 필드에 `@Column(name = "order_id")` 가 추가돼 DB 컬럼명 불일치가 해소됐다.
+
+### 추가하는 코드
+- `src/main/java/com/conk/order/query/controller/OutboundStatsQueryController.java`
+    - `GET /orders/outbound/stats` 엔드포인트 처리, ApiResponse 래핑
+- `src/test/java/com/conk/order/query/controller/OutboundStatsQueryControllerTest.java`
+    - `@WebMvcTest` 기반 평일 정상 응답 / 주말 null 응답 2개 시나리오
+- `src/test/java/com/conk/order/query/controller/OutboundStatsIntegrationTest.java`
+    - `@SpringBootTest` 기반 전체 스택 통합 테스트 2개 시나리오
+
+### 테스트
+- `OutboundStatsQueryControllerTest` 2개 GREEN
+- `OutboundStatsIntegrationTest` 2개 GREEN
+- 전체 테스트 35개 GREEN
+
+### 확인해야할 점 :
+- Spring Security / JWT 인증은 현재 미구현 상태로, 이후 별도 작업이 필요하다.
+- ORD-002 시작 전 Phase 1 도메인 체크 항목(`isCancellable()`, `warehouseId` 등)을 먼저 확인해야 한다.
+
+### 마지막 커밋 내용 :
+- `feat: ORD-001 출고 통계 조회 컨트롤러 구현 및 trendLabel 수정`

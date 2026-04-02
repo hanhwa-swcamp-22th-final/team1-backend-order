@@ -2,12 +2,9 @@
 
   import static org.hamcrest.CoreMatchers.nullValue;
   import static org.mockito.BDDMockito.given;
-  import static
-  org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-  import static
-  org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-  import static
-  org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+  import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+  import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+  import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
   import com.conk.order.query.dto.OutboundStatsResponse;
   import com.conk.order.query.service.OutboundStatsQueryService;
@@ -47,11 +44,9 @@
           .andExpect(jsonPath("$.data.trendType").value("up"));
     }
 
-    /* GET /orders/outbound/stats — 주말에는 추이 필드가 null 인지 확인한다.
-  */
+    /* GET /orders/outbound/stats — 주말에는 추이 필드가 null 인지 확인한다. */
     @Test
-    void getOutboundStats_onWeekend_returnsTrendFieldsAsNull() throws 
-  Exception {
+    void getOutboundStats_onWeekend_returnsTrendFieldsAsNull() throws Exception {
       given(outboundStatsQueryService.getOutboundStats())
           .willReturn(OutboundStatsResponse.builder()
               .pendingOutboundCount(3)
