@@ -45,7 +45,7 @@ public class OutboundStatsQueryService {
     return OutboundStatsResponse.builder()
         .pendingOutboundCount(todayCount)
         .trend(trend)
-        .trendLabel("전날 대비")
+        .trendLabel("전 영업일 대비")
         .trendType(trendType)
         .build();
   }

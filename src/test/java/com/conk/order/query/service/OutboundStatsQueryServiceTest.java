@@ -45,7 +45,7 @@ public class OutboundStatsQueryServiceTest {
     OutboundStatsResponse response = service.getOutboundStats();
 
     assertThat(response.getTrend()).isEqualTo("+2");
-    assertThat(response.getTrendLabel()).isEqualTo("전날 대비");
+    assertThat(response.getTrendLabel()).isEqualTo("전 영업일 대비");
     assertThat(response.getTrendType()).isEqualTo("up");
   }
 
@@ -60,7 +60,7 @@ public class OutboundStatsQueryServiceTest {
     OutboundStatsResponse response = service.getOutboundStats();
 
     assertThat(response.getTrend()).isEqualTo("-3");
-    assertThat(response.getTrendLabel()).isEqualTo("전날 대비");
+    assertThat(response.getTrendLabel()).isEqualTo("전 영업일 대비");
     assertThat(response.getTrendType()).isEqualTo("down");
   }
 
@@ -75,7 +75,7 @@ public class OutboundStatsQueryServiceTest {
     OutboundStatsResponse response = service.getOutboundStats();
 
     assertThat(response.getTrend()).isEqualTo("0");
-    assertThat(response.getTrendLabel()).isEqualTo("전날 대비");
+    assertThat(response.getTrendLabel()).isEqualTo("전 영업일 대비");
     assertThat(response.getTrendType()).isEqualTo("flat");
   }
 
@@ -91,7 +91,7 @@ public class OutboundStatsQueryServiceTest {
     OutboundStatsResponse response = service.getOutboundStats();
 
     assertThat(response.getTrend()).isEqualTo("+3");
-    assertThat(response.getTrendLabel()).isEqualTo("전날 대비");
+    assertThat(response.getTrendLabel()).isEqualTo("전 영업일 대비");
     assertThat(response.getTrendType()).isEqualTo("up");
   }
 
