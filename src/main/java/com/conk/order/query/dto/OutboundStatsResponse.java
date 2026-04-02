@@ -3,6 +3,7 @@ package com.conk.order.query.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+
 @Builder
 @Getter
 public class OutboundStatsResponse {

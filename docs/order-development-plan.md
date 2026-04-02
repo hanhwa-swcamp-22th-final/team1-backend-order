@@ -53,7 +53,7 @@
 
 | API ID | Method | Path | 요약 | 상태 | 시작일 | 완료일 | 작업 브랜치 | 테스트 관점 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ORD-001 | GET | /orders/outbound/stats | 대시보드용 출고 통계 조회 | 진행중 | 2026-03-31 | - | feat/order-outbound-stats | `RECEIVED` 건수 집계, 응답 래퍼, 직전 영업일 대비 추이 계산 검증 | 진행 기준은 `pendingOutboundCount = RECEIVED만 집계`, 추이는 화~금 전날 대비, 월요일 직전 금요일 대비, 주말 미계산이다. 현재 구현은 기존 상태 모델 기준 초안이라 Phase 0 상태 정비 후 Mapper/Service를 함께 맞춘다 |
+| ORD-001 | GET | /orders/outbound/stats | 대시보드용 출고 통계 조회 | 완료 | 2026-03-31 | 2026-04-03 | feat/order-outbound-stats | `RECEIVED` 건수 집계, 응답 래퍼, 직전 영업일 대비 추이 계산 검증 | trendLabel은 "전 영업일 대비"로 통일. 컨트롤러·통합 테스트 포함 전체 35개 GREEN |
 | ORD-008 | GET | /orders/revenue/current | 대시보드용 당월 총 매출 조회 | 대기 | - | - | - | 월 기준 집계 범위, 금액 계산 검증 | Dashboard 카드 |
 | ORD-009 | GET | /orders/revenue/monthly | 월별 매출 추이 조회 (최근 6개월) | 대기 | - | - | - | 최근 6개월 집계, 월 정렬, 누락 월 처리 검증 | Dashboard 차트 |
 

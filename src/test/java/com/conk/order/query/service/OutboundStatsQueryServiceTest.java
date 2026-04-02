@@ -45,7 +45,7 @@ public class OutboundStatsQueryServiceTest {
     OutboundStatsResponse response = service.getOutboundStats();
 
     assertThat(response.getTrend()).isEqualTo("+2");
-    assertThat(response.getTrendLabel()).isEqualTo("전날 대비");
+    assertThat(response.getTrendLabel()).isEqualTo("전 영업일 대비");
     assertThat(response.getTrendType()).isEqualTo("up");
   }
 
@@ -60,22 +60,21 @@ public class OutboundStatsQueryServiceTest {
     OutboundStatsResponse response = service.getOutboundStats();
 
     assertThat(response.getTrend()).isEqualTo("-3");
-    assertThat(response.getTrendLabel()).isEqualTo("전날 대비");
+    assertThat(response.getTrendLabel()).isEqualTo("전 영업일 대비");
     assertThat(response.getTrendType()).isEqualTo("down");
   }
 
   /* 화~금 평일에 전날과 동일하면 trend 는 "0", trendType 은 "flat" 이다. */
   @Test
   void getOutboundStats_weekdayNoChange_returnsTrendFlat() {
-    OutboundStatsQueryService service = createService(TUE, Map.of(
-        TUE, 4,
-        TUE.minusDays(1), 4
+    OutboundStatsQueryService service = createService(
+        TUE, Map.of(TUE, 4, TUE.minusDays(1), 4
     ));
 
     OutboundStatsResponse response = service.getOutboundStats();
 
     assertThat(response.getTrend()).isEqualTo("0");
-    assertThat(response.getTrendLabel()).isEqualTo("전날 대비");
+    assertThat(response.getTrendLabel()).isEqualTo("전 영업일 대비");
     assertThat(response.getTrendType()).isEqualTo("flat");
   }
 
@@ -91,7 +90,7 @@ public class OutboundStatsQueryServiceTest {
     OutboundStatsResponse response = service.getOutboundStats();
 
     assertThat(response.getTrend()).isEqualTo("+3");
-    assertThat(response.getTrendLabel()).isEqualTo("전날 대비");
+    assertThat(response.getTrendLabel()).isEqualTo("전 영업일 대비");
     assertThat(response.getTrendType()).isEqualTo("up");
   }
 
