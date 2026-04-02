@@ -6,8 +6,8 @@
 
     <select id="countPendingOutboundOrdersByDate" resultType="int">
         SELECT COUNT(*)
-        FROM orders
-        WHERE status = 'PENDING_OUTBOUND'
-          AND order_date = #{date}
+        FROM sales_order
+        WHERE status = 'RECEIVED'
+          AND DATE(ordered_at) = #{date}
     </select>
 </mapper>
