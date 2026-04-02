@@ -47,7 +47,7 @@ public class OrderTest {
         .hasMessage("Canceled order cannot be completed.");
   }
 
-  /* 출고 완료된 주문은 취소할 수 없는지 확인한다. */
+  /* RECEIVED·ALLOCATED 외 상태에서는 취소할 수 없는지 확인한다. */
   @Test
   void completedOrderCannotBeCanceled() {
     Order order = createValidOrder();
@@ -55,7 +55,7 @@ public class OrderTest {
 
     assertThatThrownBy(order::cancelOrder)
         .isInstanceOf(IllegalStateException.class)
-        .hasMessage("Completed order cannot be canceled.");
+        .hasMessage("Order cannot be canceled in current status.");
   }
 
   /* 주문 항목과 배송지가 포함된 aggregate 가 정상 생성되는지 확인한다. */

@@ -21,6 +21,7 @@ public class Order {
 
   /** 주문번호. sales_order.order_id */
   @Id
+  @Column(name = "order_id")
   private String orderNo;
 
   /** 주문 일시. sales_order.ordered_at */
@@ -174,11 +175,11 @@ public class Order {
 
   /*
    * 주문을 취소 상태로 변경한다.
-   * 단, 이미 출고 완료된 주문은 취소할 수 없다.
+   * RECEIVED, ALLOCATED 상태일 때만 취소할 수 있다.
    */
   public void cancelOrder() {
-    if (status == OrderStatus.OUTBOUND_COMPLETED) {
-      throw new IllegalStateException("Completed order cannot be canceled.");
+    if (status != OrderStatus.RECEIVED && status != OrderStatus.ALLOCATED) {
+      throw new IllegalStateException("Order cannot be canceled in current status.");
     }
     this.status = OrderStatus.CANCELED;
     this.updatedAt = LocalDateTime.now();
