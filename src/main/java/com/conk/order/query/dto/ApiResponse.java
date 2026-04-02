@@ -2,7 +2,7 @@ package com.conk.order.query.dto;
 
 import lombok.Getter;
 
-/* Common response wrapper for query endpoints. */
+/* 조회 API 공통 응답 래퍼. */
 @Getter
 public class ApiResponse<T> {
 
