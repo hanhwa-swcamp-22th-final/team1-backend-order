@@ -3,7 +3,7 @@ package com.conk.order.command.domain.aggregate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -11,31 +11,30 @@ import org.junit.jupiter.api.Test;
 /*
  * Order 도메인 규칙 테스트.
  * 주문 aggregate 생성 규칙과 상태 전이 규칙을 검증한다.
- * */
+ */
 public class OrderTest {
 
-  /* 정상 주문 생성 시 기본 상태가 출고 대기인지 확인한다. */
+  /* 정상 주문 생성 시 기본 상태가 RECEIVED(접수) 인지 확인한다. */
   @Test
-  void createCreatesPendingOutboundOrder() {
+  void createCreatesReceivedOrder() {
     Order order = createValidOrder();
 
     assertThat(order.getOrderNo()).isEqualTo("ORD-20260327-001");
-    assertThat(order.getOrderDate()).isEqualTo(LocalDate.of(2026, 3, 27));
-    assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING_OUTBOUND);
+    assertThat(order.getOrderedAt()).isEqualTo(LocalDateTime.of(2026, 3, 27, 0, 0));
+    assertThat(order.getStatus()).isEqualTo(OrderStatus.RECEIVED);
   }
 
-  /* 출고 완료 전후로 출고 대기 여부가 올바르게 바뀌는지 확인한다. */
+  /* 출고 완료 전후로 접수 상태 여부가 올바르게 바뀌는지 확인한다. */
   @Test
-  void isPendingOutboundReturnsTrueOnlyForPendingStatus() {
+  void isReceivedReturnsTrueOnlyForReceivedStatus() {
     Order order = createValidOrder();
 
-    assertThat(order.isPendingOutbound()).isTrue();
+    assertThat(order.isReceived()).isTrue();
 
     order.markOutboundCompleted();
 
-    assertThat(order.isPendingOutbound()).isFalse();
+    assertThat(order.isReceived()).isFalse();
   }
-
 
   /* 취소된 주문은 출고 완료 처리할 수 없는지 확인한다. */
   @Test
@@ -48,33 +47,7 @@ public class OrderTest {
         .hasMessage("Canceled order cannot be completed.");
   }
 
-  /* 주문번호가 비어 있으면 생성할 수 없는지 확인한다. */
-  @Test
-  void createFailsWhenOrderNoIsBlank() {
-    assertThatThrownBy(() -> Order.create(
-        " ",
-        LocalDate.of(2026, 3, 27),
-        List.of(createValidItem()),
-        createValidAddress()
-    ))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Order number is required.");
-  }
-
-  /* 주문일자가 없으면 생성할 수 없는지 확인한다. */
-  @Test
-  void createFailsWhenOrderDateIsNull() {
-    assertThatThrownBy(() -> Order.create(
-        "ORD-20260327-001",
-        null,
-        List.of(createValidItem()),
-        createValidAddress()
-    ))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Order date is required.");
-  }
-
-  /* 출고 완료된 주문은 취소할 수 없는지 확인한다. */
+  /* RECEIVED·ALLOCATED 외 상태에서는 취소할 수 없는지 확인한다. */
   @Test
   void completedOrderCannotBeCanceled() {
     Order order = createValidOrder();
@@ -82,10 +55,10 @@ public class OrderTest {
 
     assertThatThrownBy(order::cancelOrder)
         .isInstanceOf(IllegalStateException.class)
-        .hasMessage("Completed order cannot be canceled.");
+        .hasMessage("Order cannot be canceled in current status.");
   }
 
-  /* 주문 항목과 배송지가 포함된 aggregate가 정상 생성되는지 확인한다. */
+  /* 주문 항목과 배송지가 포함된 aggregate 가 정상 생성되는지 확인한다. */
   @Test
   void createCreatesOrderWithItemsAndShippingAddress() {
     OrderItem item = createValidItem();
@@ -93,38 +66,106 @@ public class OrderTest {
 
     Order order = Order.create(
         "ORD-20260327-001",
-        LocalDate.of(2026, 3, 27),
+        LocalDateTime.of(2026, 3, 27, 0, 0),
+        "SELLER-001",
+        OrderChannel.MANUAL,
         List.of(item),
-        address
+        address,
+        "홍길동",
+        "010-1234-5678",
+        null
     );
+
     assertThat(order.getItems()).hasSize(1);
     assertThat(order.getShippingAddress()).isEqualTo(address);
-    assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING_OUTBOUND);
+    assertThat(order.getStatus()).isEqualTo(OrderStatus.RECEIVED);
+  }
+
+  /* 주문번호가 비어 있으면 생성할 수 없는지 확인한다. */
+  @Test
+  void createFailsWhenOrderNoIsBlank() {
+    assertThatThrownBy(() -> Order.create(
+        " ",
+        LocalDateTime.of(2026, 3, 27, 0, 0),
+        "SELLER-001",
+        OrderChannel.MANUAL,
+        List.of(createValidItem()),
+        createValidAddress(),
+        "홍길동",
+        "010-1234-5678",
+        null
+    ))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Order number is required.");
+  }
+
+  /* 주문 일시가 없으면 생성할 수 없는지 확인한다. */
+  @Test
+  void createFailsWhenOrderedAtIsNull() {
+    assertThatThrownBy(() -> Order.create(
+        "ORD-20260327-001",
+        null,
+        "SELLER-001",
+        OrderChannel.MANUAL,
+        List.of(createValidItem()),
+        createValidAddress(),
+        "홍길동",
+        "010-1234-5678",
+        null
+    ))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Order date is required.");
+  }
+
+  /* 셀러 식별자가 없으면 생성할 수 없는지 확인한다. */
+  @Test
+  void createFailsWhenSellerIdIsBlank() {
+    assertThatThrownBy(() -> Order.create(
+        "ORD-20260327-001",
+        LocalDateTime.of(2026, 3, 27, 0, 0),
+        " ",
+        OrderChannel.MANUAL,
+        List.of(createValidItem()),
+        createValidAddress(),
+        "홍길동",
+        "010-1234-5678",
+        null
+    ))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Seller ID is required.");
   }
 
   /* 주문 항목이 비어 있으면 생성할 수 없는지 확인한다. */
   @Test
   void createFailsWhenItemsIsEmpty() {
-    ShippingAddress address = createValidAddress();
-
     assertThatThrownBy(() -> Order.create(
         "ORD-20260327-001",
-        LocalDate.of(2026, 3, 27),
+        LocalDateTime.of(2026, 3, 27, 0, 0),
+        "SELLER-001",
+        OrderChannel.MANUAL,
         List.of(),
-        address
+        createValidAddress(),
+        "홍길동",
+        "010-1234-5678",
+        null
     ))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Order items are required.");
   }
 
-  /* 주문 항목이 없으면 생성할 수 없는지 확인한다. */
+  /* 주문 항목이 null 이면 생성할 수 없는지 확인한다. */
   @Test
   void createFailsWhenItemsIsNull() {
     assertThatThrownBy(() -> Order.create(
         "ORD-20260327-001",
-        LocalDate.of(2026, 3, 27),
+        LocalDateTime.of(2026, 3, 27, 0, 0),
+        "SELLER-001",
+        OrderChannel.MANUAL,
         null,
-        createValidAddress()
+        createValidAddress(),
+        "홍길동",
+        "010-1234-5678",
+        null
     ))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Order items are required.");
@@ -135,25 +176,37 @@ public class OrderTest {
   void createFailsWhenShippingAddressIsNull() {
     assertThatThrownBy(() -> Order.create(
         "ORD-20260327-001",
-        LocalDate.of(2026, 3, 27),
+        LocalDateTime.of(2026, 3, 27, 0, 0),
+        "SELLER-001",
+        OrderChannel.MANUAL,
         List.of(createValidItem()),
+        null,
+        "홍길동",
+        "010-1234-5678",
         null
     ))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Shipping address is required.");
   }
 
+  // ── 헬퍼 ──────────────────────────────────────────────────────────────────
+
   private Order createValidOrder() {
     return Order.create(
         "ORD-20260327-001",
-        LocalDate.of(2026, 3, 27),
+        LocalDateTime.of(2026, 3, 27, 0, 0),
+        "SELLER-001",
+        OrderChannel.MANUAL,
         List.of(createValidItem()),
-        createValidAddress()
+        createValidAddress(),
+        "홍길동",
+        "010-1234-5678",
+        null
     );
   }
 
   private OrderItem createValidItem() {
-    return OrderItem.create("SKU-001", 2);
+    return OrderItem.create("SKU-001", 2, null);
   }
 
   private ShippingAddress createValidAddress() {

@@ -2,50 +2,110 @@ package com.conk.order.command.domain.aggregate;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * 주문 애그리거트 루트.
+ *
+ * 하나의 주문은 하나 이상의 주문 항목(OrderItem)과 배송지(ShippingAddress)를 포함한다.
+ * 외부에서 직접 생성자를 호출하지 못하게 막고,
+ * create() 팩토리 메서드를 통해 생성 규칙을 강제한다.
+ * 물리 테이블: sales_order
+ */
 @Getter
 @Entity
-@Table(name = "orders")
+@Table(name = "sales_order")
 public class Order {
 
+  /** 주문번호. sales_order.order_id */
   @Id
+  @Column(name = "order_id")
   private String orderNo;
 
-  private LocalDate orderDate;
+  /** 주문 일시. sales_order.ordered_at */
+  private LocalDateTime orderedAt;
 
+  /** 주문 상태. sales_order.status */
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
 
+  /** 주문 항목 목록. sales_order_item 참조 */
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<OrderItem> items = new ArrayList<>();
 
+  /** 배송지 정보. sales_order 내 ship_to_* 컬럼 */
   @Embedded
   private ShippingAddress shippingAddress;
 
+  /** 셀러 식별자. sales_order.seller_id */
+  private String sellerId;
 
-  protected Order(){}
-  /*
-   * 외부에서 직접 생성자를 호출하지 못하게 막고,
-   * create() 팩토리 메서드를 통해 생성 규칙을 강제한다.
-   * */
+  /** 송장번호. sales_order.invoice_no */
+  private String invoiceNo;
+
+  /** 소채널 주문번호. sales_order.channel_order_no */
+  private String channelOrderNo;
+
+  /** 판매 채널. sales_order.order_channel */
+  @Enumerated(EnumType.STRING)
+  private OrderChannel orderChannel;
+
+  /** 수령인 이름. sales_order.receiver_name */
+  private String receiverName;
+
+  /** 수령인 연락처. sales_order.receiver_phone_no */
+  private String receiverPhoneNo;
+
+  /** 메모. sales_order.memo */
+  private String memo;
+
+  /** 출고 완료 일시. sales_order.shipped_at */
+  private LocalDateTime shippedAt;
+
+  /** 등록 일시. sales_order.created_at */
+  private LocalDateTime createdAt;
+
+  /** 수정 일시. sales_order.updated_at */
+  private LocalDateTime updatedAt;
+
+  /** 등록자. sales_order.created_by */
+  private String createdBy;
+
+  /** 수정자. sales_order.updated_by */
+  private String updatedBy;
+
+  protected Order() {}
+
   private Order(
       String orderNo,
-      LocalDate orderDate,
+      LocalDateTime orderedAt,
+      String sellerId,
+      OrderChannel orderChannel,
       List<OrderItem> items,
       ShippingAddress shippingAddress,
+      String receiverName,
+      String receiverPhoneNo,
+      String memo,
       OrderStatus status
   ) {
     validateOrderNo(orderNo);
-    validateOrderDate(orderDate);
+    validateOrderedAt(orderedAt);
+    validateSellerId(sellerId);
     validateItems(items);
     validateShippingAddress(shippingAddress);
     this.orderNo = orderNo;
-    this.orderDate = orderDate;
+    this.orderedAt = orderedAt;
+    this.sellerId = sellerId;
+    this.orderChannel = orderChannel;
     this.shippingAddress = shippingAddress;
+    this.receiverName = receiverName;
+    this.receiverPhoneNo = receiverPhoneNo;
+    this.memo = memo;
     this.status = status;
+    this.createdAt = LocalDateTime.now();
+    this.updatedAt = LocalDateTime.now();
 
     for (OrderItem item : items) {
       addItem(item);
@@ -53,60 +113,76 @@ public class Order {
   }
 
   /**
-   *  - 주문 생성
-   *    새 주문은 항상 출고 대기 상태로 시작한다는 규칙을 표현한다.
+   * 주문 생성 팩토리 메서드.
+   * 새 주문은 항상 RECEIVED(접수) 상태로 시작한다.
    *
-   * @param orderNo 주문번호
-   * @param orderDate 주문날짜
-   * @param items 주문 항목 목록
+   * @param orderNo        주문번호
+   * @param orderedAt      주문 일시
+   * @param sellerId       셀러 식별자
+   * @param orderChannel   판매 채널
+   * @param items          주문 항목 목록
    * @param shippingAddress 배송지
-   *
+   * @param receiverName   수령인 이름
+   * @param receiverPhoneNo 수령인 연락처
+   * @param memo           메모
    * @return Order
    */
   public static Order create(
       String orderNo,
-      LocalDate orderDate,
+      LocalDateTime orderedAt,
+      String sellerId,
+      OrderChannel orderChannel,
       List<OrderItem> items,
-      ShippingAddress shippingAddress
+      ShippingAddress shippingAddress,
+      String receiverName,
+      String receiverPhoneNo,
+      String memo
   ) {
     return new Order(
         orderNo,
-        orderDate,
+        orderedAt,
+        sellerId,
+        orderChannel,
         items,
         shippingAddress,
-        OrderStatus.PENDING_OUTBOUND);
+        receiverName,
+        receiverPhoneNo,
+        memo,
+        OrderStatus.RECEIVED
+    );
   }
 
   /*
-   * 출고 대기 여부를 반환한다.
-   * 출고 처리나 통계 집계 시 대상 주문을 필터링하는 데 사용된다.
-   * */
-  public boolean isPendingOutbound() {
-    return status == OrderStatus.PENDING_OUTBOUND;
+   * 접수 상태 여부를 반환한다.
+   * 출고 대기 건수 집계 시 RECEIVED 상태 주문을 필터링하는 데 사용된다.
+   */
+  public boolean isReceived() {
+    return status == OrderStatus.RECEIVED;
   }
 
   /*
    * 주문을 출고 완료 상태로 변경한다.
-   *
    * 단, 이미 취소된 주문은 출고 완료 처리할 수 없다.
-   * 이 규칙을 어기면 예외를 발생시킨다.
-   * */
+   */
   public void markOutboundCompleted() {
     if (status == OrderStatus.CANCELED) {
       throw new IllegalStateException("Canceled order cannot be completed.");
     }
     this.status = OrderStatus.OUTBOUND_COMPLETED;
+    this.shippedAt = LocalDateTime.now();
+    this.updatedAt = LocalDateTime.now();
   }
 
   /*
    * 주문을 취소 상태로 변경한다.
-   * 단, 이미 출고 완료된 주문은 취소할 수 없다.
-   * */
+   * RECEIVED, ALLOCATED 상태일 때만 취소할 수 있다.
+   */
   public void cancelOrder() {
-    if (status == OrderStatus.OUTBOUND_COMPLETED) {
-      throw new IllegalStateException("Completed order cannot be canceled.");
+    if (status != OrderStatus.RECEIVED && status != OrderStatus.ALLOCATED) {
+      throw new IllegalStateException("Order cannot be canceled in current status.");
     }
     this.status = OrderStatus.CANCELED;
+    this.updatedAt = LocalDateTime.now();
   }
 
   private void addItem(OrderItem item) {
@@ -115,8 +191,7 @@ public class Order {
   }
 
   /**
-   * - 주문번호
-   * 주문 번호 필수 값 검증
+   * 주문번호 필수값 검증.
    *
    * @param orderNo 주문번호
    */
@@ -127,23 +202,43 @@ public class Order {
   }
 
   /**
-   * - 주문일자
-   * 도메인 규칙상 주문일자는 필수값
+   * 주문 일시 필수값 검증.
    *
-   * @param orderDate 주문일자
+   * @param orderedAt 주문 일시
    */
-  private void validateOrderDate(LocalDate orderDate) {
-    if (orderDate == null) {
+  private void validateOrderedAt(LocalDateTime orderedAt) {
+    if (orderedAt == null) {
       throw new IllegalArgumentException("Order date is required.");
     }
   }
 
+  /**
+   * 셀러 식별자 필수값 검증.
+   *
+   * @param sellerId 셀러 식별자
+   */
+  private void validateSellerId(String sellerId) {
+    if (sellerId == null || sellerId.isBlank()) {
+      throw new IllegalArgumentException("Seller ID is required.");
+    }
+  }
+
+  /**
+   * 주문 항목 필수값 검증.
+   *
+   * @param items 주문 항목 목록
+   */
   private void validateItems(List<OrderItem> items) {
     if (items == null || items.isEmpty()) {
       throw new IllegalArgumentException("Order items are required.");
     }
   }
 
+  /**
+   * 배송지 필수값 검증.
+   *
+   * @param shippingAddress 배송지
+   */
   private void validateShippingAddress(ShippingAddress shippingAddress) {
     if (shippingAddress == null) {
       throw new IllegalArgumentException("Shipping address is required.");
