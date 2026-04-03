@@ -341,3 +341,40 @@
 
 ### 마지막 커밋 내용 :
 - `feat: ORD-001 출고 통계 조회 컨트롤러 구현 및 trendLabel 수정`
+
+## 2026-04-03 (2)
+
+### 현재단계 :
+- ORD-002 `POST /orders/seller/manual` 셀러 단건 주문 등록 기능 구현.
+- TDD Inside-Out: Service Test → Service → Controller Test → Controller 순 진행.
+
+### 작업 브랜치 :
+- `feat/order-create-manual`
+
+### 구현 시 바뀌는 점 :
+- `POST /orders/seller/manual` 엔드포인트 추가.
+- `orderNo` 는 null 이면 UUID 자동 생성, 값 있으면 중복 검증 후 사용.
+- 응답 래퍼 `ApiResponse` 에 `message` 필드 추가 (`@JsonInclude(NON_NULL)` 로 조회 응답에는 미포함).
+- `command/port/OrderSavePort` 인터페이스 추가 — 서비스가 JpaRepository 전체가 아닌 최소 포트에만 의존.
+
+### 추가하는 코드
+- `command/port/OrderSavePort.java` — `save`, `existsById` 최소 포트 인터페이스
+- `command/dto/CreateOrderRequest.java` — 요청 DTO (Bean Validation 포함)
+- `command/dto/CreateOrderItemRequest.java` — 항목 요청 DTO
+- `command/dto/CreateShippingAddressRequest.java` — 배송지 요청 DTO
+- `command/dto/CreateOrderResponse.java` — 응답 DTO (orderNo)
+- `command/service/CreateOrderService.java` — 주문 등록 서비스
+- `command/controller/CreateOrderController.java` — 주문 등록 컨트롤러
+- `query/dto/ApiResponse.java` — message 필드 및 `created()` 팩토리 메서드 추가
+
+### 테스트
+- `CreateOrderServiceTest` 5개 GREEN (orderNo 자동생성/직접입력, 중복예외, RECEIVED 상태, 항목 수)
+- `CreateOrderControllerTest` 3개 GREEN (정상 201, sellerId 누락 400, items 누락 400)
+- 전체 39개 GREEN
+
+### 확인해야할 점 :
+- `orderChannel` 은 현재 MANUAL 고정. 추후 다른 채널 API 추가 시 분리 고려.
+- 통합 테스트 (`@SpringBootTest`) 는 미작성 — 필요 시 추가.
+
+### 마지막 커밋 내용 :
+- `feat: ORD-002 셀러 단건 주문 등록 구현`
