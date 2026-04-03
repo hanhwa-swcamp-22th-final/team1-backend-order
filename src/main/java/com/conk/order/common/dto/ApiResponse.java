@@ -1,4 +1,4 @@
-package com.conk.order.query.dto;
+package com.conk.order.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.conk.order.query.controller;
 
-import com.conk.order.query.dto.ApiResponse;
+import com.conk.order.common.dto.ApiResponse;
 import com.conk.order.query.dto.OutboundStatsResponse;
 import com.conk.order.query.service.OutboundStatsQueryService;
 import org.springframework.web.bind.annotation.GetMapping;

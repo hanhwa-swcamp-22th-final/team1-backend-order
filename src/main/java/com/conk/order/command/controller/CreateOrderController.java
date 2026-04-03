@@ -3,7 +3,7 @@ package com.conk.order.command.controller;
 import com.conk.order.command.dto.CreateOrderRequest;
 import com.conk.order.command.dto.CreateOrderResponse;
 import com.conk.order.command.service.CreateOrderService;
-import com.conk.order.query.dto.ApiResponse;
+import com.conk.order.common.dto.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
