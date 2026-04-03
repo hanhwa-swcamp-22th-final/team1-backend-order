@@ -32,7 +32,7 @@
 
 | API ID | Method | Path | 요약 | 상태 | 시작일 | 완료일 | 작업 브랜치 | 테스트 관점 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ORD-002 | POST | /orders/seller/manual | 셀러 단건 주문 등록 | 대기 | - | - | - | 요청 필수값 검증, 상품 항목 수량 검증, 생성 응답 래퍼 검증 | 생성 API |
+| ORD-002 | POST | /orders/seller/manual | 셀러 단건 주문 등록 | 완료 | 2026-04-03 | 2026-04-03 | feat/order-create-manual | 요청 필수값 검증, 상품 항목 수량 검증, 생성 응답 래퍼 검증 | orderNo 는 null 이면 UUID 자동 생성, 값 있으면 중복 검증. ApiResponse 에 message 필드 추가 (NON_NULL 직렬화). 전체 39개 GREEN |
 | ORD-003 | POST | /orders/seller/bulk | 셀러 엑셀 업로드 주문 일괄 등록 | 대기 | - | - | - | 다건 요청 검증, 부분 실패 정책 확인, 생성 응답 래퍼 검증 | 생성 API |
 
 ### (2) Seller 주문 조회
