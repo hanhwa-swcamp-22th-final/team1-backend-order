@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+  ORD-004 셀러 주문 목록 조회 MyBatis XML Mapper.
+  namespace 는 @Mapper 인터페이스 FQCN 과 반드시 일치해야 한다.
+-->
+<mapper namespace="com.conk.order.query.mapper.SellerOrderListQueryMapper">
+
+    <!--
+      공통 WHERE 절을 <sql> 블록으로 추출한다.
+      findOrders / countOrders 두 쿼리가 동일한 필터를 공유하므로
+      <include refid="whereClause"/> 로 재사용한다.
+    -->
+    <sql id="whereClause">
+        WHERE o.seller_id = #{sellerId}
+        <!--
+          status != null 이면 상태 필터를 추가한다.
+          OrderStatus enum 은 DB 에 문자열로 저장되므로 name() 변환 없이 #{status} 로 바인딩.
+        -->
+        <if test="status != null">
+            AND o.status = #{status}
+        </if>
+        <!-- startDate != null 이면 해당 날짜 이후 주문만 조회한다. -->
+        <if test="startDate != null">
+            AND DATE(o.ordered_at) &gt;= #{startDate}
+        </if>
+        <!-- endDate != null 이면 해당 날짜 이전 주문만 조회한다. -->
+        <if test="endDate != null">
+            AND DATE(o.ordered_at) &lt;= #{endDate}
+        </if>
+    </sql>
+
+    <!--
+      현재 페이지에 해당하는 주문 목록을 조회한다.
+
+      resultType = SellerOrderSummary FQCN.
+      MyBatis 가 SELECT 컬럼명을 DTO 필드명에 자동 매핑한다.
+        order_no      → orderNo
+        ordered_at    → orderedAt
+        status        → status  (String → OrderStatus 자동 변환)
+        order_channel → orderChannel
+        receiver_name → receiverName
+        item_count    → itemCount  (서브쿼리로 계산)
+    -->
+    <select id="findOrders" resultType="com.conk.order.query.dto.SellerOrderSummary">
+        SELECT
+            o.order_no         AS orderNo,
+            o.ordered_at       AS orderedAt,
+            o.status           AS status,
+            o.order_channel    AS orderChannel,
+            o.receiver_name    AS receiverName,
+            COUNT(i.id)        AS itemCount
+        FROM sales_order o
+        LEFT JOIN order_item i ON i.order_id = o.order_no
+        <include refid="whereClause"/>
+        GROUP BY
+            o.order_no,
+            o.ordered_at,
+            o.status,
+            o.order_channel,
+            o.receiver_name
+        ORDER BY o.ordered_at DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!--
+      페이징 없이 전체 건수를 조회한다.
+      프론트에서 totalCount / size 로 총 페이지 수를 계산한다.
+      findOrders 와 동일한 whereClause 를 재사용한다.
+    -->
+    <select id="countOrders" resultType="int">
+        SELECT COUNT(*)
+        FROM sales_order o
+        <include refid="whereClause"/>
+    </select>
+
+</mapper>

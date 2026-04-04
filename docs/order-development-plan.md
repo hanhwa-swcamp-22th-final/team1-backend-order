@@ -39,7 +39,7 @@
 
 | API ID | Method | Path | 요약 | 상태 | 시작일 | 완료일 | 작업 브랜치 | 테스트 관점 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ORD-004 | GET | /orders/seller/list | 셀러 주문 목록 조회 | 대기 | - | - | - | 권한별 조회 범위, 필터/정렬/페이징 검증, 응답 필드 매핑 검증 | Seller 전용 목록 |
+| ORD-004 | GET | /orders/seller/list | 셀러 주문 목록 조회 | 완료 | 2026-04-04 | 2026-04-04 | feat/order-seller-list | 필터(status/날짜) null 미적용, 페이징 page/size 반영, 응답 totalCount 검증 | MyBatis XML dynamic SQL (<if> 조건). Service 테스트 3개, Controller 테스트 2개 전체 GREEN |
 
 ### (3) 관리자 및 창고 주문 조회
 

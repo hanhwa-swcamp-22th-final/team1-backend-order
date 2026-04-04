@@ -378,3 +378,42 @@
 
 ### 마지막 커밋 내용 :
 - `feat: ORD-002 셀러 단건 주문 등록 구현`
+
+## 2026-04-04
+
+### 현재단계 :
+- ORD-004 `GET /orders/seller/list` 셀러 주문 목록 조회 기능 구현.
+- TDD Inside-Out: Service Test (StubMapper) → Service → Controller Test → Controller → XML Mapper 순 진행.
+
+### 작업 브랜치 :
+- `feat/order-seller-list`
+
+### 구현 시 바뀌는 점 :
+- `GET /orders/seller/list` 엔드포인트 추가.
+- `sellerId` 필수, `status/startDate/endDate` 선택 필터 지원.
+- `page/size` 기반 페이징 응답 (`totalCount/page/size` 포함).
+- MyBatis XML `<sql id="whereClause">` 재사용으로 `findOrders`/`countOrders` 공통 필터 유지.
+- `CreateOrderService.create()` 에 `@Transactional` 추가.
+
+### 추가하는 코드
+- `query/dto/SellerOrderListQuery.java` — 쿼리 파라미터 DTO (`getOffset()` 포함)
+- `query/dto/SellerOrderSummary.java` — 목록 항목 DTO
+- `query/dto/SellerOrderListResponse.java` — 페이징 응답 DTO
+- `query/mapper/SellerOrderListQueryMapper.java` — MyBatis @Mapper 인터페이스
+- `query/service/SellerOrderListQueryService.java` — Mapper 호출 후 응답 조립
+- `query/controller/SellerOrderListQueryController.java` — GET 엔드포인트
+- `resources/mappers/SellerOrderListQueryMapper.xml` — dynamic SQL (status/날짜 필터, LIMIT/OFFSET 페이징)
+- `command/service/CreateOrderService.java` — `@Transactional` 추가
+
+### 테스트
+- `SellerOrderListQueryServiceTest` 3개 GREEN (2건 반환, 빈 결과, page/size 반영)
+- `SellerOrderListQueryControllerTest` 2개 GREEN (200 정상, sellerId 누락 400)
+- 전체 테스트 GREEN
+
+### 확인해야할 점 :
+- `ORDER BY ordered_at DESC` 정렬 기준은 요구사항 변경 시 쿼리 파라미터로 분리 고려.
+- XML의 `ORDER_CHANNEL` enum 값이 DB 저장 형식과 일치하는지 실 DB 연동 시 확인.
+- `@ControllerAdvice` 전역 예외 처리기 미구현 — ORD-005 전에 추가 권장.
+
+### 마지막 커밋 내용 :
+- `feat: ORD-004 셀러 주문 목록 조회 구현`
