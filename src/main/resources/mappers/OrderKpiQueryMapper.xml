@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+  ORD-006 주문 KPI 집계 MyBatis XML Mapper.
+  namespace 는 @Mapper 인터페이스 FQCN 과 반드시 일치해야 한다.
+-->
+<mapper namespace="com.conk.order.query.mapper.OrderKpiQueryMapper">
+
+    <!--
+      날짜 필터 공통 SQL 조각.
+      각 COUNT 쿼리의 <where> 안에서 <include> 로 재사용한다.
+      startDate/endDate 가 null 이면 해당 조건이 생략된다.
+    -->
+    <sql id="dateFilter">
+        <if test="startDate != null">
+            AND DATE(ordered_at) &gt;= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND DATE(ordered_at) &lt;= #{endDate}
+        </if>
+    </sql>
+
+    <!-- 기간 내 전체 주문 건수. -->
+    <select id="countTotal" resultType="int">
+        SELECT COUNT(*)
+        FROM sales_order
+        <where>
+            <include refid="dateFilter"/>
+        </where>
+    </select>
+
+    <!-- 기간 내 RECEIVED 상태 주문 건수. -->
+    <select id="countReceived" resultType="int">
+        SELECT COUNT(*)
+        FROM sales_order
+        <where>
+            status = 'RECEIVED'
+            <include refid="dateFilter"/>
+        </where>
+    </select>
+
+    <!-- 기간 내 ALLOCATED 상태 주문 건수. -->
+    <select id="countAllocated" resultType="int">
+        SELECT COUNT(*)
+        FROM sales_order
+        <where>
+            status = 'ALLOCATED'
+            <include refid="dateFilter"/>
+        </where>
+    </select>
+
+    <!-- 기간 내 PICKING 상태 주문 건수. -->
+    <select id="countPicking" resultType="int">
+        SELECT COUNT(*)
+        FROM sales_order
+        <where>
+            status = 'PICKING'
+            <include refid="dateFilter"/>
+        </where>
+    </select>
+
+    <!-- 기간 내 PACKING 상태 주문 건수. -->
+    <select id="countPacking" resultType="int">
+        SELECT COUNT(*)
+        FROM sales_order
+        <where>
+            status = 'PACKING'
+            <include refid="dateFilter"/>
+        </where>
+    </select>
+
+    <!-- 기간 내 OUTBOUND_COMPLETED 상태 주문 건수. -->
+    <select id="countOutboundCompleted" resultType="int">
+        SELECT COUNT(*)
+        FROM sales_order
+        <where>
+            status = 'OUTBOUND_COMPLETED'
+            <include refid="dateFilter"/>
+        </where>
+    </select>
+
+    <!-- 기간 내 CANCELED 상태 주문 건수. -->
+    <select id="countCanceled" resultType="int">
+        SELECT COUNT(*)
+        FROM sales_order
+        <where>
+            status = 'CANCELED'
+            <include refid="dateFilter"/>
+        </where>
+    </select>
+
+</mapper>
