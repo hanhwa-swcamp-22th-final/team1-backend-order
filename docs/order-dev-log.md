@@ -526,4 +526,37 @@
 - XML 작성 후 통합 테스트 추가 필요.
 
 ### 마지막 커밋 내용 :
-- 아직 기록 전
+- `feat: ORD-007 창고 관리자 주문 목록 조회 구현`
+
+## 2026-04-05 (4)
+
+### 현재단계 :
+- ORD-003 `POST /orders/seller/bulk` 셀러 엑셀 업로드 주문 일괄 등록 기능 구현.
+- TDD Inside-Out: DTO → Service 테스트(RED) → Service(GREEN) → Controller 테스트(RED) → Controller(GREEN) 완료.
+
+### 작업 브랜치 :
+- `feat/order-whm-list`
+
+### 구현 시 바뀌는 점 :
+- `POST /orders/seller/bulk` 엔드포인트 추가.
+- `multipart/form-data`: `file`(xlsx) + `sellerId`(String).
+- 부분 저장 정책: 각 행을 독립 트랜잭션으로 처리, 실패 행은 건너뛰고 성공 행만 저장.
+- 응답: `{ successCount, failedRows: [{ rowNumber, reason }] }` 형태로 성공/실패 집계 반환.
+- Apache POI 5.3.0 (`poi-ooxml`) 의존성 추가.
+
+### 추가하는 코드
+- `command/dto/FailedRow.java` — 실패 행 번호 + 원인 DTO
+- `command/dto/BulkCreateOrderResponse.java` — 일괄 등록 응답 DTO
+- `command/service/BulkCreateOrderService.java` — xlsx 파싱, 행별 주문 저장
+- `command/controller/BulkCreateOrderController.java` — POST /orders/seller/bulk 엔드포인트
+- `build.gradle` — `poi-ooxml:5.3.0` 의존성 추가
+
+### 테스트
+- `BulkCreateOrderServiceTest` 4개 GREEN (전체 저장, 부분 실패, 빈 파일, 비xlsx 예외)
+- `BulkCreateOrderControllerTest` 4개 GREEN (정상 200, 실패행 반환, sellerId 누락 400, file 누락 400)
+
+### 확인해야할 점 :
+- 통합 테스트 미작성 (실제 DB 저장 경로 검증 필요).
+
+### 마지막 커밋 내용 :
+- `feat: ORD-003 엑셀 일괄 주문 등록 구현`
