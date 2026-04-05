@@ -42,6 +42,14 @@ public class Order {
   /** 셀러 식별자. sales_order.seller_id */
   private String sellerId;
 
+  /*
+   * 창고 식별자. sales_order.warehouse_id
+   * Warehouse 도메인 소유권 확인 전까지 참조값(String) 으로 관리한다.
+   * WHM 주문 목록 조회(ORD-007) 필터로 사용된다.
+   */
+  @Column(name = "warehouse_id")
+  private String warehouseId;
+
   /** 송장번호. sales_order.invoice_no */
   private String invoiceNo;
 
@@ -182,6 +190,16 @@ public class Order {
       throw new IllegalStateException("Order cannot be canceled in current status.");
     }
     this.status = OrderStatus.CANCELED;
+    this.updatedAt = LocalDateTime.now();
+  }
+
+  /*
+   * 창고를 주문에 배정한다.
+   * 재고 할당(ALLOCATED) 단계에서 담당 창고가 결정될 때 호출된다.
+   * ORD-007 WHM 주문 목록 조회의 warehouseId 필터 기준값으로 사용된다.
+   */
+  public void assignWarehouse(String warehouseId) {
+    this.warehouseId = warehouseId;
     this.updatedAt = LocalDateTime.now();
   }
 

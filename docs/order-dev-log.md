@@ -490,3 +490,40 @@
 
 ### 마지막 커밋 내용 :
 - `feat: ORD-006 주문 KPI 집계 구현`
+
+## 2026-04-05 (3)
+
+### 현재단계 :
+- ORD-007 `GET /orders/whm` 창고 관리자 주문 목록 조회 기능 구현 진행 중.
+- TDD Inside-Out 계층 단위 진행: DTO → Mapper 인터페이스 → Service 테스트(RED) → Service(GREEN) → Controller 테스트(RED) → Controller(GREEN) 완료. XML + 통합 테스트 미작성.
+
+### 작업 브랜치 :
+- `feat/order-whm-list`
+
+### 구현 시 바뀌는 점 :
+- `GET /orders/whm` 엔드포인트 추가.
+- `warehouseId` 필수 파라미터 — WHM은 자신이 담당하는 창고의 주문만 조회 가능.
+- `Order` 엔티티에 `warehouseId` 필드 추가 (창고 필터 지원).
+- `status/startDate/endDate` 선택 필터, `page/size` 페이징 지원.
+
+### 추가하는 코드
+- `query/dto/WhmOrderListQuery.java` — 쿼리 파라미터 DTO (`warehouseId` 필수, `getOffset()` 포함)
+- `query/dto/WhmOrderSummary.java` — 목록 항목 DTO
+- `query/dto/WhmOrderListResponse.java` — 페이징 응답 DTO
+- `query/mapper/WhmOrderListQueryMapper.java` — MyBatis @Mapper 인터페이스
+- `query/service/WhmOrderListQueryService.java` — Mapper 호출 후 응답 조립
+- `query/controller/WhmOrderListQueryController.java` — GET 엔드포인트
+- `command/domain/aggregate/Order.java` — `warehouseId` 필드 추가
+- `resources/mappers/WhmOrderListQueryMapper.xml` — (미작성)
+
+### 테스트
+- `WhmOrderListQueryServiceTest` 3개 GREEN (창고별 조회, 빈 결과, page/size 반영)
+- `WhmOrderListQueryControllerTest` 2개 GREEN (warehouseId 있으면 200, 없으면 400)
+- XML·통합 테스트 미작성
+
+### 확인해야할 점 :
+- `Order` 엔티티에 `warehouseId` 추가로 MariaDB `sales_order` 테이블에 해당 컬럼이 없어 통합 테스트 실패 — `ddl-auto: update` 또는 ALTER TABLE 처리 필요.
+- XML 작성 후 통합 테스트 추가 필요.
+
+### 마지막 커밋 내용 :
+- 아직 기록 전
