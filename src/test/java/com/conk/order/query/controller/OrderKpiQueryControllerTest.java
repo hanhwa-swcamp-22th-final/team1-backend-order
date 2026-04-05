@@ -38,7 +38,7 @@ class OrderKpiQueryControllerTest {
   @Test
   void getKpi_returnsOkWithKpiData() throws Exception {
     given(orderKpiQueryService.getKpi(any()))
-        .willReturn(new OrderKpiResponse(10, 3, 2, 1, 1, 2, 1));
+        .willReturn(new OrderKpiResponse(10, 3, 2, 1, 1, 1, 2, 1));
 
     mockMvc.perform(get("/orders/kpi"))
         .andExpect(status().isOk())
@@ -46,8 +46,9 @@ class OrderKpiQueryControllerTest {
         .andExpect(jsonPath("$.data.totalCount").value(10))
         .andExpect(jsonPath("$.data.receivedCount").value(3))
         .andExpect(jsonPath("$.data.allocatedCount").value(2))
-        .andExpect(jsonPath("$.data.pickingCount").value(1))
-        .andExpect(jsonPath("$.data.packingCount").value(1))
+        .andExpect(jsonPath("$.data.outboundInstructedCount").value(1))
+        .andExpect(jsonPath("$.data.pickingPackingCount").value(1))
+        .andExpect(jsonPath("$.data.outboundPendingCount").value(1))
         .andExpect(jsonPath("$.data.outboundCompletedCount").value(2))
         .andExpect(jsonPath("$.data.canceledCount").value(1));
   }
@@ -56,7 +57,7 @@ class OrderKpiQueryControllerTest {
   @Test
   void getKpi_returnsOk_withDateFilter() throws Exception {
     given(orderKpiQueryService.getKpi(any()))
-        .willReturn(new OrderKpiResponse(5, 5, 0, 0, 0, 0, 0));
+        .willReturn(new OrderKpiResponse(5, 5, 0, 0, 0, 0, 0, 0));
 
     mockMvc.perform(get("/orders/kpi")
             .param("startDate", "2026-04-01")
