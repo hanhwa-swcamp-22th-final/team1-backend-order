@@ -417,3 +417,40 @@
 
 ### 마지막 커밋 내용 :
 - `feat: ORD-004 셀러 주문 목록 조회 구현`
+
+## 2026-04-05
+
+### 현재단계 :
+- ORD-005 `GET /orders/list` 관리자 주문 목록 조회 기능 구현.
+- TDD Inside-Out 계층 단위 진행: DTO → Mapper Interface → Service 테스트(RED) → Service(GREEN) → Controller 테스트(RED) → Controller(GREEN) → XML + 통합 테스트(GREEN).
+
+### 작업 브랜치 :
+- `feat/order-admin-list`
+
+### 구현 시 바뀌는 점 :
+- `GET /orders/list` 엔드포인트 추가.
+- ORD-004(sellerId 필수)와 달리 모든 파라미터가 선택값 — 파라미터 없이 요청하면 전체 셀러 주문 조회.
+- MyBatis XML `<where>` 태그 사용 — sellerId null 시 WHERE 절 자체가 생략됨.
+- `AdminOrderSummary`에 sellerId 필드 추가 — 관리자는 어느 셀러 주문인지 함께 표시.
+
+### 추가하는 코드
+- `query/dto/AdminOrderListQuery.java` — 쿼리 파라미터 DTO (모두 선택값)
+- `query/dto/AdminOrderSummary.java` — 목록 항목 DTO (sellerId 포함)
+- `query/dto/AdminOrderListResponse.java` — 페이징 응답 DTO
+- `query/mapper/AdminOrderListQueryMapper.java` — MyBatis @Mapper 인터페이스
+- `query/service/AdminOrderListQueryService.java` — Mapper 호출 후 응답 조립
+- `query/controller/AdminOrderListQueryController.java` — GET 엔드포인트
+- `resources/mappers/AdminOrderListQueryMapper.xml` — dynamic SQL (<where>/<if> 조합)
+
+### 테스트
+- `AdminOrderListQueryServiceTest` 3개 GREEN (전체 조회, 빈 결과, page/size 반영)
+- `AdminOrderListQueryControllerTest` 2개 GREEN (파라미터 없이 200, sellerId 있어도 200)
+- `AdminOrderListIntegrationTest` 3개 GREEN (전체 조회, sellerId 필터, 빈 결과)
+- 전체 테스트 GREEN
+
+### 확인해야할 점 :
+- masterAdmin 권한 검증은 Spring Security 구현 후 추가 필요.
+- `@ControllerAdvice` 전역 예외 처리기 아직 미구현.
+
+### 마지막 커밋 내용 :
+- `feat: ORD-005 관리자 주문 목록 조회 구현`

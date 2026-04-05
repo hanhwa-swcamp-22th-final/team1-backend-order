@@ -45,7 +45,7 @@
 
 | API ID | Method | Path | 요약 | 상태 | 시작일 | 완료일 | 작업 브랜치 | 테스트 관점 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ORD-005 | GET | /orders/list | 주문 목록 조회 (masterAdmin) | 대기 | - | - | - | 관리자 권한 검증, 검색 조건 조합, 페이징 응답 검증 | MasterAdmin 전용 |
+| ORD-005 | GET | /orders/list | 주문 목록 조회 (masterAdmin) | 완료 | 2026-04-05 | 2026-04-05 | feat/order-admin-list | sellerId 선택 필터, 페이징 응답 검증 | ORD-004와 달리 sellerId 선택값. XML &lt;where&gt; 태그로 sellerId null 시 전체 조회. Service 3개, Controller 2개, 통합 3개 GREEN |
 | ORD-006 | GET | /orders/kpi | 주문 KPI 집계 (masterAdmin) | 대기 | - | - | - | 집계 기준 기간 검증, KPI 계산 검증 | MasterAdmin 전용 |
 | ORD-007 | GET | /orders/whm | 창고 관리자 주문 목록 조회 | 대기 | - | - | - | 창고별 조회 제한, 상태 필터, 페이징 검증 | WHM 전용 |
 
