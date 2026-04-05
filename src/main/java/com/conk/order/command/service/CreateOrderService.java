@@ -12,6 +12,7 @@ import com.conk.order.command.port.OrderSavePort;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /* ORD-002 셀러 단건 주문 등록 서비스. */
 @Service
@@ -29,6 +30,7 @@ public class CreateOrderService {
    * <p>orderNo 가 null 이면 UUID 로 자동 생성한다.
    * orderNo 가 전달되면 해당 값을 사용하되, 이미 존재하면 예외를 던진다.
    */
+  @Transactional
   public CreateOrderResponse create(CreateOrderRequest request) {
     String orderNo = resolveOrderNo(request.getOrderNo());
 
