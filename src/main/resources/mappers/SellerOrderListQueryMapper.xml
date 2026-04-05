@@ -47,17 +47,17 @@
     -->
     <select id="findOrders" resultType="com.conk.order.query.dto.SellerOrderSummary">
         SELECT
-            o.order_no         AS orderNo,
+            o.order_id         AS orderNo,
             o.ordered_at       AS orderedAt,
             o.status           AS status,
             o.order_channel    AS orderChannel,
             o.receiver_name    AS receiverName,
             COUNT(i.id)        AS itemCount
         FROM sales_order o
-        LEFT JOIN order_item i ON i.order_id = o.order_no
+        LEFT JOIN sales_order_item i ON i.order_id = o.order_id
         <include refid="whereClause"/>
         GROUP BY
-            o.order_no,
+            o.order_id,
             o.ordered_at,
             o.status,
             o.order_channel,

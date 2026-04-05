@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
  *
  * Mapper 의 상태별 COUNT 메서드를 각각 호출한 뒤
  * 결과를 OrderKpiResponse 하나로 조립해 반환한다.
+ * 호출 순서는 OrderStatus enum 흐름(RECEIVED → CANCELED)을 따른다.
  */
 @Service
 public class OrderKpiQueryService {
@@ -26,8 +27,9 @@ public class OrderKpiQueryService {
         orderKpiQueryMapper.countTotal(query),
         orderKpiQueryMapper.countReceived(query),
         orderKpiQueryMapper.countAllocated(query),
-        orderKpiQueryMapper.countPicking(query),
-        orderKpiQueryMapper.countPacking(query),
+        orderKpiQueryMapper.countOutboundInstructed(query),
+        orderKpiQueryMapper.countPickingPacking(query),
+        orderKpiQueryMapper.countOutboundPending(query),
         orderKpiQueryMapper.countOutboundCompleted(query),
         orderKpiQueryMapper.countCanceled(query)
     );
