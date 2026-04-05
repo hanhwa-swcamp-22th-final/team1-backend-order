@@ -46,7 +46,7 @@
 | API ID | Method | Path | 요약 | 상태 | 시작일 | 완료일 | 작업 브랜치 | 테스트 관점 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | ORD-005 | GET | /orders/list | 주문 목록 조회 (masterAdmin) | 완료 | 2026-04-05 | 2026-04-05 | feat/order-admin-list | sellerId 선택 필터, 페이징 응답 검증 | ORD-004와 달리 sellerId 선택값. XML &lt;where&gt; 태그로 sellerId null 시 전체 조회. Service 3개, Controller 2개, 통합 3개 GREEN |
-| ORD-006 | GET | /orders/kpi | 주문 KPI 집계 (masterAdmin) | 대기 | - | - | - | 집계 기준 기간 검증, KPI 계산 검증 | MasterAdmin 전용 |
+| ORD-006 | GET | /orders/kpi | 주문 KPI 집계 (masterAdmin) | 완료 | 2026-04-05 | 2026-04-05 | feat/order-kpi | 상태별 건수 집계, 날짜 필터 검증 | 상태별 COUNT 7개 메서드. XML &lt;sql id="dateFilter"&gt; 조각으로 날짜 조건 재사용. Service 2개, Controller 2개, 통합 3개 GREEN |
 | ORD-007 | GET | /orders/whm | 창고 관리자 주문 목록 조회 | 대기 | - | - | - | 창고별 조회 제한, 상태 필터, 페이징 검증 | WHM 전용 |
 
 ### (4) 대시보드 통계 및 매출

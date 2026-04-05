@@ -454,3 +454,39 @@
 
 ### 마지막 커밋 내용 :
 - `feat: ORD-005 관리자 주문 목록 조회 구현`
+
+## 2026-04-05 (2)
+
+### 현재단계 :
+- ORD-006 `GET /orders/kpi` 주문 KPI 집계 기능 구현.
+- TDD Inside-Out 계층 단위 진행.
+
+### 작업 브랜치 :
+- `feat/order-kpi`
+
+### 구현 시 바뀌는 점 :
+- `GET /orders/kpi` 엔드포인트 추가.
+- startDate/endDate 선택 필터 — 없으면 전체 기간 집계.
+- 전체 건수 + 상태별(RECEIVED/ALLOCATED/PICKING/PACKING/OUTBOUND_COMPLETED/CANCELED) 6가지 건수 응답.
+- MyBatis XML `<sql id="dateFilter">` 조각으로 날짜 조건을 7개 COUNT 쿼리에서 재사용.
+
+### 추가하는 코드
+- `query/dto/OrderKpiQuery.java` — 집계 기간 파라미터 DTO
+- `query/dto/OrderKpiResponse.java` — 전체 + 상태별 건수 응답 DTO
+- `query/mapper/OrderKpiQueryMapper.java` — 상태별 COUNT 7개 메서드
+- `query/service/OrderKpiQueryService.java` — Mapper 7번 호출 후 응답 조립
+- `query/controller/OrderKpiQueryController.java` — GET 엔드포인트
+- `resources/mappers/OrderKpiQueryMapper.xml` — 상태별 COUNT + 날짜 필터 dynamic SQL
+
+### 테스트
+- `OrderKpiQueryServiceTest` 2개 GREEN (건수 조립, 전체 0)
+- `OrderKpiQueryControllerTest` 2개 GREEN (파라미터 없이 200, 날짜 필터 200)
+- `OrderKpiIntegrationTest` 3개 GREEN (DB 건수 확인, 전체 0, 날짜 필터)
+- 전체 테스트 GREEN
+
+### 확인해야할 점 :
+- N+1 성격의 쿼리 7번 호출 — 트래픽 증가 시 단일 GROUP BY 쿼리로 최적화 고려.
+- masterAdmin 권한 검증은 Spring Security 구현 후 추가 필요.
+
+### 마지막 커밋 내용 :
+- `feat: ORD-006 주문 KPI 집계 구현`
