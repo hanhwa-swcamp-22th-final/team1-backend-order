@@ -33,7 +33,7 @@
 | API ID | Method | Path | 요약 | 상태 | 시작일 | 완료일 | 작업 브랜치 | 테스트 관점 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | ORD-002 | POST | /orders/seller/manual | 셀러 단건 주문 등록 | 완료 | 2026-04-03 | 2026-04-03 | feat/order-create-manual | 요청 필수값 검증, 상품 항목 수량 검증, 생성 응답 래퍼 검증 | orderNo 는 null 이면 UUID 자동 생성, 값 있으면 중복 검증. ApiResponse 에 message 필드 추가 (NON_NULL 직렬화). 전체 39개 GREEN |
-| ORD-003 | POST | /orders/seller/bulk | 셀러 엑셀 업로드 주문 일괄 등록 | 대기 | - | - | - | 다건 요청 검증, 부분 실패 정책 확인, 생성 응답 래퍼 검증 | 생성 API |
+| ORD-003 | POST | /orders/seller/bulk | 셀러 엑셀 업로드 주문 일괄 등록 | 완료 | 2026-04-05 | 2026-04-05 | feat/order-whm-list | 다건 요청 검증, 부분 실패 정책 확인, 생성 응답 래퍼 검증 | Apache POI 5.3.0. 부분 저장 정책(성공 행만 저장). Service 4개, Controller 4개 GREEN |
 
 ### (2) Seller 주문 조회
 
@@ -47,7 +47,7 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | ORD-005 | GET | /orders/list | 주문 목록 조회 (masterAdmin) | 완료 | 2026-04-05 | 2026-04-05 | feat/order-admin-list | sellerId 선택 필터, 페이징 응답 검증 | ORD-004와 달리 sellerId 선택값. XML &lt;where&gt; 태그로 sellerId null 시 전체 조회. Service 3개, Controller 2개, 통합 3개 GREEN |
 | ORD-006 | GET | /orders/kpi | 주문 KPI 집계 (masterAdmin) | 완료 | 2026-04-05 | 2026-04-05 | feat/order-kpi | 상태별 건수 집계, 날짜 필터 검증 | 상태별 COUNT 7개 메서드. XML &lt;sql id="dateFilter"&gt; 조각으로 날짜 조건 재사용. Service 2개, Controller 2개, 통합 3개 GREEN |
-| ORD-007 | GET | /orders/whm | 창고 관리자 주문 목록 조회 | 진행중 | 2026-04-05 | - | feat/order-whm-list | 창고별 조회 제한, 상태 필터, 페이징 검증 | WHM 전용. DTO·Mapper 인터페이스·Service·Controller(단위 테스트 GREEN) 완료. XML·통합 테스트 미작성 |
+| ORD-007 | GET | /orders/whm | 창고 관리자 주문 목록 조회 | 완료 | 2026-04-05 | 2026-04-05 | feat/order-whm-list | 창고별 조회 제한, 상태 필터, 페이징 검증 | WHM 전용. Order.assignWarehouse() 추가. Service 3개, Controller 2개, 통합 3개 GREEN |
 
 ### (4) 대시보드 통계 및 매출
 
