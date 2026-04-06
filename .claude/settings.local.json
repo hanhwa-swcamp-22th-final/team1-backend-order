@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth status && git branch --show-current222)",
+      "Bash(gh auth status && git branch --show-current && git status --short)",
+      "WebFetch(domain:www.erdcloud.com)"
+    ]
+  }
+}

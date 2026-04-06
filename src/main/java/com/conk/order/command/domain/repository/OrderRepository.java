@@ -2,7 +2,7 @@ package com.conk.order.command.domain.repository;
 
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderStatus;
-import com.conk.order.command.port.OrderSavePort;
+import com.conk.order.command.application.port.OrderSavePort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /*
