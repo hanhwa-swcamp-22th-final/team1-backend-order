@@ -68,7 +68,7 @@
 - `orderRepository.existsById(orderNo)` → `orderRepository.findById(orderNo).isPresent()`로 변경해 모호성 제거.
 
 **Related**
-- `src/test/java/com/conk/order/command/controller/CreateOrderIntegrationTest.java`
+- `src/test/java/com/conk/order/command/application/controller/CreateOrderIntegrationTest.java`
 
 ---
 
@@ -90,6 +90,8 @@
 - `src/main/java/com/conk/order/command/domain/aggregate/Order.java`
 - `application-dev.yml` (gitignore 대상, 로컬에서 직접 수정)
 
+> **Note**: `Order.java`는 `command/domain/aggregate/`에 위치하며, CQRS 리팩터링 이후에도 경로 변경 없음.
+
 ---
 
 ### [SellerOrderListQueryMapper.xml — 컬럼명·테이블명 오류]
@@ -106,7 +108,7 @@
 
 **Related**
 - `src/main/resources/mappers/SellerOrderListQueryMapper.xml`
-- `src/main/java/com/conk/order/command/domain/aggregate/Order.java` (L24: `@Column(name = "order_id")`)
+- `src/main/java/com/conk/order/command/domain/aggregate/Order.java` (`@Column(name = "order_id")`)
 
 ---
 
@@ -126,6 +128,6 @@
 **Related**
 - `src/main/resources/mappers/OrderKpiQueryMapper.xml`
 - `src/main/java/com/conk/order/command/domain/aggregate/OrderStatus.java`
-- `src/main/java/com/conk/order/query/dto/OrderKpiResponse.java`
-- `src/main/java/com/conk/order/query/mapper/OrderKpiQueryMapper.java`
-- `src/main/java/com/conk/order/query/service/OrderKpiQueryService.java`
+- `src/main/java/com/conk/order/query/application/dto/OrderKpiResponse.java`
+- `src/main/java/com/conk/order/query/infrastructure/mapper/OrderKpiQueryMapper.java`
+- `src/main/java/com/conk/order/query/application/service/OrderKpiQueryService.java`

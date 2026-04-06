@@ -10,6 +10,7 @@
 | Framework | Spring Boot 3.5.12 |
 | ORM / Query | JPA, MyBatis |
 | Validation | spring-boot-starter-validation |
+| Excel | Apache POI 5.3.0 (poi-ooxml) |
 | Runtime DB | MariaDB Driver |
 | Test DB | H2 |
 | Test | JUnit 5, Spring Boot Test, MyBatis Starter Test |
@@ -19,19 +20,28 @@
 
 ```text
 command/
+  application/
+    controller/   -> CreateOrderController, BulkCreateOrderController
+    service/      -> CreateOrderService, BulkCreateOrderService
+    dto/          -> Request/Response DTO (6개)
   domain/
-    aggregate/    -> Order, OrderItem, ShippingAddress, OrderStatus
+    aggregate/    -> Order, OrderItem, ShippingAddress, OrderStatus, OrderChannel
     repository/   -> OrderRepository
+  port/           -> OrderSavePort
 
 query/
-  controller/     -> OutboundStatsQueryController
-  dto/            -> ApiResponse, OutboundStatsResponse
-  mapper/         -> OutboundStatsQueryMapper, XML 매퍼
-  service/        -> OutboundStatsQueryService
-```
+  application/
+    controller/   -> 5개 Query Controller
+    service/      -> 5개 Query Service
+    dto/          -> Query/Response/Summary DTO (12개)
+  infrastructure/
+    mapper/       -> 5개 MyBatis @Mapper 인터페이스
 
-- `command.application`, `command.infrastructure`, `query.dao` 패키지는 아직 없다.
-- 현재 저장소는 도메인/조회 최소 구조만 구현된 상태다.
+common/
+  controller/     -> GlobalExceptionHandler
+  dto/            -> ApiResponse
+  exception/      -> ErrorCode, BusinessException
+```
 
 ## 3. API 명세 기준
 
@@ -47,18 +57,25 @@ query/
 - 구현됨
   - `Order` aggregate와 상태 전이 규칙
   - `OrderRepository#countByStatus`
-  - `ORD-001 GET /orders/outbound/stats`
+  - ORD-001 `GET /orders/outbound/stats` 대시보드 출고 통계
+  - ORD-002 `POST /orders/seller/manual` 셀러 단건 등록
+  - ORD-003 `POST /orders/seller/bulk` 셀러 일괄 등록
+  - ORD-004 `GET /orders/seller/list` 셀러 주문 목록
+  - ORD-005 `GET /orders/list` 관리자 주문 목록
+  - ORD-006 `GET /orders/kpi` 주문 KPI 집계
+  - ORD-007 `GET /orders/whm` 창고 관리자 주문 목록
 - 미완료
-  - `ORD-001`의 추이 계산 로직
+  - ORD-008 `GET /orders/revenue/current` 당월 매출
+  - ORD-009 `GET /orders/revenue/monthly` 월별 매출 추이
   - Security/JWT 연동
-  - `ORD-002` ~ `ORD-009`
 
 ## 5. 검토 체크리스트
 
 ### (1) 구조 / 설계
-- [ ] `command`와 `query` 경계를 넘는 직접 의존이 없는가
+- [ ] `command`와 `query` 경계를 넘는 직접 의존이 없는가 (단, query → command.domain.aggregate 참조는 enum 공유 목적으로 허용)
 - [ ] 조회 로직이 MyBatis Mapper를 통해 분리되어 있는가
 - [ ] Controller가 도메인 엔티티를 직접 반환하지 않는가
+- [ ] application 레이어 내에서만 controller → service → dto 흐름이 이루어지는가
 
 ### (2) 응답 / API
 - [ ] Base path가 `/orders` 기준과 일치하는가
@@ -71,13 +88,14 @@ query/
 
 ### (4) 유효성 검증
 - [ ] 주문번호, 주문일자, 배송지, 항목, 수량 등 핵심 필수값이 도메인에서 검증되는가
-- [ ] 추후 요청 DTO 추가 시 Bean Validation이 빠지지 않도록 체크했는가
+- [ ] 요청 DTO에 Bean Validation이 적용되어 있는가
 
 ### (5) 테스트
 - [ ] 도메인 규칙 테스트가 상태 전이와 예외 케이스를 덮는가
 - [ ] Repository 테스트가 aggregate 저장과 상태 기반 조회를 확인하는가
 - [ ] 조회 서비스 테스트가 응답 조립과 필드 값을 검증하는가
-- [ ] 아직 없는 컨트롤러/보안 테스트 공백을 인지하고 있는가
+- [ ] Controller 테스트가 HTTP 상태 코드와 필수값 검증을 확인하는가
+- [ ] 통합 테스트가 전체 스택 end-to-end 흐름을 검증하는가
 
 ## 6. 개발 흐름 확인
 
