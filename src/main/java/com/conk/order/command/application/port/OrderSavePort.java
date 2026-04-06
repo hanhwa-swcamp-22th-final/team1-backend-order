@@ -1,4 +1,4 @@
-package com.conk.order.command.port;
+package com.conk.order.command.application.port;
 
 import com.conk.order.command.domain.aggregate.Order;
 

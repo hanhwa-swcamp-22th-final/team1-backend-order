@@ -6,7 +6,7 @@ import com.conk.order.command.domain.aggregate.OrderItem;
 import com.conk.order.command.domain.aggregate.ShippingAddress;
 import com.conk.order.command.application.dto.BulkCreateOrderResponse;
 import com.conk.order.command.application.dto.FailedRow;
-import com.conk.order.command.port.OrderSavePort;
+import com.conk.order.command.application.port.OrderSavePort;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
 import java.io.IOException;

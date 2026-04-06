@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.application.dto.BulkCreateOrderResponse;
-import com.conk.order.command.port.OrderSavePort;
+import com.conk.order.command.application.port.OrderSavePort;
 import com.conk.order.common.exception.BusinessException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

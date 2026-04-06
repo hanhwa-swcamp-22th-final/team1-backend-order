@@ -8,7 +8,7 @@ import com.conk.order.command.application.dto.CreateOrderItemRequest;
 import com.conk.order.command.application.dto.CreateOrderRequest;
 import com.conk.order.command.application.dto.CreateOrderResponse;
 import com.conk.order.command.application.dto.CreateShippingAddressRequest;
-import com.conk.order.command.port.OrderSavePort;
+import com.conk.order.command.application.port.OrderSavePort;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
 import java.util.List;
