@@ -7,6 +7,7 @@ import com.conk.order.query.dto.SellerOrderListResponse;
 import com.conk.order.query.service.SellerOrderListQueryService;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,7 +36,7 @@ public class SellerOrderListQueryController {
    * @RequestParam(defaultValue = "0")      → 파라미터 없을 때 기본값 사용.
    */
   @GetMapping("/seller/list")
-  public ApiResponse<SellerOrderListResponse> getSellerOrders(
+  public ResponseEntity<ApiResponse<SellerOrderListResponse>> getSellerOrders(
       @RequestParam String sellerId,
       @RequestParam(required = false) OrderStatus status,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -52,6 +53,6 @@ public class SellerOrderListQueryController {
     query.setPage(page);
     query.setSize(size);
 
-    return ApiResponse.success(sellerOrderListQueryService.getSellerOrders(query));
+    return ResponseEntity.ok(ApiResponse.success(sellerOrderListQueryService.getSellerOrders(query)));
   }
 }

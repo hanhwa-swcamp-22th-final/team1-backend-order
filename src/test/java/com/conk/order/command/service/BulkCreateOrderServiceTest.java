@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.dto.BulkCreateOrderResponse;
 import com.conk.order.command.port.OrderSavePort;
+import com.conk.order.common.exception.BusinessException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -83,7 +84,7 @@ class BulkCreateOrderServiceTest {
     assertThat(response.getFailedRows()).isEmpty();
   }
 
-  /* 빈 파일(xlsx 형식 아님) → IllegalArgumentException. */
+  /* xlsx 형식 아닌 파일 → BusinessException. */
   @Test
   void create_throwsException_whenFileIsNotExcel() {
     StubSavePort stub = new StubSavePort();
@@ -94,7 +95,7 @@ class BulkCreateOrderServiceTest {
     );
 
     assertThatThrownBy(() -> service.create(file, "SELLER-001"))
-        .isInstanceOf(IllegalArgumentException.class);
+        .isInstanceOf(BusinessException.class);
   }
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────

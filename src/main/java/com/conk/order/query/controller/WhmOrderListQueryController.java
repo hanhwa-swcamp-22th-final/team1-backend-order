@@ -7,6 +7,7 @@ import com.conk.order.query.dto.WhmOrderListResponse;
 import com.conk.order.query.service.WhmOrderListQueryService;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,7 +33,7 @@ public class WhmOrderListQueryController {
    * warehouseId 는 필수. WHM 은 자신이 담당하는 창고의 주문만 조회할 수 있다.
    */
   @GetMapping("/whm")
-  public ApiResponse<WhmOrderListResponse> getWhmOrders(
+  public ResponseEntity<ApiResponse<WhmOrderListResponse>> getWhmOrders(
       @RequestParam String warehouseId,
       @RequestParam(required = false) OrderStatus status,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -48,6 +49,6 @@ public class WhmOrderListQueryController {
     query.setPage(page);
     query.setSize(size);
 
-    return ApiResponse.success(whmOrderListQueryService.getWhmOrders(query));
+    return ResponseEntity.ok(ApiResponse.success(whmOrderListQueryService.getWhmOrders(query)));
   }
 }

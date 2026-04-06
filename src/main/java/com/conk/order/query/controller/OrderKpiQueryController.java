@@ -6,6 +6,7 @@ import com.conk.order.query.dto.OrderKpiResponse;
 import com.conk.order.query.service.OrderKpiQueryService;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,7 +33,7 @@ public class OrderKpiQueryController {
    * 날짜 파라미터가 없으면 전체 기간 집계.
    */
   @GetMapping("/kpi")
-  public ApiResponse<OrderKpiResponse> getKpi(
+  public ResponseEntity<ApiResponse<OrderKpiResponse>> getKpi(
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
   ) {
@@ -40,6 +41,6 @@ public class OrderKpiQueryController {
     query.setStartDate(startDate);
     query.setEndDate(endDate);
 
-    return ApiResponse.success(orderKpiQueryService.getKpi(query));
+    return ResponseEntity.ok(ApiResponse.success(orderKpiQueryService.getKpi(query)));
   }
 }

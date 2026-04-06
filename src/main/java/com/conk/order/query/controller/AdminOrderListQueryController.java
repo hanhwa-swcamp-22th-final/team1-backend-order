@@ -7,6 +7,7 @@ import com.conk.order.query.dto.AdminOrderListResponse;
 import com.conk.order.query.service.AdminOrderListQueryService;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,7 +34,7 @@ public class AdminOrderListQueryController {
    * masterAdmin 은 파라미터 없이 요청하면 전체 셀러의 주문을 모두 조회한다.
    */
   @GetMapping("/list")
-  public ApiResponse<AdminOrderListResponse> getAdminOrders(
+  public ResponseEntity<ApiResponse<AdminOrderListResponse>> getAdminOrders(
       @RequestParam(required = false) String sellerId,
       @RequestParam(required = false) OrderStatus status,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -49,6 +50,6 @@ public class AdminOrderListQueryController {
     query.setPage(page);
     query.setSize(size);
 
-    return ApiResponse.success(adminOrderListQueryService.getAdminOrders(query));
+    return ResponseEntity.ok(ApiResponse.success(adminOrderListQueryService.getAdminOrders(query)));
   }
 }

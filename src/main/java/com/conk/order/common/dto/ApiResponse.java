@@ -32,4 +32,9 @@ public class ApiResponse<T> {
   public static <T> ApiResponse<T> created(String message, T data) {
     return new ApiResponse<>(true, message, data);
   }
+
+  /* 오류 API 응답. { success: false, message: "code: message" } */
+  public static <T> ApiResponse<T> failure(String code, String message) {
+    return new ApiResponse<>(false, code + ": " + message, null);
+  }
 }
