@@ -3,6 +3,7 @@ package com.conk.order.query.controller;
 import com.conk.order.common.dto.ApiResponse;
 import com.conk.order.query.dto.OutboundStatsResponse;
 import com.conk.order.query.service.OutboundStatsQueryService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,9 +23,7 @@ public class OutboundStatsQueryController {
   }
 
   @GetMapping("/outbound/stats") // GET /orders/outbound/stats 에 반응
-  // 응답을 { success: true, data: ... } 형식으로 포장
-  public ApiResponse<OutboundStatsResponse> getOutboundStats() {
-    // 실제 계산은 서비스에 위임
-    return ApiResponse.success(outboundStatsQueryService.getOutboundStats());
+  public ResponseEntity<ApiResponse<OutboundStatsResponse>> getOutboundStats() {
+    return ResponseEntity.ok(ApiResponse.success(outboundStatsQueryService.getOutboundStats()));
   }
 }

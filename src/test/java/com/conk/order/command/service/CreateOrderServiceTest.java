@@ -12,6 +12,7 @@ import com.conk.order.command.dto.CreateShippingAddressRequest;
 import com.conk.order.command.port.OrderSavePort;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import com.conk.order.common.exception.BusinessException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,7 @@ class CreateOrderServiceTest {
     CreateOrderRequest duplicate = buildRequest("ORD-DUP-001");
 
     assertThatThrownBy(() -> service.create(duplicate))
-        .isInstanceOf(IllegalArgumentException.class)
+        .isInstanceOf(BusinessException.class)
         .hasMessageContaining("ORD-DUP-001");
   }
 
@@ -153,3 +154,4 @@ class CreateOrderServiceTest {
     }
   }
 }
+

@@ -3,6 +3,7 @@ package com.conk.order.command.controller;
 import com.conk.order.command.dto.BulkCreateOrderResponse;
 import com.conk.order.command.service.BulkCreateOrderService;
 import com.conk.order.common.dto.ApiResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,11 +30,11 @@ public class BulkCreateOrderController {
   }
 
   @PostMapping("/seller/bulk")
-  public ApiResponse<BulkCreateOrderResponse> bulkCreate(
+  public ResponseEntity<ApiResponse<BulkCreateOrderResponse>> bulkCreate(
       @RequestParam String sellerId,
       @RequestParam MultipartFile file
   ) {
     BulkCreateOrderResponse response = bulkCreateOrderService.create(file, sellerId);
-    return ApiResponse.created("일괄 주문이 등록되었습니다.", response);
+    return ResponseEntity.ok(ApiResponse.created("일괄 주문이 등록되었습니다.", response));
   }
 }

@@ -9,6 +9,8 @@ import com.conk.order.command.dto.CreateOrderRequest;
 import com.conk.order.command.dto.CreateOrderResponse;
 import com.conk.order.command.dto.CreateShippingAddressRequest;
 import com.conk.order.command.port.OrderSavePort;
+import com.conk.order.common.exception.BusinessException;
+import com.conk.order.common.exception.ErrorCode;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -59,7 +61,8 @@ public class CreateOrderService {
       return UUID.randomUUID().toString();
     }
     if (orderSavePort.existsById(requested)) {
-      throw new IllegalArgumentException("이미 존재하는 주문번호입니다: " + requested);
+      throw new BusinessException(ErrorCode.ORDER_ALREADY_EXISTS,
+          "이미 존재하는 주문번호입니다: " + requested);
     }
     return requested;
   }

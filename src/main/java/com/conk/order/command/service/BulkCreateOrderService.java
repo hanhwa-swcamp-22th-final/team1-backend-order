@@ -7,6 +7,8 @@ import com.conk.order.command.domain.aggregate.ShippingAddress;
 import com.conk.order.command.dto.BulkCreateOrderResponse;
 import com.conk.order.command.dto.FailedRow;
 import com.conk.order.command.port.OrderSavePort;
+import com.conk.order.common.exception.BusinessException;
+import com.conk.order.common.exception.ErrorCode;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -86,9 +88,9 @@ public class BulkCreateOrderService {
       Workbook wb = new XSSFWorkbook(file.getInputStream());
       return wb.getSheetAt(0);
     } catch (IOException e) {
-      throw new IllegalArgumentException("엑셀 파일을 읽을 수 없습니다.", e);
+      throw new BusinessException(ErrorCode.BULK_FILE_UNREADABLE);
     } catch (Exception e) {
-      throw new IllegalArgumentException("xlsx 형식의 파일만 업로드할 수 있습니다.", e);
+      throw new BusinessException(ErrorCode.BULK_FILE_FORMAT_INVALID);
     }
   }
 
