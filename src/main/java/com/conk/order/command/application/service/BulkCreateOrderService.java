@@ -6,7 +6,7 @@ import com.conk.order.command.domain.aggregate.OrderItem;
 import com.conk.order.command.domain.aggregate.ShippingAddress;
 import com.conk.order.command.application.dto.BulkCreateOrderResponse;
 import com.conk.order.command.application.dto.FailedRow;
-import com.conk.order.command.application.port.OrderSavePort;
+import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
 import java.io.IOException;
@@ -42,10 +42,10 @@ public class BulkCreateOrderService {
   private static final DateTimeFormatter DATE_TIME_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-  private final OrderSavePort orderSavePort;
+  private final OrderRepository orderRepository;
 
-  public BulkCreateOrderService(OrderSavePort orderSavePort) {
-    this.orderSavePort = orderSavePort;
+  public BulkCreateOrderService(OrderRepository orderRepository) {
+    this.orderRepository = orderRepository;
   }
 
   /*
@@ -69,7 +69,7 @@ public class BulkCreateOrderService {
       int rowNumber = i + 1; // 헤더=1행, 데이터 첫 행=2행 기준
       try {
         Order order = buildOrder(row, sellerId);
-        orderSavePort.saveOrder(order);
+        orderRepository.saveOrder(order);
         successCount++;
       } catch (Exception e) {
         failedRows.add(new FailedRow(rowNumber, e.getMessage()));

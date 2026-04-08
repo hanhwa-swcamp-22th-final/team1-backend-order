@@ -2,22 +2,26 @@ package com.conk.order.command.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.application.dto.BulkCreateOrderResponse;
-import com.conk.order.command.application.port.OrderSavePort;
+import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.common.exception.BusinessException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,17 +29,25 @@ import org.springframework.web.multipart.MultipartFile;
  * ORD-003 엑셀 일괄 주문 등록 서비스 단위 테스트.
  *
  * Spring 컨텍스트 없이 순수 Java 로 실행한다.
- * OrderSavePort 는 StubSavePort 로 대체한다.
+ * OrderRepository 는 Mockito mock 으로 대체한다.
  * 엑셀 파일은 Apache POI 로 인메모리 생성해 MultipartFile 로 감싼다.
  */
+@ExtendWith(MockitoExtension.class)
 class BulkCreateOrderServiceTest {
+
+  @Mock
+  private OrderRepository orderRepository;
+
+  private BulkCreateOrderService service;
+
+  @BeforeEach
+  void setUp() {
+    service = new BulkCreateOrderService(orderRepository);
+  }
 
   /* 유효한 2행 엑셀 → successCount=2, failedRows 없음. */
   @Test
   void create_savesAllValidRows() throws Exception {
-    StubSavePort stub = new StubSavePort();
-    BulkCreateOrderService service = new BulkCreateOrderService(stub);
-
     MultipartFile file = buildExcel(
         row("", "2026-04-05 10:00:00", "SKU-001", "2", "상품A", "홍길동", "010-1111-2222",
             "서울시 강남구 1번지", "", "Seoul", "", "06236", ""),
@@ -47,15 +59,12 @@ class BulkCreateOrderServiceTest {
 
     assertThat(response.getSuccessCount()).isEqualTo(2);
     assertThat(response.getFailedRows()).isEmpty();
-    assertThat(stub.saved).hasSize(2);
+    verify(orderRepository, times(2)).saveOrder(any());
   }
 
   /* 1행 유효 + 1행 SKU 누락 → successCount=1, failedRows 1건. */
   @Test
   void create_collectsFailedRows_whenSomeRowsInvalid() throws Exception {
-    StubSavePort stub = new StubSavePort();
-    BulkCreateOrderService service = new BulkCreateOrderService(stub);
-
     MultipartFile file = buildExcel(
         row("", "2026-04-05 10:00:00", "SKU-001", "1", "", "홍길동", "010-1111-2222",
             "서울시 강남구 1번지", "", "Seoul", "", "06236", ""),
@@ -73,9 +82,6 @@ class BulkCreateOrderServiceTest {
   /* 데이터 행이 없는 엑셀(헤더만) → successCount=0, failedRows 없음. */
   @Test
   void create_returnsZero_whenNoDataRows() throws Exception {
-    StubSavePort stub = new StubSavePort();
-    BulkCreateOrderService service = new BulkCreateOrderService(stub);
-
     MultipartFile file = buildExcel(); // 헤더만
 
     BulkCreateOrderResponse response = service.create(file, "SELLER-001");
@@ -87,9 +93,6 @@ class BulkCreateOrderServiceTest {
   /* xlsx 형식 아닌 파일 → BusinessException. */
   @Test
   void create_throwsException_whenFileIsNotExcel() {
-    StubSavePort stub = new StubSavePort();
-    BulkCreateOrderService service = new BulkCreateOrderService(stub);
-
     MultipartFile file = new MockMultipartFile(
         "file", "test.txt", "text/plain", "not excel".getBytes()
     );
@@ -138,23 +141,5 @@ class BulkCreateOrderServiceTest {
   /* 행 데이터를 가변 인수로 편리하게 생성한다. */
   private String[] row(String... cells) {
     return cells;
-  }
-
-  /*
-   * 저장 호출을 기록하는 테스트용 Stub SavePort.
-   */
-  private static class StubSavePort implements OrderSavePort {
-
-    final List<Order> saved = new ArrayList<>();
-
-    @Override
-    public void saveOrder(Order order) {
-      saved.add(order);
-    }
-
-    @Override
-    public boolean existsById(String orderNo) {
-      return false;
-    }
   }
 }

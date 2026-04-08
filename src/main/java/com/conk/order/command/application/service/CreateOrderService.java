@@ -8,7 +8,7 @@ import com.conk.order.command.application.dto.CreateOrderItemRequest;
 import com.conk.order.command.application.dto.CreateOrderRequest;
 import com.conk.order.command.application.dto.CreateOrderResponse;
 import com.conk.order.command.application.dto.CreateShippingAddressRequest;
-import com.conk.order.command.application.port.OrderSavePort;
+import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
 import java.util.List;
@@ -20,10 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CreateOrderService {
 
-  private final OrderSavePort orderSavePort;
+  private final OrderRepository orderRepository;
 
-  public CreateOrderService(OrderSavePort orderSavePort) {
-    this.orderSavePort = orderSavePort;
+  public CreateOrderService(OrderRepository orderRepository) {
+    this.orderRepository = orderRepository;
   }
 
   /**
@@ -48,7 +48,7 @@ public class CreateOrderService {
         request.getMemo()
     );
 
-    orderSavePort.saveOrder(order);
+    orderRepository.saveOrder(order);
     return new CreateOrderResponse(orderNo);
   }
 
@@ -60,7 +60,7 @@ public class CreateOrderService {
     if (requested == null || requested.isBlank()) {
       return UUID.randomUUID().toString();
     }
-    if (orderSavePort.existsById(requested)) {
+    if (orderRepository.existsById(requested)) {
       throw new BusinessException(ErrorCode.ORDER_ALREADY_EXISTS,
           "이미 존재하는 주문번호입니다: " + requested);
     }

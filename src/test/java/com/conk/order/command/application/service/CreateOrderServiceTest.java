@@ -2,6 +2,8 @@ package com.conk.order.command.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderStatus;
@@ -9,26 +11,30 @@ import com.conk.order.command.application.dto.CreateOrderItemRequest;
 import com.conk.order.command.application.dto.CreateOrderRequest;
 import com.conk.order.command.application.dto.CreateOrderResponse;
 import com.conk.order.command.application.dto.CreateShippingAddressRequest;
-import com.conk.order.command.application.port.OrderSavePort;
+import com.conk.order.command.domain.repository.OrderRepository;
+import com.conk.order.common.exception.BusinessException;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import com.conk.order.common.exception.BusinessException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /* ORD-002 셀러 단건 주문 등록 서비스 단위 테스트. */
+@ExtendWith(MockitoExtension.class)
 class CreateOrderServiceTest {
 
-  private StubOrderSavePort stubPort;
+  @Mock
+  private OrderRepository orderRepository;
+
   private CreateOrderService service;
 
   @BeforeEach
   void setUp() {
-    stubPort = new StubOrderSavePort();
-    service = new CreateOrderService(stubPort);
+    service = new CreateOrderService(orderRepository);
   }
 
   /* orderNo 를 전달하지 않으면 서버가 UUID 를 생성해 반환한다. */
@@ -39,9 +45,9 @@ class CreateOrderServiceTest {
     CreateOrderResponse response = service.create(request);
 
     assertThat(response.getOrderNo()).isNotBlank();
-    assertThat(stubPort.savedOrders).hasSize(1);
-    assertThat(stubPort.savedOrders.values().iterator().next().getOrderNo())
-        .isEqualTo(response.getOrderNo());
+    ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
+    verify(orderRepository).saveOrder(captor.capture());
+    assertThat(captor.getValue().getOrderNo()).isEqualTo(response.getOrderNo());
   }
 
   /* orderNo 를 전달하면 해당 값을 그대로 사용한다. */
@@ -57,9 +63,7 @@ class CreateOrderServiceTest {
   /* 동일한 orderNo 가 이미 존재하면 예외를 던진다. */
   @Test
   void create_throws_whenOrderNoAlreadyExists() {
-    CreateOrderRequest first = buildRequest("ORD-DUP-001");
-    service.create(first);
-
+    when(orderRepository.existsById("ORD-DUP-001")).thenReturn(true);
     CreateOrderRequest duplicate = buildRequest("ORD-DUP-001");
 
     assertThatThrownBy(() -> service.create(duplicate))
@@ -72,9 +76,9 @@ class CreateOrderServiceTest {
   void create_savesOrderWithReceivedStatus() {
     service.create(buildRequest(null));
 
-    Order saved = stubPort.savedOrders.values().iterator().next();
-
-    assertThat(saved.getStatus()).isEqualTo(OrderStatus.RECEIVED);
+    ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
+    verify(orderRepository).saveOrder(captor.capture());
+    assertThat(captor.getValue().getStatus()).isEqualTo(OrderStatus.RECEIVED);
   }
 
   /* 저장된 주문의 항목 수가 요청과 일치한다. */
@@ -82,9 +86,9 @@ class CreateOrderServiceTest {
   void create_savesCorrectItemCount() {
     service.create(buildRequest(null));
 
-    Order saved = stubPort.savedOrders.values().iterator().next();
-
-    assertThat(saved.getItems()).hasSize(2);
+    ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
+    verify(orderRepository).saveOrder(captor.capture());
+    assertThat(captor.getValue().getItems()).hasSize(2);
   }
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
@@ -137,21 +141,4 @@ class CreateOrderServiceTest {
       throw new RuntimeException(e);
     }
   }
-
-  /* 저장된 주문을 메모리에 보관하는 테스트용 Stub. */
-  private static class StubOrderSavePort implements OrderSavePort {
-
-    final Map<String, Order> savedOrders = new HashMap<>();
-
-    @Override
-    public boolean existsById(String orderNo) {
-      return savedOrders.containsKey(orderNo);
-    }
-
-    @Override
-    public void saveOrder(Order order) {
-      savedOrders.put(order.getOrderNo(), order);
-    }
-  }
 }
-
