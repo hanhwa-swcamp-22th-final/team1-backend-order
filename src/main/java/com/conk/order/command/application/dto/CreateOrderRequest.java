@@ -20,7 +20,7 @@ import lombok.Getter;
 public class CreateOrderRequest {
 
   /** 주문번호 (선택). null 이면 서버 자동 생성. */
-  private String orderNo;
+  private String orderId;
 
   /** 셀러 식별자 (필수). */
   @NotBlank

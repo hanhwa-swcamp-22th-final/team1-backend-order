@@ -45,7 +45,7 @@ class CreateOrderControllerTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.message").value("주문이 등록되었습니다."))
-        .andExpect(jsonPath("$.data.orderNo").value("ORD-UUID-001"));
+        .andExpect(jsonPath("$.data.orderId").value("ORD-UUID-001"));
   }
 
   /* sellerId 가 없으면 400 Bad Request 를 반환한다. */

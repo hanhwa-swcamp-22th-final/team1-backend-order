@@ -22,7 +22,7 @@ public class Order {
   /** 주문번호. sales_order.order_id */
   @Id
   @Column(name = "order_id")
-  private String orderNo;
+  private String orderId;
 
   /** 주문 일시. sales_order.ordered_at */
   private LocalDateTime orderedAt;
@@ -87,7 +87,7 @@ public class Order {
   protected Order() {}
 
   private Order(
-      String orderNo,
+      String orderId,
       LocalDateTime orderedAt,
       String sellerId,
       OrderChannel orderChannel,
@@ -98,12 +98,12 @@ public class Order {
       String memo,
       OrderStatus status
   ) {
-    validateOrderNo(orderNo);
+    validateOrderId(orderId);
     validateOrderedAt(orderedAt);
     validateSellerId(sellerId);
     validateItems(items);
     validateShippingAddress(shippingAddress);
-    this.orderNo = orderNo;
+    this.orderId = orderId;
     this.orderedAt = orderedAt;
     this.sellerId = sellerId;
     this.orderChannel = orderChannel;
@@ -124,7 +124,7 @@ public class Order {
    * 주문 생성 팩토리 메서드.
    * 새 주문은 항상 RECEIVED(접수) 상태로 시작한다.
    *
-   * @param orderNo        주문번호
+   * @param orderId        주문번호
    * @param orderedAt      주문 일시
    * @param sellerId       셀러 식별자
    * @param orderChannel   판매 채널
@@ -136,7 +136,7 @@ public class Order {
    * @return Order
    */
   public static Order create(
-      String orderNo,
+      String orderId,
       LocalDateTime orderedAt,
       String sellerId,
       OrderChannel orderChannel,
@@ -147,7 +147,7 @@ public class Order {
       String memo
   ) {
     return new Order(
-        orderNo,
+        orderId,
         orderedAt,
         sellerId,
         orderChannel,
@@ -211,10 +211,10 @@ public class Order {
   /**
    * 주문번호 필수값 검증.
    *
-   * @param orderNo 주문번호
+   * @param orderId 주문번호
    */
-  private void validateOrderNo(String orderNo) {
-    if (orderNo == null || orderNo.isBlank()) {
+  private void validateOrderId(String orderId) {
+    if (orderId == null || orderId.isBlank()) {
       throw new IllegalArgumentException("Order number is required.");
     }
   }

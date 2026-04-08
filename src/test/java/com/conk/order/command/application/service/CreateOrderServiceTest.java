@@ -37,32 +37,32 @@ class CreateOrderServiceTest {
     service = new CreateOrderService(orderRepository);
   }
 
-  /* orderNo 를 전달하지 않으면 서버가 UUID 를 생성해 반환한다. */
+  /* orderId 를 전달하지 않으면 서버가 UUID 를 생성해 반환한다. */
   @Test
-  void create_generatesOrderNo_whenNotProvided() {
+  void create_generatesOrderId_whenNotProvided() {
     CreateOrderRequest request = buildRequest(null);
 
     CreateOrderResponse response = service.create(request);
 
-    assertThat(response.getOrderNo()).isNotBlank();
+    assertThat(response.getOrderId()).isNotBlank();
     ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
     verify(orderRepository).saveOrder(captor.capture());
-    assertThat(captor.getValue().getOrderNo()).isEqualTo(response.getOrderNo());
+    assertThat(captor.getValue().getOrderId()).isEqualTo(response.getOrderId());
   }
 
-  /* orderNo 를 전달하면 해당 값을 그대로 사용한다. */
+  /* orderId 를 전달하면 해당 값을 그대로 사용한다. */
   @Test
-  void create_usesProvidedOrderNo_whenGiven() {
+  void create_usesProvidedOrderId_whenGiven() {
     CreateOrderRequest request = buildRequest("ORD-CUSTOM-001");
 
     CreateOrderResponse response = service.create(request);
 
-    assertThat(response.getOrderNo()).isEqualTo("ORD-CUSTOM-001");
+    assertThat(response.getOrderId()).isEqualTo("ORD-CUSTOM-001");
   }
 
   /* 동일한 orderNo 가 이미 존재하면 예외를 던진다. */
   @Test
-  void create_throws_whenOrderNoAlreadyExists() {
+  void create_throws_whenOrderIdAlreadyExists() {
     when(orderRepository.existsById("ORD-DUP-001")).thenReturn(true);
     CreateOrderRequest duplicate = buildRequest("ORD-DUP-001");
 
@@ -95,11 +95,11 @@ class CreateOrderServiceTest {
 
   /*
    * 기본 주문 요청을 생성한다.
-   * orderNo 가 null 이면 서버 자동 생성, 값이 있으면 해당 값을 사용한다.
+   * orderId 가 null 이면 서버 자동 생성, 값이 있으면 해당 값을 사용한다.
    */
-  private CreateOrderRequest buildRequest(String orderNo) {
+  private CreateOrderRequest buildRequest(String orderId) {
     CreateOrderRequest request = new CreateOrderRequest();
-    setField(request, "orderNo", orderNo);
+    setField(request, "orderId", orderId);
     setField(request, "sellerId", "SELLER-001");
     setField(request, "orderedAt", LocalDateTime.of(2026, 4, 3, 10, 0));
     setField(request, "items", List.of(

@@ -19,7 +19,7 @@ public class OrderTest {
   void createCreatesReceivedOrder() {
     Order order = createValidOrder();
 
-    assertThat(order.getOrderNo()).isEqualTo("ORD-20260327-001");
+    assertThat(order.getOrderId()).isEqualTo("ORD-20260327-001");
     assertThat(order.getOrderedAt()).isEqualTo(LocalDateTime.of(2026, 3, 27, 0, 0));
     assertThat(order.getStatus()).isEqualTo(OrderStatus.RECEIVED);
   }

@@ -34,10 +34,10 @@ public class CreateOrderService {
    */
   @Transactional
   public CreateOrderResponse create(CreateOrderRequest request) {
-    String orderNo = resolveOrderNo(request.getOrderNo());
+    String orderId = resolveOrderId(request.getOrderId());
 
     Order order = Order.create(
-        orderNo,
+        orderId,
         request.getOrderedAt(),
         request.getSellerId(),
         OrderChannel.MANUAL,
@@ -49,14 +49,14 @@ public class CreateOrderService {
     );
 
     orderRepository.saveOrder(order);
-    return new CreateOrderResponse(orderNo);
+    return new CreateOrderResponse(orderId);
   }
 
   /*
    * 요청에 orderNo 가 있으면 중복 여부를 확인하고 반환한다.
    * 없으면 UUID 를 생성해 반환한다.
    */
-  private String resolveOrderNo(String requested) {
+  private String resolveOrderId(String requested) {
     if (requested == null || requested.isBlank()) {
       return UUID.randomUUID().toString();
     }

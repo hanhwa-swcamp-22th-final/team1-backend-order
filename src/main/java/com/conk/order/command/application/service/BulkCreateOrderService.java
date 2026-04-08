@@ -96,7 +96,7 @@ public class BulkCreateOrderService {
 
   /* 엑셀 행을 Order 도메인 객체로 변환한다. */
   private Order buildOrder(Row row, String sellerId) {
-    String orderNo = cell(row, 0);
+    String orderId = cell(row, 0);
     String orderedAtStr = cell(row, 1);
     String sku = cell(row, 2);
     String quantityStr = cell(row, 3);
@@ -111,13 +111,13 @@ public class BulkCreateOrderService {
     String memo = cell(row, 12);
 
     /* 주문번호 — 없으면 UUID 자동 생성. */
-    String resolvedOrderNo = (orderNo.isBlank()) ? UUID.randomUUID().toString() : orderNo;
+    String resolvedOrderId = (orderId.isBlank()) ? UUID.randomUUID().toString() : orderId;
 
     LocalDateTime orderedAt = LocalDateTime.parse(orderedAtStr, DATE_TIME_FORMATTER);
     int quantity = Integer.parseInt(quantityStr);
 
     return Order.create(
-        resolvedOrderNo,
+        resolvedOrderId,
         orderedAt,
         sellerId,
         OrderChannel.MANUAL,

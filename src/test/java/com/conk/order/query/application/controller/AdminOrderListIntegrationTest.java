@@ -80,9 +80,9 @@ class AdminOrderListIntegrationTest {
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
-  private Order createOrder(String orderNo, String sellerId) {
+  private Order createOrder(String orderId, String sellerId) {
     return Order.create(
-        orderNo,
+        orderId,
         LocalDateTime.of(2026, 4, 5, 10, 0),
         sellerId,
         OrderChannel.MANUAL,

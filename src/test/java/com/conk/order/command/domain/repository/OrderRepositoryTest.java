@@ -30,9 +30,9 @@ public class OrderRepositoryTest {
     Order order = createOrder("ORD-001");
 
     Order saved = orderRepository.saveAndFlush(order);
-    Order found = orderRepository.findById(saved.getOrderNo()).orElseThrow();
+    Order found = orderRepository.findById(saved.getOrderId()).orElseThrow();
 
-    assertThat(found.getOrderNo()).isEqualTo("ORD-001");
+    assertThat(found.getOrderId()).isEqualTo("ORD-001");
     assertThat(found.getItems()).hasSize(1);
     assertThat(found.getShippingAddress().getCity()).isEqualTo("Seoul");
   }
