@@ -560,3 +560,43 @@
 
 ### 마지막 커밋 내용 :
 - `feat: ORD-003 엑셀 일괄 주문 등록 구현`
+
+## 2026-04-06
+
+### 현재단계 :
+- command와 query의 디렉토리 구조가 불일치하는 상태였다.
+- command: flat 구조(controller/service/dto)에 빈 application/infrastructure 디렉토리(.gitkeep)가 공존.
+- query: flat 구조만 사용.
+- CQRS + Hexagonal 구조의 application/domain/infrastructure 레이어로 통일하는 리팩터링을 진행했다.
+
+### 작업 브랜치 :
+- `refactor/cqrs-directory-structure`
+
+### 구현 시 바뀌는 점 :
+- command/query 양쪽 모두 application 레이어를 도입해 controller/service/dto를 application 하위로 이동.
+- query의 MyBatis mapper를 infrastructure/mapper로 이동해 인프라 계층을 명시적으로 분리.
+- command의 domain(aggregate/repository)과 port는 현 위치 유지.
+- 빈 .gitkeep 디렉토리 7개 정리.
+
+### 추가하는 코드
+- 파일 이동 (신규 코드 없음, 패키지/import 경로 변경)
+  - `command/controller/` → `command/application/controller/` (2개)
+  - `command/service/` → `command/application/service/` (2개)
+  - `command/dto/` → `command/application/dto/` (6개)
+  - `query/controller/` → `query/application/controller/` (5개)
+  - `query/service/` → `query/application/service/` (5개)
+  - `query/dto/` → `query/application/dto/` (12개)
+  - `query/mapper/` → `query/infrastructure/mapper/` (5개)
+  - 테스트 파일도 동일하게 이동 (18개)
+- MyBatis XML namespace + resultType 경로 수정 (5개)
+
+### 테스트
+- `./gradlew clean build` — BUILD SUCCESSFUL
+- 79개 테스트 전체 GREEN
+
+### 확인해야할 점 :
+- 이후 기능 개발 시 새 파일은 반드시 `command/application/` 또는 `query/application/` 하위에 생성해야 한다.
+- 개발 로그의 과거 항목에 기재된 파일 경로는 이전 flat 구조 기준이므로 참고 시 주의.
+
+### 마지막 커밋 내용 :
+- `refactor: CQRS 디렉토리 구조 개선 — application/infrastructure 레이어 도입`
