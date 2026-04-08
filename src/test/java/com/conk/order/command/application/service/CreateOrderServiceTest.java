@@ -1,7 +1,6 @@
 package com.conk.order.command.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,7 +11,6 @@ import com.conk.order.command.application.dto.CreateOrderRequest;
 import com.conk.order.command.application.dto.CreateOrderResponse;
 import com.conk.order.command.application.dto.CreateShippingAddressRequest;
 import com.conk.order.command.domain.repository.OrderRepository;
-import com.conk.order.common.exception.BusinessException;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,51 +28,36 @@ class CreateOrderServiceTest {
   @Mock
   private OrderRepository orderRepository;
 
+  @Mock
+  private OrderIdGenerator orderIdGenerator;
+
   private CreateOrderService service;
 
   @BeforeEach
   void setUp() {
-    service = new CreateOrderService(orderRepository);
+    service = new CreateOrderService(orderRepository, orderIdGenerator);
   }
 
-  /* orderId 를 전달하지 않으면 서버가 UUID 를 생성해 반환한다. */
+  /* 채번된 주문 ID 로 주문이 등록되고 응답에 포함된다. */
   @Test
-  void create_generatesOrderId_whenNotProvided() {
-    CreateOrderRequest request = buildRequest(null);
+  void create_usesGeneratedOrderId() {
+    when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
+    CreateOrderRequest request = buildRequest();
 
     CreateOrderResponse response = service.create(request);
 
-    assertThat(response.getOrderId()).isNotBlank();
+    assertThat(response.getOrderId()).isEqualTo("ORD-2026-0408-00001");
     ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
     verify(orderRepository).saveOrder(captor.capture());
-    assertThat(captor.getValue().getOrderId()).isEqualTo(response.getOrderId());
-  }
-
-  /* orderId 를 전달하면 해당 값을 그대로 사용한다. */
-  @Test
-  void create_usesProvidedOrderId_whenGiven() {
-    CreateOrderRequest request = buildRequest("ORD-CUSTOM-001");
-
-    CreateOrderResponse response = service.create(request);
-
-    assertThat(response.getOrderId()).isEqualTo("ORD-CUSTOM-001");
-  }
-
-  /* 동일한 orderNo 가 이미 존재하면 예외를 던진다. */
-  @Test
-  void create_throws_whenOrderIdAlreadyExists() {
-    when(orderRepository.existsById("ORD-DUP-001")).thenReturn(true);
-    CreateOrderRequest duplicate = buildRequest("ORD-DUP-001");
-
-    assertThatThrownBy(() -> service.create(duplicate))
-        .isInstanceOf(BusinessException.class)
-        .hasMessageContaining("ORD-DUP-001");
+    assertThat(captor.getValue().getOrderId()).isEqualTo("ORD-2026-0408-00001");
   }
 
   /* 저장된 주문의 상태는 RECEIVED 이다. */
   @Test
   void create_savesOrderWithReceivedStatus() {
-    service.create(buildRequest(null));
+    when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
+
+    service.create(buildRequest());
 
     ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
     verify(orderRepository).saveOrder(captor.capture());
@@ -84,7 +67,9 @@ class CreateOrderServiceTest {
   /* 저장된 주문의 항목 수가 요청과 일치한다. */
   @Test
   void create_savesCorrectItemCount() {
-    service.create(buildRequest(null));
+    when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
+
+    service.create(buildRequest());
 
     ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
     verify(orderRepository).saveOrder(captor.capture());
@@ -93,13 +78,8 @@ class CreateOrderServiceTest {
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
-  /*
-   * 기본 주문 요청을 생성한다.
-   * orderId 가 null 이면 서버 자동 생성, 값이 있으면 해당 값을 사용한다.
-   */
-  private CreateOrderRequest buildRequest(String orderId) {
+  private CreateOrderRequest buildRequest() {
     CreateOrderRequest request = new CreateOrderRequest();
-    setField(request, "orderId", orderId);
     setField(request, "sellerId", "SELLER-001");
     setField(request, "orderedAt", LocalDateTime.of(2026, 4, 3, 10, 0));
     setField(request, "items", List.of(

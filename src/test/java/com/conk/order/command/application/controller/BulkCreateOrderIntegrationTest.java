@@ -43,9 +43,9 @@ class BulkCreateOrderIntegrationTest {
   @Test
   void bulkCreate_savesAllOrders_whenAllRowsAreValid() throws Exception {
     MockMultipartFile file = excelFile(
-        new String[]{"", "2026-04-07 10:00:00", "SKU-001", "2", "상품A",
+        new String[]{"2026-04-07 10:00:00", "SKU-001", "2", "상품A",
             "홍길동", "010-1234-5678", "서울시 강남구 테헤란로 123", "", "Seoul", "", "06236", ""},
-        new String[]{"", "2026-04-07 11:00:00", "SKU-002", "1", "상품B",
+        new String[]{"2026-04-07 11:00:00", "SKU-002", "1", "상품B",
             "김철수", "010-9876-5432", "서울시 서초구 반포대로 456", "", "Seoul", "", "06500", ""}
     );
 
@@ -68,9 +68,9 @@ class BulkCreateOrderIntegrationTest {
   @Test
   void bulkCreate_savesOnlyValidRows_whenSomeRowsFail() throws Exception {
     MockMultipartFile file = excelFile(
-        new String[]{"", "2026-04-07 10:00:00", "SKU-001", "2", "",
+        new String[]{"2026-04-07 10:00:00", "SKU-001", "2", "",
             "홍길동", "010-1234-5678", "서울시 강남구 테헤란로 123", "", "Seoul", "", "06236", ""},
-        new String[]{"", "2026-04-07 11:00:00", "", "1", "",  /* SKU 없음 → 실패 */
+        new String[]{"2026-04-07 11:00:00", "", "1", "",  /* SKU 없음 → 실패 */
             "김철수", "010-9876-5432", "서울시 서초구 반포대로 456", "", "Seoul", "", "06500", ""}
     );
 

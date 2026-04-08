@@ -5,8 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import com.conk.order.command.application.dto.BulkCreateOrderResponse;
+import com.conk.order.command.application.service.OrderIdGenerator;
 import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.common.exception.BusinessException;
 import java.io.ByteArrayInputStream;
@@ -38,20 +41,24 @@ class BulkCreateOrderServiceTest {
   @Mock
   private OrderRepository orderRepository;
 
+  @Mock
+  private OrderIdGenerator orderIdGenerator;
+
   private BulkCreateOrderService service;
 
   @BeforeEach
   void setUp() {
-    service = new BulkCreateOrderService(orderRepository);
+    service = new BulkCreateOrderService(orderRepository, orderIdGenerator);
+    lenient().when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
   }
 
   /* 유효한 2행 엑셀 → successCount=2, failedRows 없음. */
   @Test
   void create_savesAllValidRows() throws Exception {
     MultipartFile file = buildExcel(
-        row("", "2026-04-05 10:00:00", "SKU-001", "2", "상품A", "홍길동", "010-1111-2222",
+        row("2026-04-05 10:00:00", "SKU-001", "2", "상품A", "홍길동", "010-1111-2222",
             "서울시 강남구 1번지", "", "Seoul", "", "06236", ""),
-        row("", "2026-04-05 11:00:00", "SKU-002", "1", "", "김철수", "010-3333-4444",
+        row("2026-04-05 11:00:00", "SKU-002", "1", "", "김철수", "010-3333-4444",
             "서울시 서초구 2번지", "", "Seoul", "", "06500", "메모")
     );
 
@@ -66,9 +73,9 @@ class BulkCreateOrderServiceTest {
   @Test
   void create_collectsFailedRows_whenSomeRowsInvalid() throws Exception {
     MultipartFile file = buildExcel(
-        row("", "2026-04-05 10:00:00", "SKU-001", "1", "", "홍길동", "010-1111-2222",
+        row("2026-04-05 10:00:00", "SKU-001", "1", "", "홍길동", "010-1111-2222",
             "서울시 강남구 1번지", "", "Seoul", "", "06236", ""),
-        row("", "2026-04-05 11:00:00", "",        "1", "", "김철수", "010-3333-4444",
+        row("2026-04-05 11:00:00", "",        "1", "", "김철수", "010-3333-4444",
             "서울시 서초구 2번지", "", "Seoul", "", "06500", "")  // SKU 누락
     );
 
