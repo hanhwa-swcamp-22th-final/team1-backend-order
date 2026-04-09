@@ -13,6 +13,7 @@ import com.conk.order.command.domain.aggregate.ShippingAddress;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
 import com.conk.order.query.application.dto.OrderDetailResponse;
+import com.conk.order.query.application.service.AdminOrderListQueryService;
 import com.conk.order.query.application.service.OrderDetailQueryService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
  *   - 정상 조회 시 200 OK + 상세 데이터
  *   - 존재하지 않는 주문 시 404
  */
-@WebMvcTest(OrderDetailQueryController.class)
+@WebMvcTest(AdminOrderQueryController.class)
 class OrderDetailQueryControllerTest {
 
   @Autowired
@@ -37,6 +38,10 @@ class OrderDetailQueryControllerTest {
 
   @MockitoBean
   private OrderDetailQueryService orderDetailQueryService;
+
+  /* 병합된 AdminOrderQueryController 가 함께 의존하는 서비스. 이 테스트에서는 호출되지 않지만 컨텍스트 로딩을 위해 필요하다. */
+  @MockitoBean
+  private AdminOrderListQueryService adminOrderListQueryService;
 
   /* 정상 조회 시 200 과 주문 상세를 반환한다. */
   @Test

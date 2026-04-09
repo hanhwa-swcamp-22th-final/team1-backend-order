@@ -7,6 +7,7 @@
   import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
   import com.conk.order.query.application.dto.OutboundStatsResponse;
+  import com.conk.order.query.application.service.OrderKpiQueryService;
   import com.conk.order.query.application.service.OutboundStatsQueryService;
   import org.junit.jupiter.api.Test;
   import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@
   import org.springframework.test.web.servlet.MockMvc;
 
   /* ORD-001 출고 통계 컨트롤러 테스트. HTTP 요청·응답 형식을 검증한다. */
-  @WebMvcTest(OutboundStatsQueryController.class)
+  @WebMvcTest(OrderDashboardQueryController.class)
   public class OutboundStatsQueryControllerTest {
 
     @Autowired
@@ -23,6 +24,10 @@
 
     @MockitoBean
     private OutboundStatsQueryService outboundStatsQueryService;
+
+    /* 병합된 OrderDashboardQueryController 가 함께 의존하는 서비스. 이 테스트에서는 호출되지 않지만 컨텍스트 로딩을 위해 필요하다. */
+    @MockitoBean
+    private OrderKpiQueryService orderKpiQueryService;
 
     /* GET /orders/outbound/stats — 평일 정상 응답 형식을 확인한다. */
     @Test

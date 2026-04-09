@@ -678,3 +678,56 @@
 
 ### 마지막 커밋 내용 :
 - 아직 기록 전
+
+---
+
+### 현재단계 :
+- REF-012 Controller·Service 그룹 병합 단계. 기존 "1 기능 = 1 클래스" 구조가 과분할이라는 판단하에 Actor / URL 리소스 / 공유 의존성 기준으로 병합했다.
+- CQRS 경계는 유지했고, 운영 특성이 다른 서비스(Bulk create/validate, Shipment export)는 분리 유지했다.
+
+### 작업 브랜치 :
+- `refactor/controller-service-grouping`
+
+### 구현 시 바뀌는 점 :
+- **Query 컨트롤러 9 → 4**
+  - `SellerOrderQueryController` : SellerOrderList + SellerOrderDetail + OrderTracking (셀러 Actor, `/orders/seller/**`)
+  - `AdminOrderQueryController` : AdminOrderList + OrderDetail (관리자 Actor, `/orders` 루트)
+  - `WhmOrderQueryController` : WhmOrderList + ShipmentExport (WHM Actor, 창고/출고 운영)
+  - `OrderDashboardQueryController` : OutboundStats + OrderKpi (관리자 대시보드 집계)
+- **Command 컨트롤러 6 → 3**
+  - `SellerOrderCommandController` : CreateOrder + CancelOrder (셀러 Actor)
+  - `OrderStatusCommandController` : UpdateOrderStatus (창고/관리자 Actor)
+  - `BulkOrderCommandController` : BulkCreate + BulkValidate + BulkTemplate (`/orders/seller/bulk/**`)
+- **Command 서비스**
+  - `SellerOrderCommandService` : `CreateOrderService` + `CancelOrderService` 병합 (동일 Repository, 셀러 검증·주문 수명주기 공유)
+  - Bulk 서비스는 운영 특성 차이로 분리 유지
+  - Query 서비스는 각 Mapper 가 독립이라 분리 유지
+
+### 추가하는 코드
+- 신규
+  - `query/application/controller/SellerOrderQueryController.java`
+  - `query/application/controller/AdminOrderQueryController.java`
+  - `query/application/controller/WhmOrderQueryController.java`
+  - `query/application/controller/OrderDashboardQueryController.java`
+  - `command/application/controller/SellerOrderCommandController.java`
+  - `command/application/controller/OrderStatusCommandController.java`
+  - `command/application/controller/BulkOrderCommandController.java`
+  - `command/application/service/SellerOrderCommandService.java`
+  - `test/.../service/SellerOrderCommandServiceTest.java`
+- 삭제
+  - Query 컨트롤러 9개 (SellerOrderList/SellerOrderDetail/OrderTracking/AdminOrderList/OrderDetail/WhmOrderList/ShipmentExport/OutboundStats/OrderKpi)
+  - Command 컨트롤러 6개 (Create/Cancel/UpdateOrderStatus/BulkCreate/BulkOrderTemplate/BulkValidate)
+  - `CreateOrderService.java`, `CancelOrderService.java`, 기존 두 서비스 테스트 2개
+- 수정
+  - 기존 `@WebMvcTest` 10개: 타겟 클래스 변경 + 병합 컨트롤러가 함께 의존하는 서비스를 위한 `@MockitoBean` 추가
+
+### 테스트
+- `./gradlew test`
+- 결과: BUILD SUCCESSFUL — 전체 118 테스트 GREEN (실패 0, 에러 0)
+
+### 확인해야할 점 :
+- 병합된 `@WebMvcTest` 테스트는 이름이 여전히 use case 단위(`CreateOrderControllerTest`, `CancelOrderControllerTest` 등)로 남아있음. 후속 리팩터링에서 `SellerOrderCommandControllerTest` 등으로 파일/클래스명을 정리할 여지가 있다.
+- URL 은 전혀 바뀌지 않아 통합 테스트는 무수정으로 통과. 병합이 외부 계약에 영향 없음을 확인.
+
+### 마지막 커밋 내용 :
+- 아직 기록 전

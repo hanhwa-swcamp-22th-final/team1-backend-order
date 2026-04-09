@@ -10,6 +10,8 @@ import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderStatus;
 import com.conk.order.query.application.dto.SellerOrderListResponse;
 import com.conk.order.query.application.dto.SellerOrderSummary;
+import com.conk.order.query.application.service.OrderTrackingQueryService;
+import com.conk.order.query.application.service.SellerOrderDetailQueryService;
 import com.conk.order.query.application.service.SellerOrderListQueryService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
  *
  * sellerId 는 X-User-Id 헤더에서 추출한다.
  */
-@WebMvcTest(SellerOrderListQueryController.class)
+@WebMvcTest(SellerOrderQueryController.class)
 class SellerOrderListQueryControllerTest {
 
   @Autowired
@@ -32,6 +34,13 @@ class SellerOrderListQueryControllerTest {
 
   @MockitoBean
   private SellerOrderListQueryService sellerOrderListQueryService;
+
+  /* 병합된 SellerOrderQueryController 가 함께 의존하는 서비스들. 이 테스트에서는 호출되지 않지만 컨텍스트 로딩을 위해 필요하다. */
+  @MockitoBean
+  private SellerOrderDetailQueryService sellerOrderDetailQueryService;
+
+  @MockitoBean
+  private OrderTrackingQueryService orderTrackingQueryService;
 
   /* 정상 요청 시 200 OK 와 success/data 형식으로 응답한다. */
   @Test

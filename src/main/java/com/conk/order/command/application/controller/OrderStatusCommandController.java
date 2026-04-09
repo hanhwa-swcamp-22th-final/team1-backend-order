@@ -12,23 +12,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /*
- * 주문 상태 변경 컨트롤러.
+ * 주문 상태 Command 컨트롤러.
  *
- * PATCH /orders/{orderId}/status
- * 요청 바디: { "status": "PICKING" }
- * 응답: { "success": true, "message": "주문 상태가 변경되었습니다." }
+ * 창고 관리자·관리자가 주문 상태를 변경하는 엔드포인트를 모은다.
+ *   - PATCH /orders/{orderId}/status : 주문 상태 변경
+ *
+ * 향후 출고 확정, 재할당 등 관리 측 상태 변경 기능이 추가되면 이 컨트롤러에 누적한다.
  */
 @RestController
 @RequestMapping("/orders")
-public class UpdateOrderStatusController {
+public class OrderStatusCommandController {
 
   private final UpdateOrderStatusService updateOrderStatusService;
 
-  public UpdateOrderStatusController(UpdateOrderStatusService updateOrderStatusService) {
+  public OrderStatusCommandController(UpdateOrderStatusService updateOrderStatusService) {
     this.updateOrderStatusService = updateOrderStatusService;
   }
 
-  /* 주문 상태를 변경한다. */
+  /* PATCH /orders/{orderId}/status — 주문 상태를 변경한다. */
   @PatchMapping("/{orderId}/status")
   public ResponseEntity<ApiResponse<Void>> updateStatus(
       @PathVariable String orderId,
