@@ -51,7 +51,7 @@ class BulkCreateOrderIntegrationTest {
 
     mockMvc.perform(multipart("/orders/seller/bulk")
             .file(file)
-            .param("sellerId", "SELLER-001")
+            .header("X-User-Id", "SELLER-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
@@ -76,7 +76,7 @@ class BulkCreateOrderIntegrationTest {
 
     mockMvc.perform(multipart("/orders/seller/bulk")
             .file(file)
-            .param("sellerId", "SELLER-001")
+            .header("X-User-Id", "SELLER-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.successCount").value(1))
@@ -98,7 +98,7 @@ class BulkCreateOrderIntegrationTest {
 
     mockMvc.perform(multipart("/orders/seller/bulk")
             .file(file)
-            .param("sellerId", "SELLER-001")
+            .header("X-User-Id", "SELLER-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isBadRequest());
   }

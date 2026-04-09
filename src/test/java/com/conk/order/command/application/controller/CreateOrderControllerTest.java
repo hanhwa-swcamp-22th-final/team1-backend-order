@@ -1,6 +1,8 @@
 package com.conk.order.command.application.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,12 +36,13 @@ class CreateOrderControllerTest {
   /* 정상 요청 시 201 Created 와 success/message/data 형식으로 응답한다. */
   @Test
   void createOrder_returnsCreatedWithOrderNo() throws Exception {
-    given(createOrderService.create(org.mockito.ArgumentMatchers.any()))
+    given(createOrderService.create(any(), eq("SELLER-001")))
         .willReturn(new CreateOrderResponse("ORD-UUID-001"));
 
     String requestBody = objectMapper.writeValueAsString(buildRequestBody());
 
     mockMvc.perform(post("/orders/seller/manual")
+            .header("X-User-Id", "SELLER-001")
             .contentType(MediaType.APPLICATION_JSON)
             .content(requestBody))
         .andExpect(status().isCreated())
@@ -48,16 +51,16 @@ class CreateOrderControllerTest {
         .andExpect(jsonPath("$.data.orderId").value("ORD-UUID-001"));
   }
 
-  /* sellerId 가 없으면 400 Bad Request 를 반환한다. */
+  /*
+   * X-User-Id 헤더가 없으면 GlobalExceptionHandler 가 401 Unauthorized 를 반환한다.
+   * 운영에서는 NGINX 가 항상 헤더를 주입하므로 발생하지 않는 케이스.
+   */
   @Test
-  void createOrder_returnsBadRequest_whenSellerIdMissing() throws Exception {
-    Map<String, Object> body = buildRequestBody();
-    body.remove("sellerId");
-
+  void createOrder_returnsUnauthorized_whenUserIdHeaderMissing() throws Exception {
     mockMvc.perform(post("/orders/seller/manual")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(body)))
-        .andExpect(status().isBadRequest());
+            .content(objectMapper.writeValueAsString(buildRequestBody())))
+        .andExpect(status().isUnauthorized());
   }
 
   /* items 가 없으면 400 Bad Request 를 반환한다. */
@@ -67,6 +70,7 @@ class CreateOrderControllerTest {
     body.remove("items");
 
     mockMvc.perform(post("/orders/seller/manual")
+            .header("X-User-Id", "SELLER-001")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(body)))
         .andExpect(status().isBadRequest());
@@ -74,10 +78,9 @@ class CreateOrderControllerTest {
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
-  /* 기본 요청 바디를 Map 으로 구성한다. Map 이므로 필드 제거 테스트에 편리하다. */
+  /* 기본 요청 바디를 Map 으로 구성한다. sellerId 는 body 에 없고 헤더에서 온다. */
   private Map<String, Object> buildRequestBody() {
     return new java.util.HashMap<>(Map.of(
-        "sellerId", "SELLER-001",
         "orderedAt", LocalDateTime.of(2026, 4, 3, 10, 0).toString(),
         "items", List.of(Map.of("sku", "SKU-001", "quantity", 2)),
         "shippingAddress", Map.of(

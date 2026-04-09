@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,6 +19,18 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 /* 컨트롤러마다 흩어져 있던 예외 응답 포맷을 한 곳에서 통일한다. */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  /* X-User-Id 헤더 누락 → 401 Unauthorized. 그 외 헤더 누락 → 400. */
+  @ExceptionHandler(MissingRequestHeaderException.class)
+  public ResponseEntity<ApiResponse<Void>> handleMissingHeader(MissingRequestHeaderException ex) {
+    if ("X-User-Id".equals(ex.getHeaderName())) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(ApiResponse.failure("UNAUTHORIZED", "인증 정보가 없습니다. X-User-Id 헤더가 필요합니다."));
+    }
+    return ResponseEntity.badRequest()
+        .body(ApiResponse.failure(ErrorCode.INVALID_INPUT.getCode(),
+            "필수 헤더가 누락되었습니다: " + ex.getHeaderName()));
+  }
 
   /* 비즈니스 예외 — ErrorCode 에 정의된 status/code/message 로 응답한다. */
   @ExceptionHandler(BusinessException.class)
