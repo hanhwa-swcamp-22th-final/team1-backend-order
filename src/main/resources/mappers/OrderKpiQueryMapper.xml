@@ -62,12 +62,22 @@
         </where>
     </select>
 
-    <!-- 기간 내 PICKING_PACKING 상태 주문 건수. -->
-    <select id="countPickingPacking" resultType="int">
+    <!-- 기간 내 PICKING 상태 주문 건수. -->
+    <select id="countPicking" resultType="int">
         SELECT COUNT(*)
         FROM sales_order
         <where>
-            status = 'PICKING_PACKING'
+            status = 'PICKING'
+            <include refid="dateFilter"/>
+        </where>
+    </select>
+
+    <!-- 기간 내 PACKING 상태 주문 건수. -->
+    <select id="countPacking" resultType="int">
+        SELECT COUNT(*)
+        FROM sales_order
+        <where>
+            status = 'PACKING'
             <include refid="dateFilter"/>
         </where>
     </select>

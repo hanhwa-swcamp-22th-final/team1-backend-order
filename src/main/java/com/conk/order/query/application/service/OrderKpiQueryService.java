@@ -28,7 +28,8 @@ public class OrderKpiQueryService {
         orderKpiQueryMapper.countReceived(query),
         orderKpiQueryMapper.countAllocated(query),
         orderKpiQueryMapper.countOutboundInstructed(query),
-        orderKpiQueryMapper.countPickingPacking(query),
+        orderKpiQueryMapper.countPicking(query),
+        orderKpiQueryMapper.countPacking(query),
         orderKpiQueryMapper.countOutboundPending(query),
         orderKpiQueryMapper.countOutboundCompleted(query),
         orderKpiQueryMapper.countCanceled(query)
