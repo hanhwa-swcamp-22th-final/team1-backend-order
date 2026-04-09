@@ -600,3 +600,42 @@
 
 ### 마지막 커밋 내용 :
 - `refactor: CQRS 디렉토리 구조 개선 — application/infrastructure 레이어 도입`
+
+## 2026-04-09
+
+### 현재단계 :
+- 프로젝트 전체 코드 리뷰를 진행하고, 발견된 이슈를 단계별로 개선하는 작업을 시작했다.
+- Phase 1(설정/인프라)과 Phase 2(JPA Auditing) 완료.
+
+### 작업 브랜치 :
+- `refactor/cqrs-directory-structure`
+
+### 구현 시 바뀌는 점 :
+
+#### Phase 1 — 설정/인프라 수정
+- 서버 포트가 `7001`로 고정된다.
+- `build.gradle`에서 불필요한 `org.jacoco:org.jacoco.core` 의존성이 제거된다.
+- `command/infrastructure/service/` 빈 디렉토리에 `.gitkeep` 추가.
+
+#### Phase 2 — JPA Auditing 도입
+- `Order`, `OrderItem`의 `LocalDateTime.now()` 직접 호출 → `@CreatedDate`, `@LastModifiedDate` 자동 처리로 변경.
+- `cancelOrder()`, `assignWarehouse()`, `markOutboundCompleted()` 등에서 수동 `updatedAt` 세팅 제거.
+- `shippedAt`은 비즈니스 시간이므로 `now()` 유지.
+
+### 추가하는 코드
+- `src/main/resources/application.yml` — `server.port: 7001` 추가
+- `build.gradle` — JaCoCo Core 의존성 제거
+- `command/infrastructure/service/.gitkeep` — 빈 디렉토리 유지용
+- `common/config/JpaAuditingConfig.java` (신규) — `@EnableJpaAuditing` 활성화
+- `command/domain/aggregate/Order.java` — `@EntityListeners`, `@CreatedDate`, `@LastModifiedDate` 적용, 수동 `now()` 5곳 제거
+- `command/domain/aggregate/OrderItem.java` — 동일 적용, 수동 `now()` 2곳 제거
+
+### 테스트
+- `./gradlew test` — BUILD SUCCESSFUL, 전체 테스트 GREEN
+
+### 확인해야할 점 :
+- Phase 3~6(sellerId 헤더 변경, Workbook 리소스 누수, 테스트 보강, 코드 품질) 이어서 진행 필요.
+- 환경변수 DB 인증정보 분리는 보류 상태.
+
+### 마지막 커밋 내용 :
+- 아직 기록 전
