@@ -40,4 +40,22 @@ public class SellerOrderSummary {
    * sales_order_item 테이블과 LEFT JOIN 후 집계한다.
    */
   private int itemCount;
+
+  /** 배송지 기본 주소. SQL: o.ship_to_address1 AS street1 */
+  private String street1;
+
+  /** 배송지 상세 주소. SQL: o.ship_to_address2 AS street2 */
+  private String street2;
+
+  /** 배송지 주/지역. SQL: o.ship_to_state AS state */
+  private String state;
+
+  /** 배송지 우편번호. SQL: o.ship_to_zip_code AS zip */
+  private String zip;
+
+  /** 배송지 국가. SQL: o.ship_to_country AS country */
+  private String country;
+
+  /** 수령인 연락처. SQL: o.receiver_phone_no AS phone */
+  private String phone;
 }
