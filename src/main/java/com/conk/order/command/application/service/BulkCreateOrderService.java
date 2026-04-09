@@ -54,46 +54,40 @@ public class BulkCreateOrderService {
    * 엑셀 파일을 파싱해 행별로 주문을 등록한다.
    * 성공/실패 건수를 집계해 반환한다.
    *
+   * Workbook 은 내부적으로 임시 파일과 메모리를 점유하므로
+   * try-with-resources 로 반드시 닫아야 한다.
+   *
    * @param file     xlsx 형식의 엑셀 파일
    * @param sellerId 셀러 식별자 (모든 행에 공통 적용)
    */
   public BulkCreateOrderResponse create(MultipartFile file, String sellerId) {
-    Sheet sheet = parseSheet(file);
-
     int successCount = 0;
     List<FailedRow> failedRows = new ArrayList<>();
 
-    /* 첫 번째 행(인덱스 0)은 헤더이므로 1부터 시작한다. */
-    for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-      Row row = sheet.getRow(i);
-      if (row == null) continue;
+    try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
+      Sheet sheet = wb.getSheetAt(0);
 
-      int rowNumber = i + 1; // 헤더=1행, 데이터 첫 행=2행 기준
-      try {
-        Order order = buildOrder(row, sellerId);
-        orderRepository.saveOrder(order);
-        successCount++;
-      } catch (Exception e) {
-        failedRows.add(new FailedRow(rowNumber, e.getMessage()));
+      /* 첫 번째 행(인덱스 0)은 헤더이므로 1부터 시작한다. */
+      for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+        Row row = sheet.getRow(i);
+        if (row == null) continue;
+
+        int rowNumber = i + 1; // 헤더=1행, 데이터 첫 행=2행 기준
+        try {
+          Order order = buildOrder(row, sellerId);
+          orderRepository.saveOrder(order);
+          successCount++;
+        } catch (Exception e) {
+          failedRows.add(new FailedRow(rowNumber, e.getMessage()));
+        }
       }
-    }
-
-    return new BulkCreateOrderResponse(successCount, failedRows);
-  }
-
-  /*
-   * MultipartFile 을 xlsx Sheet 로 변환한다.
-   * xlsx 형식이 아니거나 파싱 실패 시 BusinessException 을 던진다.
-   */
-  private Sheet parseSheet(MultipartFile file) {
-    try {
-      Workbook wb = new XSSFWorkbook(file.getInputStream());
-      return wb.getSheetAt(0);
     } catch (IOException e) {
       throw new BusinessException(ErrorCode.BULK_FILE_UNREADABLE);
     } catch (Exception e) {
       throw new BusinessException(ErrorCode.BULK_FILE_FORMAT_INVALID);
     }
+
+    return new BulkCreateOrderResponse(successCount, failedRows);
   }
 
   /* 엑셀 행을 Order 도메인 객체로 변환한다. 주문 ID 는 채번 서비스가 생성한다. */

@@ -131,3 +131,19 @@
 - `src/main/java/com/conk/order/query/application/dto/OrderKpiResponse.java`
 - `src/main/java/com/conk/order/query/infrastructure/mapper/OrderKpiQueryMapper.java`
 - `src/main/java/com/conk/order/query/application/service/OrderKpiQueryService.java`
+
+---
+
+### Workbook 리소스 누수 (BulkCreateOrderService)
+
+**문제**
+- `parseSheet()` 에서 XSSFWorkbook 을 열고 close() 하지 않아 임시 파일과 메모리 누수 발생.
+
+**원인**
+- Sheet 만 반환하는 구조라 호출자가 Workbook 참조를 가질 수 없었음.
+
+**해결**
+- `parseSheet()` 제거, `create()` 에서 try-with-resources 로 Workbook 열고 닫도록 변경.
+
+**Related**
+- `src/main/java/com/conk/order/command/application/service/BulkCreateOrderService.java`
