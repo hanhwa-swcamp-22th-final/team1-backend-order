@@ -2,6 +2,11 @@ spring:
   application:
     name: team1-backend-order
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -26,6 +31,10 @@ mybatis:
     map-underscore-to-camel-case: true
   type-aliases-package: com.conk.order
 
+order:
+  bulk-upload:
+    max-row-limit: 5000
+    flush-interval: 500
 management:
   endpoints:
     web:

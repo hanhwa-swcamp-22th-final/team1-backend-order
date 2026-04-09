@@ -3,19 +3,19 @@ package com.conk.order.command.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 import com.conk.order.command.application.dto.BulkCreateOrderResponse;
-import com.conk.order.command.application.service.OrderIdGenerator;
+import com.conk.order.command.application.config.BulkUploadProperties;
 import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.common.exception.BusinessException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
+import jakarta.persistence.EntityManager;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -44,11 +44,19 @@ class BulkCreateOrderServiceTest {
   @Mock
   private OrderIdGenerator orderIdGenerator;
 
+  @Mock
+  private EntityManager entityManager;
+
   private BulkCreateOrderService service;
 
   @BeforeEach
   void setUp() {
-    service = new BulkCreateOrderService(orderRepository, orderIdGenerator);
+    service = new BulkCreateOrderService(
+        orderRepository,
+        orderIdGenerator,
+        entityManager,
+        bulkUploadProperties(5_000, 500)
+    );
     lenient().when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
   }
 
@@ -67,6 +75,8 @@ class BulkCreateOrderServiceTest {
     assertThat(response.getSuccessCount()).isEqualTo(2);
     assertThat(response.getFailedRows()).isEmpty();
     verify(orderRepository, times(2)).saveOrder(any());
+    verify(orderRepository).flush();
+    verify(entityManager).clear();
   }
 
   /* 1행 유효 + 1행 SKU 누락 → successCount=1, failedRows 1건. */
@@ -84,6 +94,9 @@ class BulkCreateOrderServiceTest {
     assertThat(response.getSuccessCount()).isEqualTo(1);
     assertThat(response.getFailedRows()).hasSize(1);
     assertThat(response.getFailedRows().get(0).getRowNumber()).isEqualTo(3); // 헤더=1, 1행=2, 2행=3
+    verify(orderRepository).saveOrder(any());
+    verify(orderRepository).flush();
+    verify(entityManager).clear();
   }
 
   /* 데이터 행이 없는 엑셀(헤더만) → successCount=0, failedRows 없음. */
@@ -95,6 +108,28 @@ class BulkCreateOrderServiceTest {
 
     assertThat(response.getSuccessCount()).isZero();
     assertThat(response.getFailedRows()).isEmpty();
+    verify(orderRepository, never()).flush();
+    verify(entityManager, never()).clear();
+  }
+
+  /* 설정한 flush interval 을 넘기면 중간 flush/clear 와 마지막 flush/clear 가 모두 호출된다. */
+  @Test
+  void create_flushesAndClearsPeriodically_whenRowsExceedInterval() throws Exception {
+    service = new BulkCreateOrderService(
+        orderRepository,
+        orderIdGenerator,
+        entityManager,
+        bulkUploadProperties(5_000, 2)
+    );
+    MultipartFile file = buildExcelWithRepeatedRows(3);
+
+    BulkCreateOrderResponse response = service.create(file, "SELLER-001");
+
+    assertThat(response.getSuccessCount()).isEqualTo(3);
+    assertThat(response.getFailedRows()).isEmpty();
+    verify(orderRepository, times(3)).saveOrder(any());
+    verify(orderRepository, times(2)).flush();
+    verify(entityManager, times(2)).clear();
   }
 
   /* xlsx 형식 아닌 파일 → BusinessException. */
@@ -106,6 +141,25 @@ class BulkCreateOrderServiceTest {
 
     assertThatThrownBy(() -> service.create(file, "SELLER-001"))
         .isInstanceOf(BusinessException.class);
+  }
+
+  /* 설정한 최대 행 수를 초과한 엑셀은 저장 전에 즉시 차단한다. */
+  @Test
+  void create_throwsException_whenRowLimitExceeded() throws Exception {
+    service = new BulkCreateOrderService(
+        orderRepository,
+        orderIdGenerator,
+        entityManager,
+        bulkUploadProperties(2, 500)
+    );
+    MultipartFile file = buildExcelWithRepeatedRows(3);
+
+    assertThatThrownBy(() -> service.create(file, "SELLER-001"))
+        .isInstanceOf(BusinessException.class);
+
+    verify(orderRepository, never()).saveOrder(any());
+    verify(orderRepository, never()).flush();
+    verify(entityManager, never()).clear();
   }
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
@@ -148,5 +202,52 @@ class BulkCreateOrderServiceTest {
   /* 행 데이터를 가변 인수로 편리하게 생성한다. */
   private String[] row(String... cells) {
     return cells;
+  }
+
+  /* 동일한 데이터 행을 count 만큼 반복한 엑셀 파일을 만든다. */
+  private MultipartFile buildExcelWithRepeatedRows(int count) throws IOException {
+    Workbook wb = new XSSFWorkbook();
+    Sheet sheet = wb.createSheet("orders");
+
+    Row header = sheet.createRow(0);
+    String[] headers = {"주문번호", "주문일시", "SKU", "수량", "상품명",
+        "수령인", "연락처", "주소1", "주소2", "도시", "주/지역", "우편번호", "메모"};
+    for (int i = 0; i < headers.length; i++) {
+      header.createCell(i).setCellValue(headers[i]);
+    }
+
+    for (int i = 0; i < count; i++) {
+      Row row = sheet.createRow(i + 1);
+      row.createCell(0).setCellValue("2026-04-05 10:00:00");
+      row.createCell(1).setCellValue("SKU-" + i);
+      row.createCell(2).setCellValue("1");
+      row.createCell(3).setCellValue("상품");
+      row.createCell(4).setCellValue("홍길동");
+      row.createCell(5).setCellValue("010-1111-2222");
+      row.createCell(6).setCellValue("서울시 강남구 1번지");
+      row.createCell(7).setCellValue("");
+      row.createCell(8).setCellValue("Seoul");
+      row.createCell(9).setCellValue("");
+      row.createCell(10).setCellValue("06236");
+      row.createCell(11).setCellValue("");
+    }
+
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    wb.write(out);
+    wb.close();
+
+    return new MockMultipartFile(
+        "file", "orders.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        new ByteArrayInputStream(out.toByteArray())
+    );
+  }
+
+  /* 테스트마다 원하는 업로드 제한값을 주입한다. */
+  private BulkUploadProperties bulkUploadProperties(int maxRowLimit, int flushInterval) {
+    BulkUploadProperties properties = new BulkUploadProperties();
+    properties.setMaxRowLimit(maxRowLimit);
+    properties.setFlushInterval(flushInterval);
+    return properties;
   }
 }

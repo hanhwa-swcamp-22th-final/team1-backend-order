@@ -82,6 +82,7 @@
 | REF-008 | BulkCreate 엣지 케이스 테스트 | 대기 | - | - | null cell, FORMULA 셀, 빈 행 등 |
 | REF-009 | BulkCreate 채널 MANUAL → EXCEL | 대기 | - | - | OrderChannel.EXCEL 미사용 |
 | REF-010 | Query DTO 공통 추상 클래스 도입 | 대기 | - | - | PageableOrderListQuery 추출 |
+| REF-011 | BulkCreate flush/clear 기반 메모리 관리 | 완료 | 2026-04-09 | 2026-04-09 | JDBC batch 설정 제거, 업로드 제한값 설정 분리, 관련 테스트 GREEN |
 
 ## 3. 기능 개발 시작 시 체크 항목
 
