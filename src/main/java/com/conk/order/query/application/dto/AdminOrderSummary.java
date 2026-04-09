@@ -39,4 +39,22 @@ public class AdminOrderSummary {
 
   /** 주문 항목 수. LEFT JOIN + COUNT(id) 로 계산. */
   private int itemCount;
+
+  /** 배송지 기본 주소. */
+  private String street1;
+
+  /** 배송지 상세 주소. */
+  private String street2;
+
+  /** 배송지 주/지역. */
+  private String state;
+
+  /** 배송지 우편번호. */
+  private String zip;
+
+  /** 배송지 국가. */
+  private String country;
+
+  /** 수령인 연락처. */
+  private String phone;
 }

@@ -28,15 +28,16 @@ public class CreateOrderService {
   /**
    * 주문을 등록하고 채번된 주문 ID 를 반환한다.
    * 주문 ID 는 OrderIdGenerator 가 날짜 기반 시퀀스로 생성한다.
+   * sellerId 는 NGINX 가 주입한 X-User-Id 헤더 값을 컨트롤러가 전달한다.
    */
   @Transactional
-  public CreateOrderResponse create(CreateOrderRequest request) {
+  public CreateOrderResponse create(CreateOrderRequest request, String sellerId) {
     String orderId = orderIdGenerator.generate();
 
     Order order = Order.create(
         orderId,
         request.getOrderedAt(),
-        request.getSellerId(),
+        sellerId,
         OrderChannel.MANUAL,
         toOrderItems(request.getItems()),
         toShippingAddress(request.getShippingAddress()),

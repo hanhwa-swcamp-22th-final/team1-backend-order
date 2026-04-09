@@ -44,7 +44,7 @@ class CreateOrderServiceTest {
     when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
     CreateOrderRequest request = buildRequest();
 
-    CreateOrderResponse response = service.create(request);
+    CreateOrderResponse response = service.create(request, "SELLER-001");
 
     assertThat(response.getOrderId()).isEqualTo("ORD-2026-0408-00001");
     ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
@@ -57,7 +57,7 @@ class CreateOrderServiceTest {
   void create_savesOrderWithReceivedStatus() {
     when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
 
-    service.create(buildRequest());
+    service.create(buildRequest(), "SELLER-001");
 
     ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
     verify(orderRepository).saveOrder(captor.capture());
@@ -69,7 +69,7 @@ class CreateOrderServiceTest {
   void create_savesCorrectItemCount() {
     when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
 
-    service.create(buildRequest());
+    service.create(buildRequest(), "SELLER-001");
 
     ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
     verify(orderRepository).saveOrder(captor.capture());
@@ -80,7 +80,6 @@ class CreateOrderServiceTest {
 
   private CreateOrderRequest buildRequest() {
     CreateOrderRequest request = new CreateOrderRequest();
-    setField(request, "sellerId", "SELLER-001");
     setField(request, "orderedAt", LocalDateTime.of(2026, 4, 3, 10, 0));
     setField(request, "items", List.of(
         buildItem("SKU-001", 2, "상품 A"),

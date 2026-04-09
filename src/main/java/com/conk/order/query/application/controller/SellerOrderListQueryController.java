@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,17 +28,11 @@ public class SellerOrderListQueryController {
   /*
    * GET /orders/seller/list
    *
-   * 요청 예시:
-   *   /orders/seller/list?sellerId=SELLER-001&status=RECEIVED&startDate=2026-04-01&page=0&size=20
-   *
-   * @RequestParam String sellerId          → 필수. 없으면 400 자동 반환.
-   * @RequestParam(required = false) ...    → 선택. null 이면 서비스에서 필터 미적용.
-   * @DateTimeFormat(iso = DATE)            → "2026-04-01" 형식의 문자열을 LocalDate 로 변환.
-   * @RequestParam(defaultValue = "0")      → 파라미터 없을 때 기본값 사용.
+   * sellerId 는 NGINX 가 JWT 검증 후 주입하는 X-User-Id 헤더에서 추출한다.
    */
   @GetMapping("/seller/list")
   public ResponseEntity<ApiResponse<SellerOrderListResponse>> getSellerOrders(
-      @RequestParam String sellerId,
+      @RequestHeader("X-User-Id") String sellerId,
       @RequestParam(required = false) OrderStatus status,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,

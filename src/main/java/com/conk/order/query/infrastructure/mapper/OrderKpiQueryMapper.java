@@ -27,8 +27,11 @@ public interface OrderKpiQueryMapper {
   /* 기간 내 OUTBOUND_INSTRUCTED 상태 주문 건수를 조회한다. */
   int countOutboundInstructed(OrderKpiQuery query);
 
-  /* 기간 내 PICKING_PACKING 상태 주문 건수를 조회한다. */
-  int countPickingPacking(OrderKpiQuery query);
+  /* 기간 내 PICKING 상태 주문 건수를 조회한다. */
+  int countPicking(OrderKpiQuery query);
+
+  /* 기간 내 PACKING 상태 주문 건수를 조회한다. */
+  int countPacking(OrderKpiQuery query);
 
   /* 기간 내 OUTBOUND_PENDING 상태 주문 건수를 조회한다. */
   int countOutboundPending(OrderKpiQuery query);

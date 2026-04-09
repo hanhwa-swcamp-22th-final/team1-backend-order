@@ -44,12 +44,18 @@
     -->
     <select id="findOrders" resultType="com.conk.order.query.application.dto.WhmOrderSummary">
         SELECT
-            o.order_id         AS orderNo,
-            o.ordered_at       AS orderedAt,
-            o.status           AS status,
-            o.order_channel    AS orderChannel,
-            o.receiver_name    AS receiverName,
-            COUNT(i.id)        AS itemCount
+            o.order_id           AS orderNo,
+            o.ordered_at         AS orderedAt,
+            o.status             AS status,
+            o.order_channel      AS orderChannel,
+            o.receiver_name      AS receiverName,
+            COUNT(i.id)          AS itemCount,
+            o.ship_to_address1   AS street1,
+            o.ship_to_address2   AS street2,
+            o.ship_to_state      AS state,
+            o.ship_to_zip_code   AS zip,
+            o.ship_to_country    AS country,
+            o.receiver_phone_no  AS phone
         FROM sales_order o
         LEFT JOIN sales_order_item i ON i.order_id = o.order_id
         <include refid="whereClause"/>
@@ -58,7 +64,13 @@
             o.ordered_at,
             o.status,
             o.order_channel,
-            o.receiver_name
+            o.receiver_name,
+            o.ship_to_address1,
+            o.ship_to_address2,
+            o.ship_to_state,
+            o.ship_to_zip_code,
+            o.ship_to_country,
+            o.receiver_phone_no
         ORDER BY o.ordered_at DESC
         LIMIT #{size} OFFSET #{offset}
     </select>

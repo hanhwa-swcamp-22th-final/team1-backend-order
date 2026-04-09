@@ -22,8 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 /*
  * ORD-003 엑셀 일괄 주문 등록 컨트롤러 단위 테스트.
  *
- * Spring MVC 슬라이스 테스트로 HTTP 요청/응답 형식만 검증한다.
- * BulkCreateOrderService 는 MockitoBean 으로 대체한다.
+ * sellerId 는 X-User-Id 헤더에서 추출한다.
  */
 @WebMvcTest(BulkCreateOrderController.class)
 class BulkCreateOrderControllerTest {
@@ -51,7 +50,7 @@ class BulkCreateOrderControllerTest {
 
     mockMvc.perform(multipart("/orders/seller/bulk")
             .file(file)
-            .param("sellerId", "SELLER-001")
+            .header("X-User-Id", "SELLER-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
@@ -77,7 +76,7 @@ class BulkCreateOrderControllerTest {
 
     mockMvc.perform(multipart("/orders/seller/bulk")
             .file(file)
-            .param("sellerId", "SELLER-001")
+            .header("X-User-Id", "SELLER-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.successCount").value(1))
@@ -85,9 +84,11 @@ class BulkCreateOrderControllerTest {
         .andExpect(jsonPath("$.data.failedRows[0].reason").value("SKU는 필수입니다."));
   }
 
-  /* sellerId 파라미터가 없으면 400 Bad Request 를 반환한다. */
+  /*
+   * X-User-Id 헤더가 없으면 GlobalExceptionHandler 가 401 Unauthorized 를 반환한다.
+   */
   @Test
-  void bulkCreate_returnsBadRequest_whenSellerIdMissing() throws Exception {
+  void bulkCreate_returnsUnauthorized_whenUserIdHeaderMissing() throws Exception {
     MockMultipartFile file = new MockMultipartFile(
         "file", "orders.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -97,14 +98,14 @@ class BulkCreateOrderControllerTest {
     mockMvc.perform(multipart("/orders/seller/bulk")
             .file(file)
             .contentType(MediaType.MULTIPART_FORM_DATA))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isUnauthorized());
   }
 
   /* file 파트가 없으면 400 Bad Request 를 반환한다. */
   @Test
   void bulkCreate_returnsBadRequest_whenFileMissing() throws Exception {
     mockMvc.perform(multipart("/orders/seller/bulk")
-            .param("sellerId", "SELLER-001")
+            .header("X-User-Id", "SELLER-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isBadRequest());
   }
