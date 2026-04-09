@@ -2,6 +2,9 @@ package com.conk.order.command.domain.aggregate;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,17 +15,19 @@ import java.util.List;
  * 하나의 주문은 하나 이상의 주문 항목(OrderItem)과 배송지(ShippingAddress)를 포함한다.
  * 외부에서 직접 생성자를 호출하지 못하게 막고,
  * create() 팩토리 메서드를 통해 생성 규칙을 강제한다.
+ * createdAt/updatedAt 은 JPA Auditing 이 자동으로 채운다.
  * 물리 테이블: sales_order
  */
 @Getter
 @Entity
 @Table(name = "sales_order")
+@EntityListeners(AuditingEntityListener.class)
 public class Order {
 
   /** 주문번호. sales_order.order_id */
   @Id
   @Column(name = "order_id")
-  private String orderNo;
+  private String orderId;
 
   /** 주문 일시. sales_order.ordered_at */
   private LocalDateTime orderedAt;
@@ -72,10 +77,13 @@ public class Order {
   /** 출고 완료 일시. sales_order.shipped_at */
   private LocalDateTime shippedAt;
 
-  /** 등록 일시. sales_order.created_at */
+  /** 등록 일시. sales_order.created_at — JPA Auditing 자동 세팅. */
+  @CreatedDate
+  @Column(updatable = false)
   private LocalDateTime createdAt;
 
-  /** 수정 일시. sales_order.updated_at */
+  /** 수정 일시. sales_order.updated_at — JPA Auditing 자동 세팅. */
+  @LastModifiedDate
   private LocalDateTime updatedAt;
 
   /** 등록자. sales_order.created_by */
@@ -87,7 +95,7 @@ public class Order {
   protected Order() {}
 
   private Order(
-      String orderNo,
+      String orderId,
       LocalDateTime orderedAt,
       String sellerId,
       OrderChannel orderChannel,
@@ -98,12 +106,12 @@ public class Order {
       String memo,
       OrderStatus status
   ) {
-    validateOrderNo(orderNo);
+    validateOrderId(orderId);
     validateOrderedAt(orderedAt);
     validateSellerId(sellerId);
     validateItems(items);
     validateShippingAddress(shippingAddress);
-    this.orderNo = orderNo;
+    this.orderId = orderId;
     this.orderedAt = orderedAt;
     this.sellerId = sellerId;
     this.orderChannel = orderChannel;
@@ -112,8 +120,6 @@ public class Order {
     this.receiverPhoneNo = receiverPhoneNo;
     this.memo = memo;
     this.status = status;
-    this.createdAt = LocalDateTime.now();
-    this.updatedAt = LocalDateTime.now();
 
     for (OrderItem item : items) {
       addItem(item);
@@ -124,7 +130,7 @@ public class Order {
    * 주문 생성 팩토리 메서드.
    * 새 주문은 항상 RECEIVED(접수) 상태로 시작한다.
    *
-   * @param orderNo        주문번호
+   * @param orderId        주문번호
    * @param orderedAt      주문 일시
    * @param sellerId       셀러 식별자
    * @param orderChannel   판매 채널
@@ -136,7 +142,7 @@ public class Order {
    * @return Order
    */
   public static Order create(
-      String orderNo,
+      String orderId,
       LocalDateTime orderedAt,
       String sellerId,
       OrderChannel orderChannel,
@@ -147,7 +153,7 @@ public class Order {
       String memo
   ) {
     return new Order(
-        orderNo,
+        orderId,
         orderedAt,
         sellerId,
         orderChannel,
@@ -178,7 +184,6 @@ public class Order {
     }
     this.status = OrderStatus.OUTBOUND_COMPLETED;
     this.shippedAt = LocalDateTime.now();
-    this.updatedAt = LocalDateTime.now();
   }
 
   /*
@@ -190,7 +195,6 @@ public class Order {
       throw new IllegalStateException("Order cannot be canceled in current status.");
     }
     this.status = OrderStatus.CANCELED;
-    this.updatedAt = LocalDateTime.now();
   }
 
   /*
@@ -200,7 +204,6 @@ public class Order {
    */
   public void assignWarehouse(String warehouseId) {
     this.warehouseId = warehouseId;
-    this.updatedAt = LocalDateTime.now();
   }
 
   private void addItem(OrderItem item) {
@@ -211,10 +214,10 @@ public class Order {
   /**
    * 주문번호 필수값 검증.
    *
-   * @param orderNo 주문번호
+   * @param orderId 주문번호
    */
-  private void validateOrderNo(String orderNo) {
-    if (orderNo == null || orderNo.isBlank()) {
+  private void validateOrderId(String orderId) {
+    if (orderId == null || orderId.isBlank()) {
       throw new IllegalArgumentException("Order number is required.");
     }
   }

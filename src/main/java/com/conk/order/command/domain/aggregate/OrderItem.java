@@ -2,6 +2,9 @@ package com.conk.order.command.domain.aggregate;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 /*
@@ -9,11 +12,13 @@ import java.time.LocalDateTime;
  *
  * 한 주문 안에 포함되는 개별 상품 단위를 표현한다.
  * SKU와 수량은 필수값이며, 상품명 스냅샷은 주문 시점의 상품명을 보존한다.
+ * createdAt/updatedAt 은 JPA Auditing 이 자동으로 채운다.
  * 물리 테이블: sales_order_item
  */
 @Getter
 @Entity
 @Table(name = "sales_order_item")
+@EntityListeners(AuditingEntityListener.class)
 public class OrderItem {
 
   /** 주문 항목 식별자. 자동 생성. */
@@ -45,10 +50,13 @@ public class OrderItem {
   @Column(name = "packed_quantity")
   private int packedQuantity = 0;
 
-  /** 등록 일시. sales_order_item.created_at */
+  /** 등록 일시. sales_order_item.created_at — JPA Auditing 자동 세팅. */
+  @CreatedDate
+  @Column(updatable = false)
   private LocalDateTime createdAt;
 
-  /** 수정 일시. sales_order_item.updated_at */
+  /** 수정 일시. sales_order_item.updated_at — JPA Auditing 자동 세팅. */
+  @LastModifiedDate
   private LocalDateTime updatedAt;
 
   /** 등록자. sales_order_item.created_by */
@@ -65,8 +73,6 @@ public class OrderItem {
     this.sku = sku;
     this.quantity = quantity;
     this.productNameSnapshot = productNameSnapshot;
-    this.createdAt = LocalDateTime.now();
-    this.updatedAt = LocalDateTime.now();
   }
 
   /**

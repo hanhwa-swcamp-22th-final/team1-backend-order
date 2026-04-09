@@ -94,9 +94,9 @@ class OutboundStatsIntegrationTest {
    * 테스트용 Order 를 생성하는 헬퍼 메서드.
    * orderedAt 에 date 를 넣어 MyBatis SQL 의 DATE(ordered_at) = #{date} 조건에 맞춘다.
    */
-  private Order createOrder(String orderNo, LocalDate date) {
+  private Order createOrder(String orderId, LocalDate date) {
     return Order.create(
-        orderNo,
+        orderId,
         date.atStartOfDay(),    // LocalDate → LocalDateTime 변환 (2026-04-03 → 2026-04-03T00:00:00)
         "SELLER-001",
         OrderChannel.MANUAL,

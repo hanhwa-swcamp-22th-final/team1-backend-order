@@ -9,5 +9,5 @@ import lombok.RequiredArgsConstructor;
 public class CreateOrderResponse {
 
   /** 생성된 주문번호. */
-  private final String orderNo;
+  private final String orderId;
 }

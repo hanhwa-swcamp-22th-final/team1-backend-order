@@ -1,4 +1,4 @@
-package com.conk.order.common.controller;
+package com.conk.order.common.advice;
 
 import com.conk.order.common.dto.ApiResponse;
 import com.conk.order.common.exception.BusinessException;

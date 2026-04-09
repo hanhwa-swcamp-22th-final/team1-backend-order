@@ -6,7 +6,7 @@ import com.conk.order.command.domain.aggregate.OrderItem;
 import com.conk.order.command.domain.aggregate.ShippingAddress;
 import com.conk.order.command.application.dto.BulkCreateOrderResponse;
 import com.conk.order.command.application.dto.FailedRow;
-import com.conk.order.command.application.port.OrderSavePort;
+import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
 import java.io.IOException;
@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -29,12 +28,13 @@ import org.springframework.web.multipart.MultipartFile;
  * 엑셀 파일을 파싱해 행별로 주문을 저장한다.
  * 실패한 행은 건너뛰고 성공한 행만 저장하는 정책(부분 저장)을 따른다.
  * 각 행은 독립 트랜잭션으로 처리되므로 이 클래스에는 @Transactional 을 붙이지 않는다.
- * OrderSavePort.saveOrder() 는 CreateOrderService 에서 @Transactional 이 보장된다.
  *
  * 엑셀 컬럼 구조 (0-indexed):
- *   0: 주문번호(선택)  1: 주문일시  2: SKU  3: 수량  4: 상품명(선택)
- *   5: 수령인  6: 연락처  7: 주소1  8: 주소2(선택)  9: 도시
- *   10: 주/지역(선택)  11: 우편번호  12: 메모(선택)
+ *   0: 주문일시  1: SKU  2: 수량  3: 상품명(선택)
+ *   4: 수령인  5: 연락처  6: 주소1  7: 주소2(선택)  8: 도시
+ *   9: 주/지역(선택)  10: 우편번호  11: 메모(선택)
+ *
+ * 주문 ID 는 OrderIdGenerator 가 채번하므로 엑셀에 포함하지 않는다.
  */
 @Service
 public class BulkCreateOrderService {
@@ -42,10 +42,12 @@ public class BulkCreateOrderService {
   private static final DateTimeFormatter DATE_TIME_FORMATTER =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-  private final OrderSavePort orderSavePort;
+  private final OrderRepository orderRepository;
+  private final OrderIdGenerator orderIdGenerator;
 
-  public BulkCreateOrderService(OrderSavePort orderSavePort) {
-    this.orderSavePort = orderSavePort;
+  public BulkCreateOrderService(OrderRepository orderRepository, OrderIdGenerator orderIdGenerator) {
+    this.orderRepository = orderRepository;
+    this.orderIdGenerator = orderIdGenerator;
   }
 
   /*
@@ -69,7 +71,7 @@ public class BulkCreateOrderService {
       int rowNumber = i + 1; // 헤더=1행, 데이터 첫 행=2행 기준
       try {
         Order order = buildOrder(row, sellerId);
-        orderSavePort.saveOrder(order);
+        orderRepository.saveOrder(order);
         successCount++;
       } catch (Exception e) {
         failedRows.add(new FailedRow(rowNumber, e.getMessage()));
@@ -81,7 +83,7 @@ public class BulkCreateOrderService {
 
   /*
    * MultipartFile 을 xlsx Sheet 로 변환한다.
-   * xlsx 형식이 아니거나 파싱 실패 시 IllegalArgumentException 을 던진다.
+   * xlsx 형식이 아니거나 파싱 실패 시 BusinessException 을 던진다.
    */
   private Sheet parseSheet(MultipartFile file) {
     try {
@@ -94,30 +96,26 @@ public class BulkCreateOrderService {
     }
   }
 
-  /* 엑셀 행을 Order 도메인 객체로 변환한다. */
+  /* 엑셀 행을 Order 도메인 객체로 변환한다. 주문 ID 는 채번 서비스가 생성한다. */
   private Order buildOrder(Row row, String sellerId) {
-    String orderNo = cell(row, 0);
-    String orderedAtStr = cell(row, 1);
-    String sku = cell(row, 2);
-    String quantityStr = cell(row, 3);
-    String productName = cell(row, 4);
-    String receiverName = cell(row, 5);
-    String receiverPhone = cell(row, 6);
-    String address1 = cell(row, 7);
-    String address2 = cell(row, 8);
-    String city = cell(row, 9);
-    String state = cell(row, 10);
-    String zipCode = cell(row, 11);
-    String memo = cell(row, 12);
-
-    /* 주문번호 — 없으면 UUID 자동 생성. */
-    String resolvedOrderNo = (orderNo.isBlank()) ? UUID.randomUUID().toString() : orderNo;
+    String orderedAtStr = cell(row, 0);
+    String sku = cell(row, 1);
+    String quantityStr = cell(row, 2);
+    String productName = cell(row, 3);
+    String receiverName = cell(row, 4);
+    String receiverPhone = cell(row, 5);
+    String address1 = cell(row, 6);
+    String address2 = cell(row, 7);
+    String city = cell(row, 8);
+    String state = cell(row, 9);
+    String zipCode = cell(row, 10);
+    String memo = cell(row, 11);
 
     LocalDateTime orderedAt = LocalDateTime.parse(orderedAtStr, DATE_TIME_FORMATTER);
     int quantity = Integer.parseInt(quantityStr);
 
     return Order.create(
-        resolvedOrderNo,
+        orderIdGenerator.generate(),
         orderedAt,
         sellerId,
         OrderChannel.MANUAL,

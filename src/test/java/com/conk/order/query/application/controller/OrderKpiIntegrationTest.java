@@ -83,13 +83,13 @@ class OrderKpiIntegrationTest {
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
-  private Order createOrder(String orderNo, String sellerId) {
-    return createOrderAtDate(orderNo, LocalDateTime.of(2026, 4, 5, 10, 0));
+  private Order createOrder(String orderId, String sellerId) {
+    return createOrderAtDate(orderId, LocalDateTime.of(2026, 4, 5, 10, 0));
   }
 
-  private Order createOrderAtDate(String orderNo, LocalDateTime orderedAt) {
+  private Order createOrderAtDate(String orderId, LocalDateTime orderedAt) {
     return Order.create(
-        orderNo,
+        orderId,
         orderedAt,
         "SELLER-001",
         OrderChannel.MANUAL,

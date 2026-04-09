@@ -8,11 +8,8 @@ import com.conk.order.command.application.dto.CreateOrderItemRequest;
 import com.conk.order.command.application.dto.CreateOrderRequest;
 import com.conk.order.command.application.dto.CreateOrderResponse;
 import com.conk.order.command.application.dto.CreateShippingAddressRequest;
-import com.conk.order.command.application.port.OrderSavePort;
-import com.conk.order.common.exception.BusinessException;
-import com.conk.order.common.exception.ErrorCode;
+import com.conk.order.command.domain.repository.OrderRepository;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,24 +17,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CreateOrderService {
 
-  private final OrderSavePort orderSavePort;
+  private final OrderRepository orderRepository;
+  private final OrderIdGenerator orderIdGenerator;
 
-  public CreateOrderService(OrderSavePort orderSavePort) {
-    this.orderSavePort = orderSavePort;
+  public CreateOrderService(OrderRepository orderRepository, OrderIdGenerator orderIdGenerator) {
+    this.orderRepository = orderRepository;
+    this.orderIdGenerator = orderIdGenerator;
   }
 
   /**
-   * 주문을 등록하고 생성된 주문번호를 반환한다.
-   *
-   * <p>orderNo 가 null 이면 UUID 로 자동 생성한다.
-   * orderNo 가 전달되면 해당 값을 사용하되, 이미 존재하면 예외를 던진다.
+   * 주문을 등록하고 채번된 주문 ID 를 반환한다.
+   * 주문 ID 는 OrderIdGenerator 가 날짜 기반 시퀀스로 생성한다.
    */
   @Transactional
   public CreateOrderResponse create(CreateOrderRequest request) {
-    String orderNo = resolveOrderNo(request.getOrderNo());
+    String orderId = orderIdGenerator.generate();
 
     Order order = Order.create(
-        orderNo,
+        orderId,
         request.getOrderedAt(),
         request.getSellerId(),
         OrderChannel.MANUAL,
@@ -48,23 +45,8 @@ public class CreateOrderService {
         request.getMemo()
     );
 
-    orderSavePort.saveOrder(order);
-    return new CreateOrderResponse(orderNo);
-  }
-
-  /*
-   * 요청에 orderNo 가 있으면 중복 여부를 확인하고 반환한다.
-   * 없으면 UUID 를 생성해 반환한다.
-   */
-  private String resolveOrderNo(String requested) {
-    if (requested == null || requested.isBlank()) {
-      return UUID.randomUUID().toString();
-    }
-    if (orderSavePort.existsById(requested)) {
-      throw new BusinessException(ErrorCode.ORDER_ALREADY_EXISTS,
-          "이미 존재하는 주문번호입니다: " + requested);
-    }
-    return requested;
+    orderRepository.saveOrder(order);
+    return new CreateOrderResponse(orderId);
   }
 
   /* 요청 항목 목록을 도메인 OrderItem 으로 변환한다. */

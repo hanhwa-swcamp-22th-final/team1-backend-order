@@ -87,13 +87,13 @@ class WhmOrderListIntegrationTest {
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
-  private Order createOrder(String orderNo, String warehouseId) {
-    return createOrderAtDate(orderNo, warehouseId, LocalDateTime.of(2026, 4, 5, 10, 0));
+  private Order createOrder(String orderId, String warehouseId) {
+    return createOrderAtDate(orderId, warehouseId, LocalDateTime.of(2026, 4, 5, 10, 0));
   }
 
-  private Order createOrderAtDate(String orderNo, String warehouseId, LocalDateTime orderedAt) {
+  private Order createOrderAtDate(String orderId, String warehouseId, LocalDateTime orderedAt) {
     Order order = Order.create(
-        orderNo,
+        orderId,
         orderedAt,
         "SELLER-001",
         OrderChannel.MANUAL,

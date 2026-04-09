@@ -1,7 +1,8 @@
 package com.conk.order.command.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderStatus;
@@ -9,93 +10,76 @@ import com.conk.order.command.application.dto.CreateOrderItemRequest;
 import com.conk.order.command.application.dto.CreateOrderRequest;
 import com.conk.order.command.application.dto.CreateOrderResponse;
 import com.conk.order.command.application.dto.CreateShippingAddressRequest;
-import com.conk.order.command.application.port.OrderSavePort;
+import com.conk.order.command.domain.repository.OrderRepository;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import com.conk.order.common.exception.BusinessException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /* ORD-002 셀러 단건 주문 등록 서비스 단위 테스트. */
+@ExtendWith(MockitoExtension.class)
 class CreateOrderServiceTest {
 
-  private StubOrderSavePort stubPort;
+  @Mock
+  private OrderRepository orderRepository;
+
+  @Mock
+  private OrderIdGenerator orderIdGenerator;
+
   private CreateOrderService service;
 
   @BeforeEach
   void setUp() {
-    stubPort = new StubOrderSavePort();
-    service = new CreateOrderService(stubPort);
+    service = new CreateOrderService(orderRepository, orderIdGenerator);
   }
 
-  /* orderNo 를 전달하지 않으면 서버가 UUID 를 생성해 반환한다. */
+  /* 채번된 주문 ID 로 주문이 등록되고 응답에 포함된다. */
   @Test
-  void create_generatesOrderNo_whenNotProvided() {
-    CreateOrderRequest request = buildRequest(null);
+  void create_usesGeneratedOrderId() {
+    when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
+    CreateOrderRequest request = buildRequest();
 
     CreateOrderResponse response = service.create(request);
 
-    assertThat(response.getOrderNo()).isNotBlank();
-    assertThat(stubPort.savedOrders).hasSize(1);
-    assertThat(stubPort.savedOrders.values().iterator().next().getOrderNo())
-        .isEqualTo(response.getOrderNo());
-  }
-
-  /* orderNo 를 전달하면 해당 값을 그대로 사용한다. */
-  @Test
-  void create_usesProvidedOrderNo_whenGiven() {
-    CreateOrderRequest request = buildRequest("ORD-CUSTOM-001");
-
-    CreateOrderResponse response = service.create(request);
-
-    assertThat(response.getOrderNo()).isEqualTo("ORD-CUSTOM-001");
-  }
-
-  /* 동일한 orderNo 가 이미 존재하면 예외를 던진다. */
-  @Test
-  void create_throws_whenOrderNoAlreadyExists() {
-    CreateOrderRequest first = buildRequest("ORD-DUP-001");
-    service.create(first);
-
-    CreateOrderRequest duplicate = buildRequest("ORD-DUP-001");
-
-    assertThatThrownBy(() -> service.create(duplicate))
-        .isInstanceOf(BusinessException.class)
-        .hasMessageContaining("ORD-DUP-001");
+    assertThat(response.getOrderId()).isEqualTo("ORD-2026-0408-00001");
+    ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
+    verify(orderRepository).saveOrder(captor.capture());
+    assertThat(captor.getValue().getOrderId()).isEqualTo("ORD-2026-0408-00001");
   }
 
   /* 저장된 주문의 상태는 RECEIVED 이다. */
   @Test
   void create_savesOrderWithReceivedStatus() {
-    service.create(buildRequest(null));
+    when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
 
-    Order saved = stubPort.savedOrders.values().iterator().next();
+    service.create(buildRequest());
 
-    assertThat(saved.getStatus()).isEqualTo(OrderStatus.RECEIVED);
+    ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
+    verify(orderRepository).saveOrder(captor.capture());
+    assertThat(captor.getValue().getStatus()).isEqualTo(OrderStatus.RECEIVED);
   }
 
   /* 저장된 주문의 항목 수가 요청과 일치한다. */
   @Test
   void create_savesCorrectItemCount() {
-    service.create(buildRequest(null));
+    when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
 
-    Order saved = stubPort.savedOrders.values().iterator().next();
+    service.create(buildRequest());
 
-    assertThat(saved.getItems()).hasSize(2);
+    ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
+    verify(orderRepository).saveOrder(captor.capture());
+    assertThat(captor.getValue().getItems()).hasSize(2);
   }
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
-  /*
-   * 기본 주문 요청을 생성한다.
-   * orderNo 가 null 이면 서버 자동 생성, 값이 있으면 해당 값을 사용한다.
-   */
-  private CreateOrderRequest buildRequest(String orderNo) {
+  private CreateOrderRequest buildRequest() {
     CreateOrderRequest request = new CreateOrderRequest();
-    setField(request, "orderNo", orderNo);
     setField(request, "sellerId", "SELLER-001");
     setField(request, "orderedAt", LocalDateTime.of(2026, 4, 3, 10, 0));
     setField(request, "items", List.of(
@@ -137,21 +121,4 @@ class CreateOrderServiceTest {
       throw new RuntimeException(e);
     }
   }
-
-  /* 저장된 주문을 메모리에 보관하는 테스트용 Stub. */
-  private static class StubOrderSavePort implements OrderSavePort {
-
-    final Map<String, Order> savedOrders = new HashMap<>();
-
-    @Override
-    public boolean existsById(String orderNo) {
-      return savedOrders.containsKey(orderNo);
-    }
-
-    @Override
-    public void saveOrder(Order order) {
-      savedOrders.put(order.getOrderNo(), order);
-    }
-  }
 }
-
