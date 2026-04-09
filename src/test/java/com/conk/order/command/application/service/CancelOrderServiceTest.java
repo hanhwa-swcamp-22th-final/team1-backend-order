@@ -2,14 +2,18 @@ package com.conk.order.command.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderItem;
 import com.conk.order.command.domain.aggregate.OrderStatus;
 import com.conk.order.command.domain.aggregate.ShippingAddress;
+import com.conk.order.command.domain.aggregate.OrderStatusHistory;
 import com.conk.order.command.domain.repository.OrderRepository;
+import com.conk.order.command.domain.repository.OrderStatusHistoryRepository;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
 import java.time.LocalDateTime;
@@ -36,6 +40,9 @@ class CancelOrderServiceTest {
   @Mock
   private OrderRepository orderRepository;
 
+  @Mock
+  private OrderStatusHistoryRepository historyRepository;
+
   @InjectMocks
   private CancelOrderService cancelOrderService;
 
@@ -48,6 +55,7 @@ class CancelOrderServiceTest {
     cancelOrderService.cancel("ORD-001", "SELLER-001");
 
     assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
+    verify(historyRepository).save(any(OrderStatusHistory.class));
   }
 
   /* 존재하지 않는 주문 → ORDER_NOT_FOUND. */

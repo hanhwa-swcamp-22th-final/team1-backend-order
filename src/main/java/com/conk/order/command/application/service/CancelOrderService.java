@@ -1,7 +1,10 @@
 package com.conk.order.command.application.service;
 
 import com.conk.order.command.domain.aggregate.Order;
+import com.conk.order.command.domain.aggregate.OrderStatus;
+import com.conk.order.command.domain.aggregate.OrderStatusHistory;
 import com.conk.order.command.domain.repository.OrderRepository;
+import com.conk.order.command.domain.repository.OrderStatusHistoryRepository;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
 import org.springframework.stereotype.Service;
@@ -12,14 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * RECEIVED, ALLOCATED 상태의 주문만 취소 가능하다.
  * 셀러 본인의 주문인지 검증한 뒤 Order.cancelOrder() 를 호출한다.
+ * 취소 시 히스토리를 기록한다.
  */
 @Service
 public class CancelOrderService {
 
   private final OrderRepository orderRepository;
+  private final OrderStatusHistoryRepository historyRepository;
 
-  public CancelOrderService(OrderRepository orderRepository) {
+  public CancelOrderService(OrderRepository orderRepository,
+      OrderStatusHistoryRepository historyRepository) {
     this.orderRepository = orderRepository;
+    this.historyRepository = historyRepository;
   }
 
   /*
@@ -38,10 +45,15 @@ public class CancelOrderService {
       throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
     }
 
+    OrderStatus fromStatus = order.getStatus();
+
     try {
       order.cancelOrder();
     } catch (IllegalStateException e) {
       throw new BusinessException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
     }
+
+    historyRepository.save(
+        OrderStatusHistory.create(orderId, fromStatus, OrderStatus.CANCELED, sellerId));
   }
 }

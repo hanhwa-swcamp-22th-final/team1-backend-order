@@ -3,7 +3,14 @@
     "allow": [
       "Bash(gh auth status && git branch --show-current222)",
       "Bash(gh auth status && git branch --show-current && git status --short)",
-      "WebFetch(domain:www.erdcloud.com)"
+      "WebFetch(domain:www.erdcloud.com)",
+      "Bash(sed -i '' -e 's/private String orderNo;/private String orderId;/' -e 's/public String getOrderNo\\(\\)/public String getOrderId\\(\\)/' src/main/java/com/conk/order/command/application/dto/CreateOrderRequest.java)",
+      "Bash(sed -i '' -e 's/private final String orderNo;/private final String orderId;/' src/main/java/com/conk/order/command/application/dto/CreateOrderResponse.java)",
+      "Bash(sed -i '' -e 's/String orderNo = resolveOrderNo\\(request\\\\.getOrderNo\\(\\)\\)/String orderId = resolveOrderId\\(request.getOrderId\\(\\)\\)/' -e 's/return new CreateOrderResponse\\(orderNo\\);/return new CreateOrderResponse\\(orderId\\);/' -e 's/private String resolveOrderNo/private String resolveOrderId/' -e 's/request\\\\.getOrderNo\\(\\)/request.getOrderId\\(\\)/g' src/main/java/com/conk/order/command/application/service/CreateOrderService.java)",
+      "Bash(sed -i '' -e 's/        orderNo,/        orderId,/' src/main/java/com/conk/order/command/application/service/CreateOrderService.java)",
+      "Bash(./gradlew test:*)",
+      "Bash(xargs ls:*)",
+      "Bash(grep -l \"IntegrationTest\\\\|@SpringBootTest\" /Users/jeongbyeongjin/SWCAMP22/be22-final-team1-project/team1-backend-order/src/test/java/com/conk/order/**/*.java)"
     ]
   }
 }
