@@ -26,3 +26,8 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
   type-aliases-package: com.conk.order
+
+order:
+  bulk-upload:
+    max-row-limit: 5000
+    flush-interval: 500

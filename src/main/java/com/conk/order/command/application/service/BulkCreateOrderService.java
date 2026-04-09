@@ -1,5 +1,6 @@
 package com.conk.order.command.application.service;
 
+import com.conk.order.command.application.config.BulkUploadProperties;
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderItem;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.EntityManager;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -28,6 +30,11 @@ import org.springframework.web.multipart.MultipartFile;
  * 엑셀 파일을 파싱해 행별로 주문을 저장한다.
  * 실패한 행은 건너뛰고 성공한 행만 저장하는 정책(부분 저장)을 따른다.
  * 각 행은 독립 트랜잭션으로 처리되므로 이 클래스에는 @Transactional 을 붙이지 않는다.
+ *
+ * 대용량 처리 최적화:
+ *   - 업로드 제한 행 수는 설정값(order.bulk-upload.max-row-limit)으로 관리
+ *   - flush/clear 주기는 설정값(order.bulk-upload.flush-interval)으로 관리
+ *   - multipart 파일 크기 10MB 제한 (application.yml)
  *
  * 엑셀 컬럼 구조 (0-indexed):
  *   0: 주문일시  1: SKU  2: 수량  3: 상품명(선택)
@@ -44,10 +51,15 @@ public class BulkCreateOrderService {
 
   private final OrderRepository orderRepository;
   private final OrderIdGenerator orderIdGenerator;
+  private final EntityManager entityManager;
+  private final BulkUploadProperties bulkUploadProperties;
 
-  public BulkCreateOrderService(OrderRepository orderRepository, OrderIdGenerator orderIdGenerator) {
+  public BulkCreateOrderService(OrderRepository orderRepository, OrderIdGenerator orderIdGenerator,
+      EntityManager entityManager, BulkUploadProperties bulkUploadProperties) {
     this.orderRepository = orderRepository;
     this.orderIdGenerator = orderIdGenerator;
+    this.entityManager = entityManager;
+    this.bulkUploadProperties = bulkUploadProperties;
   }
 
   /*
@@ -62,10 +74,17 @@ public class BulkCreateOrderService {
    */
   public BulkCreateOrderResponse create(MultipartFile file, String sellerId) {
     int successCount = 0;
+    int savedSinceLastClear = 0;
     List<FailedRow> failedRows = new ArrayList<>();
 
     try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
       Sheet sheet = wb.getSheetAt(0);
+      int totalDataRows = sheet.getLastRowNum(); // 헤더 제외 데이터 행 수
+
+      /* 행 수 제한 검증 */
+      if (totalDataRows > bulkUploadProperties.getMaxRowLimit()) {
+        throw new BusinessException(ErrorCode.BULK_ROW_LIMIT_EXCEEDED);
+      }
 
       /* 첫 번째 행(인덱스 0)은 헤더이므로 1부터 시작한다. */
       for (int i = 1; i <= sheet.getLastRowNum(); i++) {
@@ -77,10 +96,24 @@ public class BulkCreateOrderService {
           Order order = buildOrder(row, sellerId);
           orderRepository.saveOrder(order);
           successCount++;
+          savedSinceLastClear++;
+
+          /* 일정 건수마다 flush/clear 로 1차 캐시 누적을 줄인다. */
+          if (savedSinceLastClear >= bulkUploadProperties.getFlushInterval()) {
+            flushAndClear();
+            savedSinceLastClear = 0;
+          }
         } catch (Exception e) {
           failedRows.add(new FailedRow(rowNumber, e.getMessage()));
         }
       }
+
+      /* 마지막 남은 엔티티도 flush/clear 로 정리한다. */
+      if (savedSinceLastClear > 0) {
+        flushAndClear();
+      }
+    } catch (BusinessException e) {
+      throw e;
     } catch (IOException e) {
       throw new BusinessException(ErrorCode.BULK_FILE_UNREADABLE);
     } catch (Exception e) {
@@ -88,6 +121,12 @@ public class BulkCreateOrderService {
     }
 
     return new BulkCreateOrderResponse(successCount, failedRows);
+  }
+
+  /* 영속성 컨텍스트에 남은 엔티티를 반영하고 분리한다. */
+  private void flushAndClear() {
+    orderRepository.flush();
+    entityManager.clear();
   }
 
   /* 엑셀 행을 Order 도메인 객체로 변환한다. 주문 ID 는 채번 서비스가 생성한다. */

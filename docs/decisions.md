@@ -35,3 +35,27 @@
 - 엔티티 선도출 방식은 이후 기능 테스트의 기반 구조를 먼저 고정하는 데 유리하다.
 - 외부 도메인 소유 데이터는 참조 ID로 우선 처리하는 편이 잘못된 Aggregate 경계 설정을 피할 수 있다.
 - `ORD-001` 추이 계산은 이미 합의된 제품 규칙이 있으므로 가이드보다 프로젝트 결정을 우선한다.
+
+## 2026-04-09 BulkCreate 대용량 업로드 처리 방식
+
+### Decision
+- `ORD-003` 대용량 업로드는 JDBC batch 설정 대신 `flush + clear` 기반 메모리 관리로 처리한다.
+- `BulkCreateOrderService`는 `saveOrder()` 흐름을 유지하고, 업로드 제한값과 `flush/clear` 주기를 `order.bulk-upload.*` 설정으로 관리한다.
+- `hibernate.jdbc.batch_size`, `hibernate.order_inserts` 설정은 사용하지 않는다.
+- 기본 설정은 `max-row-limit=5000`, `flush-interval=500`으로 둔다.
+
+### Context
+- Bulk 업로드 처리에 `saveAll + hibernate.jdbc.batch_size`를 적용하는 시도가 있었지만, 이번 작업에서는 배치 최적화보다 현재 서비스 구조를 유지하는 쪽이 우선이었다.
+- 기존 서비스는 부분 저장 정책과 행 단위 실패 수집을 중심으로 작성되어 있었다.
+- 대량 업로드 시 영속성 컨텍스트 누적에 따른 메모리 사용량 증가를 완화할 필요가 있었다.
+
+### Alternatives Considered
+- `saveAll`과 Hibernate JDBC batch 설정을 유지한다.
+- 서비스 전체를 하나의 트랜잭션으로 묶고 `EntityManager.persist()` 기반으로 chunk 처리한다.
+- 현재 저장 흐름을 유지하면서 `flush + clear`만 주기적으로 호출한다.
+
+### Why
+- 현재 코드와 테스트 변경 폭을 가장 작게 유지하면서도 대량 처리 시 1차 캐시 누적을 줄일 수 있다.
+- 부분 저장과 실패 행 수집이라는 기존 서비스 의도를 크게 흔들지 않는다.
+- JDBC batch 설정은 성능 최적화 효과는 있지만, 이번 작업 목표인 처리 방식 단순화와는 맞지 않았다.
+- 운영 환경별 업로드 정책을 코드 수정 없이 조정할 수 있다.

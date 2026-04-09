@@ -27,7 +27,8 @@ public enum ErrorCode {
 
   /* 엑셀 일괄 등록 (Bulk) */
   BULK_FILE_UNREADABLE(HttpStatus.BAD_REQUEST, "ORD-201", "엑셀 파일을 읽을 수 없습니다."),
-  BULK_FILE_FORMAT_INVALID(HttpStatus.BAD_REQUEST, "ORD-202", "xlsx 형식의 파일만 업로드할 수 있습니다.");
+  BULK_FILE_FORMAT_INVALID(HttpStatus.BAD_REQUEST, "ORD-202", "xlsx 형식의 파일만 업로드할 수 있습니다."),
+  BULK_ROW_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "ORD-203", "최대 업로드 가능 행 수를 초과했습니다.");
 
   private final HttpStatus status;
   private final String code;

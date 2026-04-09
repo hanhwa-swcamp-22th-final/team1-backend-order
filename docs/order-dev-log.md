@@ -639,3 +639,42 @@
 
 ### 마지막 커밋 내용 :
 - 아직 기록 전
+
+---
+
+### 현재단계 :
+- ORD-003 대용량 업로드 처리 방향을 JDBC batch 기반 시도에서 `flush + clear` 기반 메모리 관리로 다시 정리하는 단계였다.
+- 기존 `saveAll + hibernate.jdbc.batch_size` 방향 대신 `saveOrder` 유지와 주기적 `flush/clear` 호출로 변경했다.
+- 업로드 제한값은 서비스 상수 대신 `application.yml` 기반 설정으로 이동했다.
+
+### 작업 브랜치 :
+- `feat/order-status-tracking`
+
+### 구현 시 바뀌는 점 :
+- Bulk 업로드는 각 주문 저장 흐름을 유지하면서 설정된 주기마다 `flush/clear`를 호출해 영속성 컨텍스트 누적을 줄인다.
+- `hibernate.jdbc.batch_size`, `order_inserts` 설정을 제거해 JDBC batch 최적화 의존 없이 동작한다.
+- 최대 업로드 행 수도 설정값으로 관리하며, 제한 초과 업로드는 서비스 진입 시 즉시 차단한다.
+
+### 추가하는 코드
+- `src/main/java/com/conk/order/command/application/service/BulkCreateOrderService.java`
+  - `saveAll` 제거
+  - `saveOrder` 후 설정된 주기마다 `flush/clear` 수행
+  - 업로드 제한 행 수를 설정 프로퍼티로 조회
+- `src/main/java/com/conk/order/command/application/config/BulkUploadProperties.java`
+  - Bulk 업로드 제한값 바인딩 전용 설정 클래스 추가
+- `src/test/java/com/conk/order/command/application/service/BulkCreateOrderServiceTest.java`
+  - 설정 주기/제한값 기반 검증 테스트로 조정
+- `src/main/resources/application.yml`
+  - `hibernate.jdbc.batch_size`, `order_inserts` 제거
+  - `order.bulk-upload.*` 설정 추가
+
+### 테스트
+- `./gradlew test --tests com.conk.order.command.application.service.BulkCreateOrderServiceTest --tests com.conk.order.command.application.controller.BulkCreateOrderIntegrationTest`
+- 결과: BUILD SUCCESSFUL
+
+### 확인해야할 점 :
+- 현재 작업은 기존 브랜치에서 진행 중이므로 후속 커밋 전 작업 브랜치 분리 필요 여부를 다시 확인해야 한다.
+- `flush/clear`는 1차 캐시 누적 완화가 목적이며, insert 라운드트립 자체를 줄이는 방식은 아니다.
+
+### 마지막 커밋 내용 :
+- 아직 기록 전
