@@ -11,6 +11,7 @@ import com.conk.order.command.domain.aggregate.OrderStatus;
 import com.conk.order.query.application.dto.AdminOrderListResponse;
 import com.conk.order.query.application.dto.AdminOrderSummary;
 import com.conk.order.query.application.service.AdminOrderListQueryService;
+import com.conk.order.query.application.service.OrderDetailQueryService;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
  *   - JSON 응답 구조가 success/data 형식인가
  *   - status 필터 파라미터를 전달하면 쿼리 객체에 담기는가
  */
-@WebMvcTest(AdminOrderListQueryController.class)
+@WebMvcTest(AdminOrderQueryController.class)
 class AdminOrderListQueryControllerTest {
 
   @Autowired
@@ -38,6 +39,10 @@ class AdminOrderListQueryControllerTest {
 
   @MockitoBean
   private AdminOrderListQueryService adminOrderListQueryService;
+
+  /* 병합된 AdminOrderQueryController 가 함께 의존하는 서비스. 이 테스트에서는 호출되지 않지만 컨텍스트 로딩을 위해 필요하다. */
+  @MockitoBean
+  private OrderDetailQueryService orderDetailQueryService;
 
   /*
    * 파라미터 없이 요청해도 200 OK 와 success/data 형식으로 응답한다.

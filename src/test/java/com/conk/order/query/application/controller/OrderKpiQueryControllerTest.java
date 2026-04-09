@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.conk.order.query.application.dto.OrderKpiResponse;
 import com.conk.order.query.application.service.OrderKpiQueryService;
+import com.conk.order.query.application.service.OutboundStatsQueryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,7 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
  *   - JSON 응답 구조가 success/data 형식인가
  *   - 응답 필드(totalCount, 상태별 건수)가 올바르게 직렬화되는가
  */
-@WebMvcTest(OrderKpiQueryController.class)
+@WebMvcTest(OrderDashboardQueryController.class)
 class OrderKpiQueryControllerTest {
 
   @Autowired
@@ -33,6 +34,10 @@ class OrderKpiQueryControllerTest {
 
   @MockitoBean
   private OrderKpiQueryService orderKpiQueryService;
+
+  /* 병합된 OrderDashboardQueryController 가 함께 의존하는 서비스. 이 테스트에서는 호출되지 않지만 컨텍스트 로딩을 위해 필요하다. */
+  @MockitoBean
+  private OutboundStatsQueryService outboundStatsQueryService;
 
   /* 파라미터 없이 요청해도 200 OK 와 KPI 응답을 반환한다. */
   @Test

@@ -10,6 +10,7 @@ import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderStatus;
 import com.conk.order.query.application.dto.WhmOrderListResponse;
 import com.conk.order.query.application.dto.WhmOrderSummary;
+import com.conk.order.query.application.service.ShipmentExportService;
 import com.conk.order.query.application.service.WhmOrderListQueryService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
  *   - warehouseId 있으면 200 OK 와 success/data 형식으로 응답하는가
  *   - warehouseId 없으면 400 Bad Request 를 반환하는가 (필수 파라미터)
  */
-@WebMvcTest(WhmOrderListQueryController.class)
+@WebMvcTest(WhmOrderQueryController.class)
 class WhmOrderListQueryControllerTest {
 
   @Autowired
@@ -34,6 +35,10 @@ class WhmOrderListQueryControllerTest {
 
   @MockitoBean
   private WhmOrderListQueryService whmOrderListQueryService;
+
+  /* 병합된 WhmOrderQueryController 가 함께 의존하는 서비스. 이 테스트에서는 호출되지 않지만 컨텍스트 로딩을 위해 필요하다. */
+  @MockitoBean
+  private ShipmentExportService shipmentExportService;
 
   /* warehouseId 전달 시 200 OK 와 success/data 형식으로 응답한다. */
   @Test

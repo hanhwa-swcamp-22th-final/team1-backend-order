@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.conk.order.command.application.service.CancelOrderService;
+import com.conk.order.command.application.service.SellerOrderCommandService;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
 import org.junit.jupiter.api.Test;
@@ -25,19 +25,19 @@ import org.springframework.test.web.servlet.MockMvc;
  *   - 취소 불가 → 409
  *   - X-User-Id 누락 → 401
  */
-@WebMvcTest(CancelOrderController.class)
+@WebMvcTest(SellerOrderCommandController.class)
 class CancelOrderControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
 
   @MockitoBean
-  private CancelOrderService cancelOrderService;
+  private SellerOrderCommandService sellerOrderCommandService;
 
   /* 정상 취소 시 200 OK 와 메시지를 반환한다. */
   @Test
   void cancel_returnsOk() throws Exception {
-    doNothing().when(cancelOrderService).cancel(eq("ORD-001"), eq("SELLER-001"));
+    doNothing().when(sellerOrderCommandService).cancel(eq("ORD-001"), eq("SELLER-001"));
 
     mockMvc.perform(patch("/orders/seller/ORD-001/cancel")
             .header("X-User-Id", "SELLER-001"))
@@ -50,7 +50,7 @@ class CancelOrderControllerTest {
   @Test
   void cancel_returns404_whenNotFound() throws Exception {
     doThrow(new BusinessException(ErrorCode.ORDER_NOT_FOUND))
-        .when(cancelOrderService).cancel(eq("NONE"), eq("SELLER-001"));
+        .when(sellerOrderCommandService).cancel(eq("NONE"), eq("SELLER-001"));
 
     mockMvc.perform(patch("/orders/seller/NONE/cancel")
             .header("X-User-Id", "SELLER-001"))
@@ -61,7 +61,7 @@ class CancelOrderControllerTest {
   @Test
   void cancel_returns409_whenNotCancelable() throws Exception {
     doThrow(new BusinessException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED))
-        .when(cancelOrderService).cancel(eq("ORD-001"), eq("SELLER-001"));
+        .when(sellerOrderCommandService).cancel(eq("ORD-001"), eq("SELLER-001"));
 
     mockMvc.perform(patch("/orders/seller/ORD-001/cancel")
             .header("X-User-Id", "SELLER-001"))

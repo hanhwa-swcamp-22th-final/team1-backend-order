@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.conk.order.command.application.dto.BulkCreateOrderResponse;
 import com.conk.order.command.application.dto.FailedRow;
 import com.conk.order.command.application.service.BulkCreateOrderService;
+import com.conk.order.command.application.service.BulkValidateOrderService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
  *
  * sellerId 는 X-User-Id 헤더에서 추출한다.
  */
-@WebMvcTest(BulkCreateOrderController.class)
+@WebMvcTest(BulkOrderCommandController.class)
 class BulkCreateOrderControllerTest {
 
   @Autowired
@@ -32,6 +33,10 @@ class BulkCreateOrderControllerTest {
 
   @MockitoBean
   private BulkCreateOrderService bulkCreateOrderService;
+
+  /* BulkOrderCommandController 가 함께 의존하는 서비스. 이 테스트에서는 호출되지 않지만 컨텍스트 로딩을 위해 필요하다. */
+  @MockitoBean
+  private BulkValidateOrderService bulkValidateOrderService;
 
   /* 정상 요청 시 200 OK 와 success/message/data 형식으로 응답한다. */
   @Test

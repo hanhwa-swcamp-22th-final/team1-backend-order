@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.conk.order.command.application.dto.CreateOrderResponse;
-import com.conk.order.command.application.service.CreateOrderService;
+import com.conk.order.command.application.service.SellerOrderCommandService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +21,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 /* ORD-002 셀러 단건 주문 등록 컨트롤러 단위 테스트. */
-@WebMvcTest(CreateOrderController.class)
+@WebMvcTest(SellerOrderCommandController.class)
 class CreateOrderControllerTest {
 
   @Autowired
@@ -31,12 +31,12 @@ class CreateOrderControllerTest {
   private ObjectMapper objectMapper;
 
   @MockitoBean
-  private CreateOrderService createOrderService;
+  private SellerOrderCommandService sellerOrderCommandService;
 
   /* 정상 요청 시 201 Created 와 success/message/data 형식으로 응답한다. */
   @Test
   void createOrder_returnsCreatedWithOrderNo() throws Exception {
-    given(createOrderService.create(any(), eq("SELLER-001")))
+    given(sellerOrderCommandService.create(any(), eq("SELLER-001")))
         .willReturn(new CreateOrderResponse("ORD-UUID-001"));
 
     String requestBody = objectMapper.writeValueAsString(buildRequestBody());

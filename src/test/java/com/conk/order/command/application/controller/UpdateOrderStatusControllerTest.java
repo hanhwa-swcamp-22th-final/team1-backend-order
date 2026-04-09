@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
  *   - 잘못된 전이 시 409
  *   - status 누락 시 400
  */
-@WebMvcTest(UpdateOrderStatusController.class)
+@WebMvcTest(OrderStatusCommandController.class)
 class UpdateOrderStatusControllerTest {
 
   @Autowired
