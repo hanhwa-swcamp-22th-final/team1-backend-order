@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+  송장 CSV 다운로드용 MyBatis 쿼리.
+  OUTBOUND_COMPLETED 상태의 비연동 채널(MANUAL, EXCEL) 주문을 조회한다.
+-->
+<mapper namespace="com.conk.order.query.infrastructure.mapper.ShipmentExportQueryMapper">
+
+  <select id="findShipmentExportRows"
+          resultType="com.conk.order.query.application.dto.ShipmentExportRow">
+    SELECT o.order_id       AS orderId,
+           o.invoice_no     AS invoiceNo,
+           o.order_channel  AS orderChannel,
+           o.receiver_name  AS receiverName,
+           o.receiver_phone_no AS receiverPhoneNo,
+           o.ship_to_address1  AS address1,
+           o.ship_to_address2  AS address2,
+           o.ship_to_city      AS city,
+           o.ship_to_state     AS state,
+           o.ship_to_zip_code  AS zipCode,
+           o.ship_to_country   AS country,
+           o.shipped_at        AS shippedAt
+      FROM sales_order o
+     WHERE o.status = 'OUTBOUND_COMPLETED'
+       AND o.order_channel IN ('MANUAL', 'EXCEL')
+     ORDER BY o.shipped_at DESC
+  </select>
+
+</mapper>
