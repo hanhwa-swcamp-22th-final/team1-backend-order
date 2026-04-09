@@ -112,7 +112,7 @@ public class BulkCreateOrderService {
         orderIdGenerator.generate(),
         orderedAt,
         sellerId,
-        OrderChannel.MANUAL,
+        OrderChannel.EXCEL,
         List.of(OrderItem.create(sku, quantity, productName.isBlank() ? null : productName)),
         ShippingAddress.create(address1, address2.isBlank() ? null : address2,
             city, state.isBlank() ? null : state, zipCode),
