@@ -1,8 +1,6 @@
 spring:
   application:
     name: team1-backend-order
-  profiles:
-    active: dev
 
   servlet:
     multipart:
@@ -14,7 +12,9 @@ spring:
       write-dates-as-timestamps: false
 
   kafka:
-    bootstrap-servers: localhost:9094
+    # Docker: SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    # 로컬 직접 실행: localhost:9094 (Kafka 외부 리스너)
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -35,3 +35,12 @@ order:
   bulk-upload:
     max-row-limit: 5000
     flush-interval: 500
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
