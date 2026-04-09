@@ -198,6 +198,25 @@ public class Order {
   }
 
   /*
+   * 주문 상태를 target 으로 변경한다.
+   * OrderStatus.canTransitionTo() 에 정의된 전이 규칙을 따른다.
+   * OUTBOUND_COMPLETED 로 전이 시 shippedAt 을 현재 시각으로 기록한다.
+   *
+   * @param target 변경할 상태
+   * @throws IllegalStateException 허용되지 않는 전이인 경우
+   */
+  public void changeStatus(OrderStatus target) {
+    if (!this.status.canTransitionTo(target)) {
+      throw new IllegalStateException(
+          String.format("Cannot transition from %s to %s", this.status, target));
+    }
+    this.status = target;
+    if (target == OrderStatus.OUTBOUND_COMPLETED) {
+      this.shippedAt = LocalDateTime.now();
+    }
+  }
+
+  /*
    * 창고를 주문에 배정한다.
    * 재고 할당(ALLOCATED) 단계에서 담당 창고가 결정될 때 호출된다.
    * ORD-007 WHM 주문 목록 조회의 warehouseId 필터 기준값으로 사용된다.
