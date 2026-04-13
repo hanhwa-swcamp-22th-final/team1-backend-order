@@ -1,7 +1,7 @@
 package com.conk.order.command.application.controller;
 
-import com.conk.order.command.application.dto.CreateOrderRequest;
-import com.conk.order.command.application.dto.CreateOrderResponse;
+import com.conk.order.command.application.dto.request.CreateOrderRequest;
+import com.conk.order.command.application.dto.response.CreateOrderResponse;
 import com.conk.order.command.application.service.SellerOrderCommandService;
 import com.conk.order.common.dto.ApiResponse;
 import jakarta.validation.Valid;

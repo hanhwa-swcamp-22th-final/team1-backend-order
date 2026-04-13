@@ -7,10 +7,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.conk.order.command.application.dto.BulkCreateOrderResponse;
-import com.conk.order.command.application.dto.FailedRow;
-import com.conk.order.command.application.service.BulkCreateOrderService;
-import com.conk.order.command.application.service.BulkValidateOrderService;
+import com.conk.order.command.application.dto.response.BulkCreateOrderResponse;
+import com.conk.order.command.application.dto.response.BulkValidateResponse;
+import com.conk.order.command.application.dto.response.FailedRow;
+import com.conk.order.command.application.service.BulkOrderCommandService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +32,7 @@ class BulkCreateOrderControllerTest {
   private MockMvc mockMvc;
 
   @MockitoBean
-  private BulkCreateOrderService bulkCreateOrderService;
-
-  /* BulkOrderCommandController 가 함께 의존하는 서비스. 이 테스트에서는 호출되지 않지만 컨텍스트 로딩을 위해 필요하다. */
-  @MockitoBean
-  private BulkValidateOrderService bulkValidateOrderService;
+  private BulkOrderCommandService bulkOrderCommandService;
 
   /* 정상 요청 시 200 OK 와 success/message/data 형식으로 응답한다. */
   @Test
@@ -44,7 +40,7 @@ class BulkCreateOrderControllerTest {
     BulkCreateOrderResponse mockResponse =
         new BulkCreateOrderResponse(2, List.of());
 
-    given(bulkCreateOrderService.create(any(), eq("SELLER-001")))
+    given(bulkOrderCommandService.create(any(), eq("SELLER-001")))
         .willReturn(mockResponse);
 
     MockMultipartFile file = new MockMultipartFile(
@@ -70,7 +66,7 @@ class BulkCreateOrderControllerTest {
     BulkCreateOrderResponse mockResponse =
         new BulkCreateOrderResponse(1, List.of(new FailedRow(3, "SKU는 필수입니다.")));
 
-    given(bulkCreateOrderService.create(any(), eq("SELLER-001")))
+    given(bulkOrderCommandService.create(any(), eq("SELLER-001")))
         .willReturn(mockResponse);
 
     MockMultipartFile file = new MockMultipartFile(
@@ -113,5 +109,29 @@ class BulkCreateOrderControllerTest {
             .header("X-User-Id", "SELLER-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isBadRequest());
+  }
+
+  /* validate 엔드포인트는 검증 결과를 success/data 형식으로 반환한다. */
+  @Test
+  void validate_returnsOkWithSummary() throws Exception {
+    given(bulkOrderCommandService.validate(any()))
+        .willReturn(new BulkValidateResponse(2, 1,
+            List.of(new BulkValidateResponse.RowError(3, "SKU가 비어있습니다."))));
+
+    MockMultipartFile file = new MockMultipartFile(
+        "file", "orders.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "dummy".getBytes()
+    );
+
+    mockMvc.perform(multipart("/orders/seller/bulk/validate")
+            .file(file)
+            .contentType(MediaType.MULTIPART_FORM_DATA))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.totalRows").value(2))
+        .andExpect(jsonPath("$.data.validRows").value(1))
+        .andExpect(jsonPath("$.data.errors[0].row").value(3))
+        .andExpect(jsonPath("$.data.errors[0].message").value("SKU가 비어있습니다."));
   }
 }
