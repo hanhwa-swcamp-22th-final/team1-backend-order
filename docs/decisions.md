@@ -36,16 +36,16 @@
 - 외부 도메인 소유 데이터는 참조 ID로 우선 처리하는 편이 잘못된 Aggregate 경계 설정을 피할 수 있다.
 - `ORD-001` 추이 계산은 이미 합의된 제품 규칙이 있으므로 가이드보다 프로젝트 결정을 우선한다.
 
-## 2026-04-09 BulkCreate 대용량 업로드 처리 방식
+## 2026-04-09 Bulk 업로드 대용량 처리 방식
 
 ### Decision
 - `ORD-003` 대용량 업로드는 JDBC batch 설정 대신 `flush + clear` 기반 메모리 관리로 처리한다.
-- `BulkCreateOrderService`는 `saveOrder()` 흐름을 유지하고, 업로드 제한값과 `flush/clear` 주기를 `order.bulk-upload.*` 설정으로 관리한다.
+- 현재 구현은 `BulkOrderCommandService.create()`가 `saveOrder()` 흐름을 유지하면서 업로드 제한값과 `flush/clear` 주기를 `order.bulk-upload.*` 설정으로 관리한다.
 - `hibernate.jdbc.batch_size`, `hibernate.order_inserts` 설정은 사용하지 않는다.
 - 기본 설정은 `max-row-limit=5000`, `flush-interval=500`으로 둔다.
 
 ### Context
-- Bulk 업로드 처리에 `saveAll + hibernate.jdbc.batch_size`를 적용하는 시도가 있었지만, 이번 작업에서는 배치 최적화보다 현재 서비스 구조를 유지하는 쪽이 우선이었다.
+- Bulk 업로드 처리에 `saveAll + hibernate.jdbc.batch_size`를 적용하는 시도가 있었지만, 이번 작업에서는 배치 최적화보다 부분 저장 정책과 현재 서비스 구조를 유지하는 쪽이 우선이었다.
 - 기존 서비스는 부분 저장 정책과 행 단위 실패 수집을 중심으로 작성되어 있었다.
 - 대량 업로드 시 영속성 컨텍스트 누적에 따른 메모리 사용량 증가를 완화할 필요가 있었다.
 
@@ -59,3 +59,32 @@
 - 부분 저장과 실패 행 수집이라는 기존 서비스 의도를 크게 흔들지 않는다.
 - JDBC batch 설정은 성능 최적화 효과는 있지만, 이번 작업 목표인 처리 방식 단순화와는 맞지 않았다.
 - 운영 환경별 업로드 정책을 코드 수정 없이 조정할 수 있다.
+
+## 2026-04-10 Query flat 구조와 grouped service 기준
+
+### Decision
+- `command`는 기존처럼 `application/domain/infrastructure` 레이어 구조를 유지한다.
+- `query`는 `application/infrastructure`를 제거하고 `controller/service/dto/mapper` flat 구조로 정리한다.
+- Query DTO는 명확한 입출력 DTO만 `dto/request`, `dto/response`로 이동하고, 애매한 DTO는 별도 위치에 유지한다.
+- grouped controller에 맞춰 query service도 `SellerOrderQueryService`, `AdminOrderQueryService`, `WhmOrderQueryService`, `OrderDashboardQueryService`로 묶는다.
+  - `SellerOrderQueryService`: 목록 + 상세 + 상태 이력
+  - `AdminOrderQueryService`: 관리자 목록 + 주문 상세
+  - `WhmOrderQueryService`: 창고 목록 + 송장 CSV
+  - `OrderDashboardQueryService`: 출고 통계 + KPI
+- bulk 업로드는 `BulkOrderCommandService` 하나로 create/validate/템플릿 헤더 정책을 묶고, `OrderIdGenerator`는 독립 지원 컴포넌트로 유지한다.
+
+### Context
+- 이전 리팩터링으로 command/query 모두 `application/infrastructure`를 도입했지만, query 쪽은 조회 조립 중심이라 경로만 길어지고 기능 맥락 파악이 느려졌다.
+- controller는 이미 Actor·URL 기준으로 묶인 상태였는데 service는 여전히 use case 단위로 흩어져 있어 구조 대칭이 맞지 않았다.
+- bulk create와 validate는 같은 파일 구조, 같은 검증 규칙, 같은 템플릿 헤더를 공유하고 있었다.
+
+### Alternatives Considered
+- command/query 모두 레이어 구조를 그대로 유지한다.
+- query도 Actor별 feature package로 더 쪼갠다.
+- bulk create와 validate를 계속 별도 서비스로 유지한다.
+
+### Why
+- query는 도메인 규칙보다 조회 조립과 mapper 호출이 중심이라 flat 구조가 탐색 비용을 줄인다.
+- grouped controller와 grouped service를 맞추면 의존성 그래프와 테스트 구성이 단순해진다.
+- bulk create/validate는 입력 포맷과 정책이 같아 하나의 서비스로 묶는 편이 하드코딩 제거와 정책 일관성 측면에서 유리하다.
+- 반면 `OrderIdGenerator`는 유스케이스가 아니라 지원 컴포넌트이므로 독립 유지가 맞다.

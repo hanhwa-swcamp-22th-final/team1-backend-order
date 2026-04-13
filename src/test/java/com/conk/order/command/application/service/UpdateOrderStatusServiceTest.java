@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import com.conk.order.command.application.dto.UpdateOrderStatusRequest;
+import com.conk.order.command.application.dto.request.UpdateOrderStatusRequest;
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderItem;

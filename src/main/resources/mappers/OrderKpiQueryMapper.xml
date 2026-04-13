@@ -7,7 +7,7 @@
   ORD-006 주문 KPI 집계 MyBatis XML Mapper.
   namespace 는 @Mapper 인터페이스 FQCN 과 반드시 일치해야 한다.
 -->
-<mapper namespace="com.conk.order.query.infrastructure.mapper.OrderKpiQueryMapper">
+<mapper namespace="com.conk.order.query.mapper.OrderKpiQueryMapper">
 
     <!--
       날짜 필터 공통 SQL 조각.

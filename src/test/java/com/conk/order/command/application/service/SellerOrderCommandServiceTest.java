@@ -7,10 +7,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.conk.order.command.application.dto.CreateOrderItemRequest;
-import com.conk.order.command.application.dto.CreateOrderRequest;
-import com.conk.order.command.application.dto.CreateOrderResponse;
-import com.conk.order.command.application.dto.CreateShippingAddressRequest;
+import com.conk.order.command.application.dto.request.CreateOrderItemRequest;
+import com.conk.order.command.application.dto.request.CreateOrderRequest;
+import com.conk.order.command.application.dto.response.CreateOrderResponse;
+import com.conk.order.command.application.dto.request.CreateShippingAddressRequest;
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderItem;

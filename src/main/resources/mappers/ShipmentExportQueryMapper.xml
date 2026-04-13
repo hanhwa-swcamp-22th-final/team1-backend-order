@@ -6,10 +6,10 @@
   송장 CSV 다운로드용 MyBatis 쿼리.
   OUTBOUND_COMPLETED 상태의 비연동 채널(MANUAL, EXCEL) 주문을 조회한다.
 -->
-<mapper namespace="com.conk.order.query.infrastructure.mapper.ShipmentExportQueryMapper">
+<mapper namespace="com.conk.order.query.mapper.ShipmentExportQueryMapper">
 
   <select id="findShipmentExportRows"
-          resultType="com.conk.order.query.application.dto.ShipmentExportRow">
+          resultType="com.conk.order.query.dto.ShipmentExportRow">
     SELECT o.order_id       AS orderId,
            o.invoice_no     AS invoiceNo,
            o.order_channel  AS orderChannel,

@@ -1,6 +1,6 @@
 package com.conk.order.command.application.service;
 
-import com.conk.order.command.application.dto.UpdateOrderStatusRequest;
+import com.conk.order.command.application.dto.request.UpdateOrderStatusRequest;
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderStatus;
 import com.conk.order.command.domain.aggregate.OrderStatusHistory;

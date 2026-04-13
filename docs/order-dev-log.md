@@ -642,6 +642,8 @@
 
 ---
 
+## 2026-04-09 (2)
+
 ### 현재단계 :
 - ORD-003 대용량 업로드 처리 방향을 JDBC batch 기반 시도에서 `flush + clear` 기반 메모리 관리로 다시 정리하는 단계였다.
 - 기존 `saveAll + hibernate.jdbc.batch_size` 방향 대신 `saveOrder` 유지와 주기적 `flush/clear` 호출로 변경했다.
@@ -680,6 +682,8 @@
 - 아직 기록 전
 
 ---
+
+## 2026-04-10
 
 ### 현재단계 :
 - REF-012 Controller·Service 그룹 병합 단계. 기존 "1 기능 = 1 클래스" 구조가 과분할이라는 판단하에 Actor / URL 리소스 / 공유 의존성 기준으로 병합했다.
@@ -728,6 +732,101 @@
 ### 확인해야할 점 :
 - 병합된 `@WebMvcTest` 테스트는 이름이 여전히 use case 단위(`CreateOrderControllerTest`, `CancelOrderControllerTest` 등)로 남아있음. 후속 리팩터링에서 `SellerOrderCommandControllerTest` 등으로 파일/클래스명을 정리할 여지가 있다.
 - URL 은 전혀 바뀌지 않아 통합 테스트는 무수정으로 통과. 병합이 외부 계약에 영향 없음을 확인.
+
+### 마지막 커밋 내용 :
+- 아직 기록 전
+
+---
+
+## 2026-04-10 (2)
+
+### 현재단계 :
+- Query 패키지를 다시 flat 구조로 정리하고, grouped controller에 맞춰 grouped service로 재조립하는 단계였다.
+- `query/application|infrastructure`를 걷어내고 `query/controller|service|dto|mapper` 구조로 단순화했다.
+- Command 쪽 bulk 업로드는 `BulkOrderCommandService` 하나로 묶어 create/validate/템플릿 헤더 정책을 한곳에서 관리하도록 변경했다.
+
+### 작업 브랜치 :
+- `refactor/query-flat-and-group-services`
+
+### 구현 시 바뀌는 점 :
+- **Query 패키지**
+  - `query/application/controller` → `query/controller`
+  - `query/application/service` → grouped service 4개로 재편
+  - `query/application/dto` → `query/dto/request`, `query/dto/response`, `query/dto`
+  - `query/infrastructure/mapper` → `query/mapper`
+- **Query 서비스 병합**
+  - `SellerOrderQueryService` : 목록 + 상세 + tracking
+  - `AdminOrderQueryService` : 관리자 목록 + 주문 상세
+  - `WhmOrderQueryService` : 창고 목록 + shipment export
+  - `OrderDashboardQueryService` : outbound stats + KPI
+- **Command bulk 서비스**
+  - `BulkCreateOrderService`, `BulkValidateOrderService` 삭제
+  - `BulkOrderCommandService`로 통합
+  - 템플릿 헤더 상수도 서비스에서 관리
+- **DTO**
+  - Query는 명확한 DTO만 `request/response`로 이동
+  - Command도 `Create*`, `Update*`는 `request`, `Bulk*Response`, `FailedRow`, `CreateOrderResponse`는 `response`로 이동
+
+### 추가하는 코드
+- 신규
+  - `src/main/java/com/conk/order/query/service/SellerOrderQueryService.java`
+  - `src/main/java/com/conk/order/query/service/AdminOrderQueryService.java`
+  - `src/main/java/com/conk/order/query/service/WhmOrderQueryService.java`
+  - `src/main/java/com/conk/order/query/service/OrderDashboardQueryService.java`
+  - `src/main/java/com/conk/order/command/application/service/BulkOrderCommandService.java`
+- 삭제
+  - 기존 query 개별 서비스 9개
+  - `src/main/java/com/conk/order/command/application/service/BulkValidateOrderService.java`
+- 이동/수정
+  - query controller, dto, mapper, 관련 테스트 전부 새 패키지로 이동
+  - command DTO를 `application/dto/request`, `application/dto/response`로 분리
+  - `BulkOrderCommandController`가 `BulkOrderCommandService` 하나만 의존하도록 변경
+  - bulk controller/service 테스트를 통합 서비스 기준으로 갱신
+
+### 테스트
+- `./gradlew test --tests 'com.conk.order.query.*' --tests 'com.conk.order.command.application.service.Bulk*' --tests 'com.conk.order.command.application.controller.Bulk*'`
+- 결과: BUILD SUCCESSFUL
+- `./gradlew test`
+- 결과: BUILD SUCCESSFUL
+
+### 확인해야할 점 :
+- query/command 테스트 파일명은 일부가 여전히 이전 use case 이름(`SellerOrderListQueryServiceTest`, `BulkCreateOrderServiceTest`)을 유지하고 있다.
+- 이번 작업에서는 파일명까지 일괄 정리하지 않았으므로 후속 리네이밍 여지는 남아 있다.
+
+### 마지막 커밋 내용 :
+- 아직 기록 전
+
+---
+
+## 2026-04-12
+
+### 현재단계 :
+- 문서 상태표와 개발로그, 결정 기록이 현재 코드 구조와 일부 어긋난 상태였다.
+- `query/controller|service|dto|mapper` 평탄화와 grouped controller/service 구조가 반영되지 않은 문장을 최신 상태로 맞추는 단계였다.
+
+### 작업 브랜치 :
+- `refactor/query-flat-and-group-services`
+
+### 구현 시 바뀌는 점 :
+- `order-development-plan.md`의 구현 완료 API 상태와 비고를 현재 엔드포인트 기준으로 정리했다.
+- `order-dev-log.md`의 날짜 섹션 누락을 보정하고, 2026-04-10 구조 개편 로그를 정상 위치로 옮겼다.
+- `decisions.md`의 bulk 업로드와 query 구조 관련 결정 문구를 현재 클래스명 기준으로 정리했다.
+
+### 추가하는 코드
+- `docs/order-development-plan.md`
+  - ORD-008/009/010/011/012/013/014 상태를 현재 구현 기준으로 갱신
+  - REF-011/012/013/014 비고를 현재 구조 기준으로 정리
+- `docs/order-dev-log.md`
+  - 2026-04-09 (2), 2026-04-10, 2026-04-10 (2), 2026-04-12 섹션 정리
+- `docs/decisions.md`
+  - `BulkOrderCommandService`, grouped query service 명칭 기준으로 문구 정정
+
+### 테스트
+- `./gradlew test`
+- 결과: BUILD SUCCESSFUL, 전체 121 테스트 GREEN (실패 0, 에러 0, 스킵 0)
+
+### 확인해야할 점 :
+- `docs/issues/` 하위 일부 문서는 현재 API와 다른 과거 이슈 초안이 남아 있어, 이번 문서 최신화 범위에서는 핵심 운영 문서만 우선 정리했다.
 
 ### 마지막 커밋 내용 :
 - 아직 기록 전

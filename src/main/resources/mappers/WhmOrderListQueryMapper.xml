@@ -7,7 +7,7 @@
   ORD-007 창고 관리자 주문 목록 조회 MyBatis XML Mapper.
   namespace 는 @Mapper 인터페이스 FQCN 과 반드시 일치해야 한다.
 -->
-<mapper namespace="com.conk.order.query.infrastructure.mapper.WhmOrderListQueryMapper">
+<mapper namespace="com.conk.order.query.mapper.WhmOrderListQueryMapper">
 
     <!--
       공통 WHERE 절을 <sql> 블록으로 추출한다.
@@ -42,7 +42,7 @@
         receiver_name → receiverName
         item_count    → itemCount  (COUNT 집계)
     -->
-    <select id="findOrders" resultType="com.conk.order.query.application.dto.WhmOrderSummary">
+    <select id="findOrders" resultType="com.conk.order.query.dto.response.WhmOrderSummary">
         SELECT
             o.order_id           AS orderNo,
             o.ordered_at         AS orderedAt,
