@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.conk.order.command.application.dto.CreateOrderResponse;
+import com.conk.order.command.application.dto.response.CreateOrderResponse;
 import com.conk.order.command.application.service.SellerOrderCommandService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;

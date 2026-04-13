@@ -8,7 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.conk.order.command.application.dto.BulkCreateOrderResponse;
+import com.conk.order.command.application.dto.response.BulkCreateOrderResponse;
+import com.conk.order.command.application.dto.response.BulkValidateResponse;
 import com.conk.order.command.application.config.BulkUploadProperties;
 import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.common.exception.BusinessException;
@@ -29,7 +30,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 /*
- * ORD-003 엑셀 일괄 주문 등록 서비스 단위 테스트.
+ * ORD-003 엑셀 일괄 주문 Command 서비스 단위 테스트.
  *
  * Spring 컨텍스트 없이 순수 Java 로 실행한다.
  * OrderRepository 는 Mockito mock 으로 대체한다.
@@ -47,11 +48,11 @@ class BulkCreateOrderServiceTest {
   @Mock
   private EntityManager entityManager;
 
-  private BulkCreateOrderService service;
+  private BulkOrderCommandService service;
 
   @BeforeEach
   void setUp() {
-    service = new BulkCreateOrderService(
+    service = new BulkOrderCommandService(
         orderRepository,
         orderIdGenerator,
         entityManager,
@@ -115,7 +116,7 @@ class BulkCreateOrderServiceTest {
   /* 설정한 flush interval 을 넘기면 중간 flush/clear 와 마지막 flush/clear 가 모두 호출된다. */
   @Test
   void create_flushesAndClearsPeriodically_whenRowsExceedInterval() throws Exception {
-    service = new BulkCreateOrderService(
+    service = new BulkOrderCommandService(
         orderRepository,
         orderIdGenerator,
         entityManager,
@@ -146,7 +147,7 @@ class BulkCreateOrderServiceTest {
   /* 설정한 최대 행 수를 초과한 엑셀은 저장 전에 즉시 차단한다. */
   @Test
   void create_throwsException_whenRowLimitExceeded() throws Exception {
-    service = new BulkCreateOrderService(
+    service = new BulkOrderCommandService(
         orderRepository,
         orderIdGenerator,
         entityManager,
@@ -160,6 +161,39 @@ class BulkCreateOrderServiceTest {
     verify(orderRepository, never()).saveOrder(any());
     verify(orderRepository, never()).flush();
     verify(entityManager, never()).clear();
+  }
+
+  /* 사전 검증은 총 행 수, 유효 행 수, 오류 목록을 함께 반환한다. */
+  @Test
+  void validate_returnsRowSummary_whenFileContainsInvalidRows() throws Exception {
+    MultipartFile file = buildExcel(
+        row("2026-04-05 10:00:00", "SKU-001", "1", "", "홍길동", "010-1111-2222",
+            "서울시 강남구 1번지", "", "Seoul", "", "06236", ""),
+        row("2026-04-05 11:00:00", "", "1", "", "김철수", "010-3333-4444",
+            "서울시 서초구 2번지", "", "Seoul", "", "06500", "")
+    );
+
+    BulkValidateResponse response = service.validate(file);
+
+    assertThat(response.getTotalRows()).isEqualTo(2);
+    assertThat(response.getValidRows()).isEqualTo(1);
+    assertThat(response.getErrors()).hasSize(1);
+    assertThat(response.getErrors().get(0).getRow()).isEqualTo(3);
+  }
+
+  /* 사전 검증도 설정한 최대 행 수를 초과한 파일을 즉시 차단한다. */
+  @Test
+  void validate_throwsException_whenRowLimitExceeded() throws Exception {
+    service = new BulkOrderCommandService(
+        orderRepository,
+        orderIdGenerator,
+        entityManager,
+        bulkUploadProperties(2, 500)
+    );
+    MultipartFile file = buildExcelWithRepeatedRows(3);
+
+    assertThatThrownBy(() -> service.validate(file))
+        .isInstanceOf(BusinessException.class);
   }
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────

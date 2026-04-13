@@ -1,9 +1,8 @@
 package com.conk.order.command.application.controller;
 
-import com.conk.order.command.application.dto.BulkCreateOrderResponse;
-import com.conk.order.command.application.dto.BulkValidateResponse;
-import com.conk.order.command.application.service.BulkCreateOrderService;
-import com.conk.order.command.application.service.BulkValidateOrderService;
+import com.conk.order.command.application.dto.response.BulkCreateOrderResponse;
+import com.conk.order.command.application.dto.response.BulkValidateResponse;
+import com.conk.order.command.application.service.BulkOrderCommandService;
 import com.conk.order.common.dto.ApiResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,30 +36,10 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/orders/seller/bulk")
 public class BulkOrderCommandController {
 
-  /* 엑셀 헤더 컬럼 순서. BulkCreateOrderService.buildOrder() 와 일치해야 한다. */
-  private static final String[] TEMPLATE_HEADERS = {
-      "주문일시(yyyy-MM-dd HH:mm:ss)",
-      "SKU",
-      "수량",
-      "상품명",
-      "수령인",
-      "수령인 연락처",
-      "기본주소",
-      "상세주소",
-      "도시",
-      "주/지역",
-      "우편번호",
-      "메모"
-  };
+  private final BulkOrderCommandService bulkOrderCommandService;
 
-  private final BulkCreateOrderService bulkCreateOrderService;
-  private final BulkValidateOrderService bulkValidateOrderService;
-
-  public BulkOrderCommandController(
-      BulkCreateOrderService bulkCreateOrderService,
-      BulkValidateOrderService bulkValidateOrderService) {
-    this.bulkCreateOrderService = bulkCreateOrderService;
-    this.bulkValidateOrderService = bulkValidateOrderService;
+  public BulkOrderCommandController(BulkOrderCommandService bulkOrderCommandService) {
+    this.bulkOrderCommandService = bulkOrderCommandService;
   }
 
   /* GET /orders/seller/bulk/template — 주문 업로드용 엑셀 템플릿을 다운로드한다. */
@@ -71,8 +50,9 @@ public class BulkOrderCommandController {
 
       Sheet sheet = workbook.createSheet("주문");
       Row headerRow = sheet.createRow(0);
-      for (int i = 0; i < TEMPLATE_HEADERS.length; i++) {
-        headerRow.createCell(i).setCellValue(TEMPLATE_HEADERS[i]);
+      String[] templateHeaders = bulkOrderCommandService.getTemplateHeaders();
+      for (int i = 0; i < templateHeaders.length; i++) {
+        headerRow.createCell(i).setCellValue(templateHeaders[i]);
       }
 
       workbook.write(out);
@@ -90,7 +70,7 @@ public class BulkOrderCommandController {
   @PostMapping(value = "/validate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<ApiResponse<BulkValidateResponse>> validate(
       @RequestParam("file") MultipartFile file) {
-    BulkValidateResponse response = bulkValidateOrderService.validate(file);
+    BulkValidateResponse response = bulkOrderCommandService.validate(file);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
@@ -99,7 +79,7 @@ public class BulkOrderCommandController {
   public ResponseEntity<ApiResponse<BulkCreateOrderResponse>> bulkCreate(
       @RequestHeader("X-User-Id") String sellerId,
       @RequestParam MultipartFile file) {
-    BulkCreateOrderResponse response = bulkCreateOrderService.create(file, sellerId);
+    BulkCreateOrderResponse response = bulkOrderCommandService.create(file, sellerId);
     return ResponseEntity.ok(ApiResponse.created("일괄 주문이 등록되었습니다.", response));
   }
 }
