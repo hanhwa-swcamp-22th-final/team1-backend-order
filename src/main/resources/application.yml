@@ -2,6 +2,14 @@ spring:
   application:
     name: team1-backend-order
 
+  datasource:
+    # Docker: SPRING_DATASOURCE_URL 환경변수로 주입 (order-db:3306)
+    # 로컬 직접 실행: 기본값 localhost:3308 사용
+    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://localhost:3308/order_db?useSSL=false&serverTimezone=Asia/Seoul}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:temp_password}
+    driver-class-name: org.mariadb.jdbc.Driver
+
   servlet:
     multipart:
       max-file-size: 10MB
