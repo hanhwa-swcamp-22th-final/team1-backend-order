@@ -1,6 +1,7 @@
 package com.conk.order.query.service;
 
 import com.conk.order.command.domain.aggregate.Order;
+import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderStatusHistory;
 import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.command.domain.repository.OrderStatusHistoryRepository;
@@ -11,8 +12,11 @@ import com.conk.order.query.dto.response.OrderTrackingResponse;
 import com.conk.order.query.dto.response.OrderTrackingResponse.StatusChange;
 import com.conk.order.query.dto.response.SellerOrderDetailResponse;
 import com.conk.order.query.dto.response.SellerOrderListResponse;
+import com.conk.order.query.dto.response.SellerOrderOptionsResponse;
+import com.conk.order.query.dto.response.SellerOrderOptionsResponse.ChannelOption;
 import com.conk.order.query.dto.response.SellerOrderSummary;
 import com.conk.order.query.mapper.SellerOrderListQueryMapper;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,14 +35,17 @@ public class SellerOrderQueryService {
   private final SellerOrderListQueryMapper sellerOrderListQueryMapper;
   private final OrderRepository orderRepository;
   private final OrderStatusHistoryRepository historyRepository;
+  private final SellerProductOptionFetcher sellerProductOptionFetcher;
 
   public SellerOrderQueryService(
       SellerOrderListQueryMapper sellerOrderListQueryMapper,
       OrderRepository orderRepository,
-      OrderStatusHistoryRepository historyRepository) {
+      OrderStatusHistoryRepository historyRepository,
+      SellerProductOptionFetcher sellerProductOptionFetcher) {
     this.sellerOrderListQueryMapper = sellerOrderListQueryMapper;
     this.orderRepository = orderRepository;
     this.historyRepository = historyRepository;
+    this.sellerProductOptionFetcher = sellerProductOptionFetcher;
   }
 
   /* 셀러 주문 목록을 조회해 페이징 응답으로 조립한다. */
@@ -46,6 +53,18 @@ public class SellerOrderQueryService {
     List<SellerOrderSummary> orders = sellerOrderListQueryMapper.findOrders(query);
     int totalCount = sellerOrderListQueryMapper.countOrders(query);
     return new SellerOrderListResponse(orders, totalCount, query.getPage(), query.getSize());
+  }
+
+  /* 셀러 주문 등록 화면 옵션을 반환한다. */
+  @Transactional(readOnly = true)
+  public SellerOrderOptionsResponse getOrderOptions(String sellerId) {
+    return new SellerOrderOptionsResponse(
+        sellerProductOptionFetcher.fetchProducts(sellerId),
+        Arrays.stream(OrderChannel.values())
+            .filter(this::isSelectableSalesChannel)
+            .map(channel -> new ChannelOption(channel.name(), toChannelLabel(channel)))
+            .toList()
+    );
   }
 
   /* 셀러 본인의 주문 상세를 조회한다. */
@@ -78,5 +97,16 @@ public class SellerOrderQueryService {
       throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
     }
     return order;
+  }
+
+  private boolean isSelectableSalesChannel(OrderChannel channel) {
+    return channel != OrderChannel.MANUAL && channel != OrderChannel.EXCEL;
+  }
+
+  private String toChannelLabel(OrderChannel channel) {
+    return switch (channel) {
+      case SHOPIFY -> "Shopify";
+      default -> channel.name();
+    };
   }
 }

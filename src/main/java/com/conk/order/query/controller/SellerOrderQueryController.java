@@ -6,6 +6,7 @@ import com.conk.order.query.dto.request.SellerOrderListQuery;
 import com.conk.order.query.dto.response.OrderTrackingResponse;
 import com.conk.order.query.dto.response.SellerOrderDetailResponse;
 import com.conk.order.query.dto.response.SellerOrderListResponse;
+import com.conk.order.query.dto.response.SellerOrderOptionsResponse;
 import com.conk.order.query.service.SellerOrderQueryService;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * 셀러 Actor 가 자신의 주문을 조회하는 엔드포인트를 한곳에 묶는다.
  *   - GET /orders/seller/list             : 주문 목록 (ORD-004)
+ *   - GET /orders/seller/options          : 주문 등록 옵션
  *   - GET /orders/seller/{orderId}        : 주문 상세 (canCancel 포함)
  *   - GET /orders/seller/{orderId}/tracking : 주문 상태 변경 이력
  *
@@ -56,6 +58,14 @@ public class SellerOrderQueryController {
     query.setSize(size);
 
     return ResponseEntity.ok(ApiResponse.success(sellerOrderQueryService.getSellerOrders(query)));
+  }
+
+  /* GET /orders/seller/options — 셀러 주문 등록 화면 옵션을 조회한다. */
+  @GetMapping("/options")
+  public ResponseEntity<ApiResponse<SellerOrderOptionsResponse>> getOptions(
+      @RequestHeader("X-User-Id") String sellerId) {
+    SellerOrderOptionsResponse response = sellerOrderQueryService.getOrderOptions(sellerId);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   /* GET /orders/seller/{orderId} — 셀러 본인의 주문 상세를 조회한다. */

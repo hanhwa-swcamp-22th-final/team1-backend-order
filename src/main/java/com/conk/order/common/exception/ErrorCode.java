@@ -20,6 +20,7 @@ public enum ErrorCode {
   ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORD-003", "주문을 찾을 수 없습니다."),
   ORDER_CANCEL_NOT_ALLOWED(HttpStatus.CONFLICT, "ORD-004", "현재 상태에서는 주문을 취소할 수 없습니다."),
   ORDER_STATUS_TRANSITION_NOT_ALLOWED(HttpStatus.CONFLICT, "ORD-005", "허용되지 않는 상태 전이입니다."),
+  ORDER_OPTIONS_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "ORD-301", "주문 등록 옵션을 불러오지 못했습니다."),
 
   /* 주문 항목 (OrderItem) */
   ORDER_ITEM_SKU_REQUIRED(HttpStatus.BAD_REQUEST, "ORD-101", "SKU는 필수입니다."),
