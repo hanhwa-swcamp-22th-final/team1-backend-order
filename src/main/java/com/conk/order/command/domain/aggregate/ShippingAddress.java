@@ -10,7 +10,7 @@ import lombok.Getter;
  * 주문 배송에 필요한 주소 정보를 표현한다.
  * sales_order 테이블의 ship_to_* 컬럼에 매핑된다.
  * address1, city, zipCode 는 필수값이며, address2 와 state 는 선택값이다.
- * country 는 현재 미국 전용 서비스로 "USA" 고정이다.
+ * country 는 현재 미국 전용 서비스로 "US" 고정이다.
  */
 @Getter
 @Embeddable
@@ -36,7 +36,7 @@ public class ShippingAddress {
   @Column(name = "ship_to_zip_code")
   private String zipCode;
 
-  /** 국가. sales_order.ship_to_country — 현재 미국 전용 서비스로 "USA" 고정. */
+  /** 국가. sales_order.ship_to_country — 현재 미국 전용 서비스로 "US" 고정. */
   @Column(name = "ship_to_country", nullable = false)
   private String country;
 
@@ -51,7 +51,7 @@ public class ShippingAddress {
     this.city = city;
     this.state = state;
     this.zipCode = zipCode;
-    this.country = "USA";
+    this.country = "US";
   }
 
   /**
