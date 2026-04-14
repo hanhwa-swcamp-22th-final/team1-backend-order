@@ -81,9 +81,9 @@ class SellerOrderListQueryServiceTest {
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
   /* 테스트용 주문 요약 객체를 생성한다. */
-  private SellerOrderSummary summary(String orderNo) {
+  private SellerOrderSummary summary(String orderId) {
     SellerOrderSummary s = new SellerOrderSummary();
-    s.setOrderNo(orderNo);
+    s.setOrderId(orderId);
     s.setOrderedAt(LocalDateTime.of(2026, 4, 3, 10, 0));
     s.setStatus(OrderStatus.RECEIVED);
     s.setOrderChannel(OrderChannel.MANUAL);

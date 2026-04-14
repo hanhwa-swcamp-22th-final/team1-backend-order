@@ -19,8 +19,8 @@ import lombok.Setter;
 @Setter
 public class AdminOrderSummary {
 
-  /** 주문번호. sales_order.order_id */
-  private String orderNo;
+  /** 주문 식별자. sales_order.order_id */
+  private String orderId;
 
   /** 주문 일시. sales_order.ordered_at */
   private LocalDateTime orderedAt;

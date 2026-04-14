@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
  * {
  *   "success": true,
  *   "data": {
- *     "orders": [ { orderNo, orderedAt, status, ... }, ... ],
+ *     "orders": [ { orderId, orderedAt, status, ... }, ... ],
  *     "totalCount": 100,   ← 필터 조건에 맞는 전체 건수 (페이지 수 계산용)
  *     "page": 0,
  *     "size": 20

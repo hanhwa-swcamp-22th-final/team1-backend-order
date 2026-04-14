@@ -37,7 +37,7 @@ class SellerOrderListQueryControllerTest {
   @Test
   void getSellerOrders_returnsOkWithData() throws Exception {
     SellerOrderSummary summary = new SellerOrderSummary();
-    summary.setOrderNo("ORD-001");
+    summary.setOrderId("ORD-001");
     summary.setOrderedAt(LocalDateTime.of(2026, 4, 3, 10, 0));
     summary.setStatus(OrderStatus.RECEIVED);
     summary.setOrderChannel(OrderChannel.MANUAL);
@@ -51,7 +51,7 @@ class SellerOrderListQueryControllerTest {
             .header("X-User-Id", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
-        .andExpect(jsonPath("$.data.orders[0].orderNo").value("ORD-001"))
+        .andExpect(jsonPath("$.data.orders[0].orderId").value("ORD-001"))
         .andExpect(jsonPath("$.data.orders[0].status").value("RECEIVED"))
         .andExpect(jsonPath("$.data.totalCount").value(1))
         .andExpect(jsonPath("$.data.page").value(0))

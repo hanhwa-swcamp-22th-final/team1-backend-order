@@ -73,9 +73,9 @@ class AdminOrderListQueryServiceTest {
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
   /* 테스트용 주문 요약 객체를 생성한다. */
-  private AdminOrderSummary summary(String orderNo, String sellerId) {
+  private AdminOrderSummary summary(String orderId, String sellerId) {
     AdminOrderSummary s = new AdminOrderSummary();
-    s.setOrderNo(orderNo);
+    s.setOrderId(orderId);
     s.setOrderedAt(LocalDateTime.of(2026, 4, 5, 10, 0));
     s.setStatus(OrderStatus.RECEIVED);
     s.setOrderChannel(OrderChannel.MANUAL);
