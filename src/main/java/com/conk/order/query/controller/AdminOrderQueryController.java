@@ -46,7 +46,7 @@ public class AdminOrderQueryController {
    */
   @GetMapping("/list")
   public ResponseEntity<ApiResponse<AdminOrderListResponse>> getAdminOrders(
-      @RequestHeader("X-Seller-Id") String sellerId,
+      @RequestParam(required = false) String sellerId,
       @RequestParam(required = false) OrderStatus status,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,

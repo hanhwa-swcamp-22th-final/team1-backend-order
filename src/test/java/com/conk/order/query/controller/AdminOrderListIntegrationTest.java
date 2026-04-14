@@ -41,8 +41,8 @@ class AdminOrderListIntegrationTest {
    */
   @Test
   void getAdminOrders_returnsAllOrdersWithoutFilter() throws Exception {
-    orderRepository.save(createOrder("ORD-IT-001", "SELLER-001"));
-    orderRepository.save(createOrder("ORD-IT-002", "SELLER-002"));
+    orderRepository.saveAndFlush(createOrder("ORD-IT-001", "SELLER-001"));
+    orderRepository.saveAndFlush(createOrder("ORD-IT-002", "SELLER-002"));
 
     mockMvc.perform(get("/orders/list")
             .header("X-Seller-Id", "MASTER-ADMIN-001"))
@@ -66,9 +66,9 @@ class AdminOrderListIntegrationTest {
    */
   @Test
   void getAdminOrders_filtersBySellerId() throws Exception {
-    orderRepository.save(createOrder("ORD-IT-003", "SELLER-001"));
-    orderRepository.save(createOrder("ORD-IT-004", "SELLER-001"));
-    orderRepository.save(createOrder("ORD-IT-005", "SELLER-002"));
+    orderRepository.saveAndFlush(createOrder("ORD-IT-003", "SELLER-001"));
+    orderRepository.saveAndFlush(createOrder("ORD-IT-004", "SELLER-001"));
+    orderRepository.saveAndFlush(createOrder("ORD-IT-005", "SELLER-002"));
 
     mockMvc.perform(get("/orders/list")
             .header("X-Seller-Id", "MASTER-ADMIN-001")

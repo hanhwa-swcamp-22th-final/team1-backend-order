@@ -60,7 +60,7 @@
             o.order_channel,
             o.seller_id,
             o.warehouse_id,
-            o.ship_to_state,
+            o.ship_to_state
         ORDER BY o.ordered_at DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
