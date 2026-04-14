@@ -1,13 +1,16 @@
 package com.conk.order.query.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.conk.order.command.domain.aggregate.OrderChannel;
-import com.conk.order.command.domain.aggregate.OrderStatus;
+import com.conk.order.query.dto.SellerOrderStatus;
+import com.conk.order.query.dto.request.SellerOrderListQuery;
 import com.conk.order.query.dto.response.SellerOrderListResponse;
 import com.conk.order.query.dto.response.SellerOrderOptionsResponse;
 import com.conk.order.query.dto.response.SellerOrderSummary;
@@ -15,6 +18,7 @@ import com.conk.order.query.service.SellerOrderQueryService;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -40,7 +44,7 @@ class SellerOrderListQueryControllerTest {
     SellerOrderSummary summary = new SellerOrderSummary();
     summary.setOrderId("ORD-001");
     summary.setOrderedAt(LocalDateTime.of(2026, 4, 3, 10, 0));
-    summary.setStatus(OrderStatus.RECEIVED);
+    summary.setStatus(SellerOrderStatus.RECEIVED);
     summary.setOrderChannel(OrderChannel.MANUAL);
     summary.setChannel("Manual");
     summary.setReceiverName("홍길동");
@@ -76,6 +80,22 @@ class SellerOrderListQueryControllerTest {
         .andExpect(jsonPath("$.data.totalCount").value(1))
         .andExpect(jsonPath("$.data.page").value(0))
         .andExpect(jsonPath("$.data.size").value(20));
+  }
+
+  @Test
+  void getSellerOrders_acceptsGroupedStatusFilter() throws Exception {
+    given(sellerOrderQueryService.getSellerOrders(any()))
+        .willReturn(new SellerOrderListResponse(List.of(), 0, 0, 20));
+
+    mockMvc.perform(get("/orders/seller/list")
+            .header("X-User-Id", "SELLER-001")
+            .param("status", "DISPATCHED"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true));
+
+    ArgumentCaptor<SellerOrderListQuery> captor = ArgumentCaptor.forClass(SellerOrderListQuery.class);
+    then(sellerOrderQueryService).should().getSellerOrders(captor.capture());
+    assertThat(captor.getValue().getSellerStatus()).isEqualTo(SellerOrderStatus.DISPATCHED);
   }
 
   @Test

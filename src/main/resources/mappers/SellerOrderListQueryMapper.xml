@@ -17,11 +17,14 @@
     <sql id="whereClause">
         WHERE o.seller_id = #{sellerId}
         <!--
-          status != null 이면 상태 필터를 추가한다.
-          OrderStatus enum 은 DB 에 문자열로 저장되므로 name() 변환 없이 #{status} 로 바인딩.
+          seller grouped status 를 raw OrderStatus 목록으로 확장해 IN 조건을 만든다.
+          DISPATCHED 처럼 여러 raw 상태를 포함하는 경우를 이곳에서 처리한다.
         -->
-        <if test="status != null">
-            AND o.status = #{status}
+        <if test="statuses != null and statuses.size > 0">
+            AND o.status IN
+            <foreach collection="statuses" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
         </if>
         <!-- startDate != null 이면 해당 날짜 이후 주문만 조회한다. -->
         <if test="startDate != null">
@@ -40,7 +43,7 @@
       MyBatis 가 SELECT 컬럼명을 DTO 필드명에 자동 매핑한다.
         order_id      → orderId
         ordered_at    → orderedAt
-        status        → status  (String → OrderStatus 자동 변환)
+        raw_status    → rawStatus (String → OrderStatus 자동 변환)
         order_channel → orderChannel
         receiver_name → receiverName
         item_count    → itemCount  (서브쿼리로 계산)
@@ -49,7 +52,7 @@
         SELECT
             o.order_id           AS orderId,
             o.ordered_at         AS orderedAt,
-            o.status             AS status,
+            o.status             AS rawStatus,
             o.order_channel      AS orderChannel,
             o.receiver_name      AS receiverName,
             COUNT(i.id)          AS itemCount,

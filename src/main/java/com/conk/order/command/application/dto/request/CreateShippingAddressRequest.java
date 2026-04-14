@@ -18,7 +18,8 @@ public class CreateShippingAddressRequest {
   @NotBlank
   private String city;
 
-  /** 주/도 (선택). */
+  /** 주/도 (필수). */
+  @NotBlank
   private String state;
 
   /** 우편번호 (필수). */

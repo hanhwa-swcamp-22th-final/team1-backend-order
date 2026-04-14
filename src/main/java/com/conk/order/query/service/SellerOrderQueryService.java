@@ -8,6 +8,7 @@ import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.command.domain.repository.OrderStatusHistoryRepository;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
+import com.conk.order.query.dto.SellerOrderStatus;
 import com.conk.order.query.dto.request.SellerOrderListQuery;
 import com.conk.order.query.dto.response.OrderTrackingResponse;
 import com.conk.order.query.dto.response.OrderTrackingResponse.StatusChange;
@@ -106,13 +107,15 @@ public class SellerOrderQueryService {
   }
 
   private void populateSellerOrderListDisplayFields(SellerOrderSummary summary) {
+    OrderStatus rawStatus = summary.getRawStatus();
+    summary.setStatus(SellerOrderStatus.from(rawStatus));
     summary.setChannel(toChannelLabel(summary.getOrderChannel()));
     summary.setRecipient(summary.getReceiverName());
     summary.setAddress(buildListAddress(summary));
     summary.setItemsSummary("상품 " + summary.getItemCount() + "건");
     summary.setTrackingNo(summary.getTrackingNo() == null ? "" : summary.getTrackingNo());
     summary.setCanCancel(
-        summary.getStatus() == OrderStatus.RECEIVED || summary.getStatus() == OrderStatus.ALLOCATED);
+        rawStatus == OrderStatus.RECEIVED || rawStatus == OrderStatus.ALLOCATED);
   }
 
   private String buildListAddress(SellerOrderSummary summary) {

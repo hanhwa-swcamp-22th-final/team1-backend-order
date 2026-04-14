@@ -1,7 +1,7 @@
 package com.conk.order.query.controller;
 
-import com.conk.order.command.domain.aggregate.OrderStatus;
 import com.conk.order.common.dto.ApiResponse;
+import com.conk.order.query.dto.SellerOrderStatus;
 import com.conk.order.query.dto.request.SellerOrderListQuery;
 import com.conk.order.query.dto.response.OrderTrackingResponse;
 import com.conk.order.query.dto.response.SellerOrderDetailResponse;
@@ -43,7 +43,7 @@ public class SellerOrderQueryController {
   @GetMapping("/list")
   public ResponseEntity<ApiResponse<SellerOrderListResponse>> getSellerOrders(
       @RequestHeader("X-User-Id") String sellerId,
-      @RequestParam(required = false) OrderStatus status,
+      @RequestParam(required = false) SellerOrderStatus status,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
       @RequestParam(defaultValue = "0") int page,
@@ -51,7 +51,7 @@ public class SellerOrderQueryController {
   ) {
     SellerOrderListQuery query = new SellerOrderListQuery();
     query.setSellerId(sellerId);
-    query.setStatus(status);
+    query.setSellerStatus(status);
     query.setStartDate(startDate);
     query.setEndDate(endDate);
     query.setPage(page);

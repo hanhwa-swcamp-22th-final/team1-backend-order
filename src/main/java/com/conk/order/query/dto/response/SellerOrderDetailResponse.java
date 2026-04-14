@@ -4,6 +4,7 @@ import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderItem;
 import com.conk.order.command.domain.aggregate.OrderStatus;
+import com.conk.order.query.dto.SellerOrderStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
@@ -20,7 +21,7 @@ public class SellerOrderDetailResponse {
 
   private final String orderId;
   private final LocalDateTime orderedAt;
-  private final OrderStatus status;
+  private final SellerOrderStatus status;
   private final OrderChannel orderChannel;
   private final String receiverName;
   private final String phone;
@@ -39,7 +40,7 @@ public class SellerOrderDetailResponse {
   private SellerOrderDetailResponse(Order order) {
     this.orderId = order.getOrderId();
     this.orderedAt = order.getOrderedAt();
-    this.status = order.getStatus();
+    this.status = SellerOrderStatus.from(order.getStatus());
     this.orderChannel = order.getOrderChannel();
     this.receiverName = order.getReceiverName();
     this.phone = order.getReceiverPhoneNo();

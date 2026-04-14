@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderStatus;
+import com.conk.order.query.dto.SellerOrderStatus;
 import com.conk.order.query.dto.request.SellerOrderListQuery;
 import com.conk.order.query.dto.response.SellerOrderListResponse;
 import com.conk.order.query.dto.response.SellerOrderSummary;
@@ -46,6 +47,23 @@ class SellerOrderListQueryServiceTest {
     assertThat(response.getOrders().get(0).getItemsSummary()).isEqualTo("상품 1건");
     assertThat(response.getOrders().get(0).getTrackingNo()).isEmpty();
     assertThat(response.getOrders().get(0).isCanCancel()).isTrue();
+    assertThat(response.getOrders().get(0).getStatus()).isEqualTo(SellerOrderStatus.RECEIVED);
+  }
+
+  @Test
+  void getSellerOrders_groupsRawOutboundStatusesForSeller() {
+    StubMapper stub = new StubMapper(List.of(
+        summary("ORD-003", OrderStatus.PACKING)
+    ), 1);
+    SellerOrderQueryService service = new SellerOrderQueryService(stub, null, null, sellerId -> List.of());
+
+    SellerOrderListQuery query = new SellerOrderListQuery();
+    query.setSellerId("SELLER-001");
+
+    SellerOrderListResponse response = service.getSellerOrders(query);
+
+    assertThat(response.getOrders().get(0).getStatus()).isEqualTo(SellerOrderStatus.DISPATCHED);
+    assertThat(response.getOrders().get(0).isCanCancel()).isFalse();
   }
 
   /* 빈 결과도 정상 응답한다. */
@@ -88,10 +106,14 @@ class SellerOrderListQueryServiceTest {
 
   /* 테스트용 주문 요약 객체를 생성한다. */
   private SellerOrderSummary summary(String orderId) {
+    return summary(orderId, OrderStatus.RECEIVED);
+  }
+
+  private SellerOrderSummary summary(String orderId, OrderStatus rawStatus) {
     SellerOrderSummary s = new SellerOrderSummary();
     s.setOrderId(orderId);
     s.setOrderedAt(LocalDateTime.of(2026, 4, 3, 10, 0));
-    s.setStatus(OrderStatus.RECEIVED);
+    s.setRawStatus(rawStatus);
     s.setOrderChannel(OrderChannel.MANUAL);
     s.setReceiverName("홍길동");
     s.setStreet1("서울시 강남구 테헤란로 123");

@@ -41,19 +41,15 @@
     -->
     <select id="findOrders" resultType="com.conk.order.query.dto.response.AdminOrderSummary">
         SELECT
-            o.order_id           AS orderId,
+            o.order_id           AS id,
             o.ordered_at         AS orderedAt,
-            o.status             AS status,
-            o.order_channel      AS orderChannel,
-            o.seller_id          AS sellerId,
-            o.receiver_name      AS receiverName,
-            COUNT(i.id)          AS itemCount,
-            o.ship_to_address1   AS street1,
-            o.ship_to_address2   AS street2,
-            o.ship_to_state      AS state,
-            o.ship_to_zip_code   AS zip,
-            o.ship_to_country    AS country,
-            o.receiver_phone_no  AS phone
+            o.status             AS rawStatus,
+            o.order_channel      AS channel,
+            o.seller_id          AS company,
+            o.warehouse_id       AS warehouse,
+            COUNT(i.id)          AS skuCount,
+            COALESCE(SUM(i.quantity), 0) AS qty,
+            o.ship_to_state      AS destState
         FROM sales_order o
         LEFT JOIN sales_order_item i ON i.order_id = o.order_id
         <include refid="whereClause"/>
@@ -63,13 +59,8 @@
             o.status,
             o.order_channel,
             o.seller_id,
-            o.receiver_name,
-            o.ship_to_address1,
-            o.ship_to_address2,
+            o.warehouse_id,
             o.ship_to_state,
-            o.ship_to_zip_code,
-            o.ship_to_country,
-            o.receiver_phone_no
         ORDER BY o.ordered_at DESC
         LIMIT #{size} OFFSET #{offset}
     </select>

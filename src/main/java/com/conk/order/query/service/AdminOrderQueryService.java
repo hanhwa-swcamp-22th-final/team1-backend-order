@@ -1,9 +1,11 @@
 package com.conk.order.query.service;
 
 import com.conk.order.command.domain.aggregate.Order;
+import com.conk.order.command.domain.aggregate.OrderStatus;
 import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
+import com.conk.order.query.dto.AdminOrderStatus;
 import com.conk.order.query.dto.request.AdminOrderListQuery;
 import com.conk.order.query.dto.response.AdminOrderListResponse;
 import com.conk.order.query.dto.response.AdminOrderSummary;
@@ -36,6 +38,7 @@ public class AdminOrderQueryService {
   /* 관리자 주문 목록을 조회해 페이징 응답으로 조립한다. */
   public AdminOrderListResponse getAdminOrders(AdminOrderListQuery query) {
     List<AdminOrderSummary> orders = adminOrderListQueryMapper.findOrders(query);
+    orders.forEach(this::populateAdminOrderListDisplayFields);
     int totalCount = adminOrderListQueryMapper.countOrders(query);
     return new AdminOrderListResponse(orders, totalCount, query.getPage(), query.getSize());
   }
@@ -46,5 +49,14 @@ public class AdminOrderQueryService {
     Order order = orderRepository.findById(orderId)
         .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
     return OrderDetailResponse.from(order);
+  }
+
+  private void populateAdminOrderListDisplayFields(AdminOrderSummary summary) {
+    OrderStatus rawStatus = summary.getRawStatus();
+    summary.setStatus(AdminOrderStatus.from(rawStatus));
+    summary.setCompany(summary.getCompany() == null ? "" : summary.getCompany());
+    summary.setWarehouse(summary.getWarehouse() == null ? "" : summary.getWarehouse());
+    summary.setChannel(summary.getChannel() == null ? "" : summary.getChannel());
+    summary.setDestState(summary.getDestState() == null ? "" : summary.getDestState());
   }
 }

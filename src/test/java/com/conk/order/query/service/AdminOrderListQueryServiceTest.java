@@ -2,8 +2,8 @@ package com.conk.order.query.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderStatus;
+import com.conk.order.query.dto.AdminOrderStatus;
 import com.conk.order.query.dto.request.AdminOrderListQuery;
 import com.conk.order.query.dto.response.AdminOrderListResponse;
 import com.conk.order.query.dto.response.AdminOrderSummary;
@@ -40,6 +40,8 @@ class AdminOrderListQueryServiceTest {
 
     assertThat(response.getOrders()).hasSize(2);
     assertThat(response.getTotalCount()).isEqualTo(2);
+    assertThat(response.getOrders().get(0).getStatus()).isEqualTo(AdminOrderStatus.PENDING);
+    assertThat(response.getOrders().get(0).getCompany()).isEqualTo("SELLER-001");
   }
 
   /* 빈 결과도 정상 응답한다. */
@@ -75,13 +77,15 @@ class AdminOrderListQueryServiceTest {
   /* 테스트용 주문 요약 객체를 생성한다. */
   private AdminOrderSummary summary(String orderId, String sellerId) {
     AdminOrderSummary s = new AdminOrderSummary();
-    s.setOrderId(orderId);
+    s.setId(orderId);
     s.setOrderedAt(LocalDateTime.of(2026, 4, 5, 10, 0));
-    s.setStatus(OrderStatus.RECEIVED);
-    s.setOrderChannel(OrderChannel.MANUAL);
-    s.setSellerId(sellerId);
-    s.setReceiverName("홍길동");
-    s.setItemCount(1);
+    s.setRawStatus(OrderStatus.RECEIVED);
+    s.setChannel("MANUAL");
+    s.setCompany(sellerId);
+    s.setWarehouse("WH-001");
+    s.setSkuCount(1);
+    s.setQty(1);
+    s.setDestState("Seoul");
     return s;
   }
 

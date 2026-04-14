@@ -2,6 +2,8 @@ package com.conk.order.query.dto.response;
 
 import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderStatus;
+import com.conk.order.query.dto.SellerOrderStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,8 +27,12 @@ public class SellerOrderSummary {
   /** 주문 일시. SQL: o.ordered_at */
   private LocalDateTime orderedAt;
 
-  /** 주문 상태. SQL: o.status */
-  private OrderStatus status;
+  /** 내부 raw 주문 상태. SQL: o.status */
+  @JsonIgnore
+  private OrderStatus rawStatus;
+
+  /** seller API 에 노출하는 grouped 주문 상태. */
+  private SellerOrderStatus status;
 
   /** 판매 채널. SQL: o.order_channel */
   private OrderChannel orderChannel;

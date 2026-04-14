@@ -6,8 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.conk.order.command.domain.aggregate.OrderChannel;
-import com.conk.order.command.domain.aggregate.OrderStatus;
+import com.conk.order.query.dto.AdminOrderStatus;
 import com.conk.order.query.dto.response.AdminOrderListResponse;
 import com.conk.order.query.dto.response.AdminOrderSummary;
 import com.conk.order.query.service.AdminOrderQueryService;
@@ -46,22 +45,31 @@ class AdminOrderListQueryControllerTest {
   @Test
   void getAdminOrders_returnsOkWithData() throws Exception {
     AdminOrderSummary summary = new AdminOrderSummary();
-    summary.setOrderId("ORD-001");
+    summary.setId("ORD-001");
     summary.setOrderedAt(LocalDateTime.of(2026, 4, 5, 10, 0));
-    summary.setStatus(OrderStatus.RECEIVED);
-    summary.setOrderChannel(OrderChannel.MANUAL);
-    summary.setSellerId("SELLER-001");
-    summary.setReceiverName("홍길동");
-    summary.setItemCount(2);
+    summary.setStatus(AdminOrderStatus.PENDING);
+    summary.setChannel("MANUAL");
+    summary.setCompany("SELLER-001");
+    summary.setWarehouse("WH-001");
+    summary.setSkuCount(2);
+    summary.setQty(5);
+    summary.setDestState("Seoul");
 
     given(adminOrderQueryService.getAdminOrders(any()))
         .willReturn(new AdminOrderListResponse(List.of(summary), 1, 0, 20));
 
-    mockMvc.perform(get("/orders/list"))
+    mockMvc.perform(get("/orders/list")
+            .header("X-Seller-Id", "MASTER-ADMIN-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
-        .andExpect(jsonPath("$.data.orders[0].orderId").value("ORD-001"))
-        .andExpect(jsonPath("$.data.orders[0].sellerId").value("SELLER-001"))
+        .andExpect(jsonPath("$.data.orders[0].id").value("ORD-001"))
+        .andExpect(jsonPath("$.data.orders[0].company").value("SELLER-001"))
+        .andExpect(jsonPath("$.data.orders[0].warehouse").value("WH-001"))
+        .andExpect(jsonPath("$.data.orders[0].channel").value("MANUAL"))
+        .andExpect(jsonPath("$.data.orders[0].skuCount").value(2))
+        .andExpect(jsonPath("$.data.orders[0].qty").value(5))
+        .andExpect(jsonPath("$.data.orders[0].destState").value("Seoul"))
+        .andExpect(jsonPath("$.data.orders[0].status").value("PENDING"))
         .andExpect(jsonPath("$.data.totalCount").value(1))
         .andExpect(jsonPath("$.data.page").value(0))
         .andExpect(jsonPath("$.data.size").value(20));
@@ -77,6 +85,7 @@ class AdminOrderListQueryControllerTest {
         .willReturn(new AdminOrderListResponse(List.of(), 0, 0, 20));
 
     mockMvc.perform(get("/orders/list")
+            .header("X-Seller-Id", "MASTER-ADMIN-001")
             .param("sellerId", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true));

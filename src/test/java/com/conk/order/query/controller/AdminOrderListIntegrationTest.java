@@ -44,11 +44,20 @@ class AdminOrderListIntegrationTest {
     orderRepository.save(createOrder("ORD-IT-001", "SELLER-001"));
     orderRepository.save(createOrder("ORD-IT-002", "SELLER-002"));
 
-    mockMvc.perform(get("/orders/list"))
+    mockMvc.perform(get("/orders/list")
+            .header("X-Seller-Id", "MASTER-ADMIN-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.totalCount").value(2))
-        .andExpect(jsonPath("$.data.orders").isArray());
+        .andExpect(jsonPath("$.data.orders").isArray())
+        .andExpect(jsonPath("$.data.orders[0].id").exists())
+        .andExpect(jsonPath("$.data.orders[0].company").exists())
+        .andExpect(jsonPath("$.data.orders[0].warehouse").exists())
+        .andExpect(jsonPath("$.data.orders[0].channel").exists())
+        .andExpect(jsonPath("$.data.orders[0].skuCount").exists())
+        .andExpect(jsonPath("$.data.orders[0].qty").exists())
+        .andExpect(jsonPath("$.data.orders[0].destState").exists())
+        .andExpect(jsonPath("$.data.orders[0].status").value("PENDING"));
   }
 
   /*
@@ -62,9 +71,12 @@ class AdminOrderListIntegrationTest {
     orderRepository.save(createOrder("ORD-IT-005", "SELLER-002"));
 
     mockMvc.perform(get("/orders/list")
+            .header("X-Seller-Id", "MASTER-ADMIN-001")
             .param("sellerId", "SELLER-001"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.totalCount").value(2));
+        .andExpect(jsonPath("$.data.totalCount").value(2))
+        .andExpect(jsonPath("$.data.orders[0].company").value("SELLER-001"))
+        .andExpect(jsonPath("$.data.orders[1].company").value("SELLER-001"));
   }
 
   /*
@@ -72,7 +84,8 @@ class AdminOrderListIntegrationTest {
    */
   @Test
   void getAdminOrders_returnsEmpty_whenNoOrders() throws Exception {
-    mockMvc.perform(get("/orders/list"))
+    mockMvc.perform(get("/orders/list")
+            .header("X-Seller-Id", "MASTER-ADMIN-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.totalCount").value(0))
         .andExpect(jsonPath("$.data.orders").isEmpty());

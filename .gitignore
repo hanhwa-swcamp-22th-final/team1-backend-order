@@ -41,3 +41,5 @@ docs/
 
 ### Secrets ###
 **/application-dev.yml
+
+/.gradle-user-home/**

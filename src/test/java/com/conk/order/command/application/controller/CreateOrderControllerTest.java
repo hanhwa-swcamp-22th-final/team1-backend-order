@@ -76,6 +76,23 @@ class CreateOrderControllerTest {
         .andExpect(status().isBadRequest());
   }
 
+  /* shippingAddress.state 가 없으면 400 Bad Request 를 반환한다. */
+  @Test
+  void createOrder_returnsBadRequest_whenStateMissing() throws Exception {
+    Map<String, Object> body = buildRequestBody();
+    @SuppressWarnings("unchecked")
+    Map<String, Object> shippingAddress = new java.util.HashMap<>(
+        (Map<String, Object>) body.get("shippingAddress"));
+    shippingAddress.remove("state");
+    body.put("shippingAddress", shippingAddress);
+
+    mockMvc.perform(post("/orders/seller/manual")
+            .header("X-User-Id", "SELLER-001")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(body)))
+        .andExpect(status().isBadRequest());
+  }
+
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
   /* 기본 요청 바디를 Map 으로 구성한다. sellerId 는 body 에 없고 헤더에서 온다. */
@@ -86,6 +103,7 @@ class CreateOrderControllerTest {
         "shippingAddress", Map.of(
             "address1", "서울시 강남구 테헤란로 123",
             "city", "Seoul",
+            "state", "CA",
             "zipCode", "06236"
         ),
         "receiverName", "홍길동",

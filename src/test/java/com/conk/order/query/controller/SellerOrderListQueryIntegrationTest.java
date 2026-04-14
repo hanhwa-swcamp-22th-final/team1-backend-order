@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderItem;
+import com.conk.order.command.domain.aggregate.OrderStatus;
 import com.conk.order.command.domain.aggregate.ShippingAddress;
 import com.conk.order.command.domain.repository.OrderRepository;
 import java.lang.reflect.Field;
@@ -60,6 +61,26 @@ class SellerOrderListQueryIntegrationTest {
         .andExpect(jsonPath("$.data.orders[0].trackingNo").value("TRK-001"))
         .andExpect(jsonPath("$.data.orders[0].canCancel").value(true))
         .andExpect(jsonPath("$.data.orders[0].status").value("RECEIVED"));
+  }
+
+  @Test
+  void getSellerOrders_filtersAndReturnsGroupedDispatchStatus() throws Exception {
+    Order dispatchedOrder = createOrder("ORD-SL-002", "SELLER-001");
+    setField(dispatchedOrder, "status", OrderStatus.PACKING);
+    orderRepository.save(dispatchedOrder);
+
+    Order receivedOrder = createOrder("ORD-SL-003", "SELLER-001");
+    orderRepository.save(receivedOrder);
+
+    mockMvc.perform(get("/orders/seller/list")
+            .header("X-User-Id", "SELLER-001")
+            .param("status", "DISPATCHED"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.totalCount").value(1))
+        .andExpect(jsonPath("$.data.orders[0].orderId").value("ORD-SL-002"))
+        .andExpect(jsonPath("$.data.orders[0].status").value("DISPATCHED"))
+        .andExpect(jsonPath("$.data.orders[0].canCancel").value(false));
   }
 
   private Order createOrder(String orderId, String sellerId) {
