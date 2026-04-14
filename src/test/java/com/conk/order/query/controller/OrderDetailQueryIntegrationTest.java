@@ -59,7 +59,7 @@ class OrderDetailQueryIntegrationTest {
         .andExpect(jsonPath("$.data.phone").value("010-1234-5678"))
         .andExpect(jsonPath("$.data.street1").value("123 Main St"))
         .andExpect(jsonPath("$.data.street2").value("Apt 4"))
-        .andExpect(jsonPath("$.data.country").value("USA"))
+        .andExpect(jsonPath("$.data.country").value("US"))
         .andExpect(jsonPath("$.data.memo").value("빠른배송"))
         .andExpect(jsonPath("$.data.items.length()").value(2))
         .andExpect(jsonPath("$.data.items[0].sku").value("SKU-001"))
