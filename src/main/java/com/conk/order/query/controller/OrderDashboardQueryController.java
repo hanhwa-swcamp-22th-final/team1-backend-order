@@ -1,11 +1,15 @@
 package com.conk.order.query.controller;
 
 import com.conk.order.common.dto.ApiResponse;
+import com.conk.order.query.dto.response.CurrentRevenueResponse;
+import com.conk.order.query.dto.response.MonthlyRevenuePointResponse;
 import com.conk.order.query.dto.request.OrderKpiQuery;
 import com.conk.order.query.dto.response.OrderKpiResponse;
 import com.conk.order.query.dto.response.OutboundStatsResponse;
+import com.conk.order.query.dto.response.SellerRevenueResponse;
 import com.conk.order.query.service.OrderDashboardQueryService;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,5 +56,20 @@ public class OrderDashboardQueryController {
     query.setEndDate(endDate);
 
     return ResponseEntity.ok(ApiResponse.success(orderDashboardQueryService.getKpi(query)));
+  }
+
+  @GetMapping("/revenue/current")
+  public ResponseEntity<ApiResponse<CurrentRevenueResponse>> getCurrentRevenue() {
+    return ResponseEntity.ok(ApiResponse.success(orderDashboardQueryService.getCurrentRevenue()));
+  }
+
+  @GetMapping("/revenue/monthly")
+  public ResponseEntity<ApiResponse<List<MonthlyRevenuePointResponse>>> getMonthlyRevenue() {
+    return ResponseEntity.ok(ApiResponse.success(orderDashboardQueryService.getMonthlyRevenue()));
+  }
+
+  @GetMapping("/revenue/sellers")
+  public ResponseEntity<ApiResponse<List<SellerRevenueResponse>>> getSellerRevenue() {
+    return ResponseEntity.ok(ApiResponse.success(orderDashboardQueryService.getSellerRevenue()));
   }
 }

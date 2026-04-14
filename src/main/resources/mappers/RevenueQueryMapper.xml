@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.conk.order.query.mapper.RevenueQueryMapper">
+
+    <sql id="revenueWhereClause">
+        WHERE o.status != 'CANCELED'
+          AND o.ordered_at <![CDATA[>=]]> #{startDateTime}
+          AND o.ordered_at <![CDATA[<]]> #{endDateTime}
+    </sql>
+
+    <select id="findSellerSkuQuantitiesBetween" resultType="com.conk.order.query.dto.response.SellerSkuQuantityRow">
+        SELECT
+            o.seller_id AS sellerId,
+            i.sku_id AS sku,
+            SUM(i.quantity) AS quantity
+        FROM sales_order o
+        JOIN sales_order_item i ON i.order_id = o.order_id
+        <include refid="revenueWhereClause"/>
+        GROUP BY o.seller_id, i.sku_id
+    </select>
+
+    <select id="findSellerOrderCountsBetween" resultType="com.conk.order.query.dto.response.SellerOrderCountRow">
+        SELECT
+            o.seller_id AS sellerId,
+            COUNT(*) AS totalOrders
+        FROM sales_order o
+        <include refid="revenueWhereClause"/>
+        GROUP BY o.seller_id
+    </select>
+
+    <select id="findMonthlySellerSkuQuantitiesBetween" resultType="com.conk.order.query.dto.response.MonthlyRevenueAggregationRow">
+        SELECT
+            DATE_FORMAT(o.ordered_at, '%Y-%m') AS month,
+            o.seller_id AS sellerId,
+            i.sku_id AS sku,
+            SUM(i.quantity) AS quantity
+        FROM sales_order o
+        JOIN sales_order_item i ON i.order_id = o.order_id
+        <include refid="revenueWhereClause"/>
+        GROUP BY DATE_FORMAT(o.ordered_at, '%Y-%m'), o.seller_id, i.sku_id
+        ORDER BY month ASC
+    </select>
+</mapper>

@@ -1,5 +1,6 @@
 package com.conk.order.query.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,5 +38,6 @@ public interface WmsSellerProductClient {
   class WmsSellerProductItem {
     private String sku;
     private String productName;
+    private BigDecimal salePrice;
   }
 }
