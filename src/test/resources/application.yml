@@ -31,3 +31,6 @@ order:
   bulk-upload:
     max-row-limit: 5000
     flush-interval: 500
+
+wms:
+  base-url: http://localhost:8083

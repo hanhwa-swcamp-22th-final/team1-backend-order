@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.conk.order.command.domain.aggregate.OrderChannel;
 import com.conk.order.command.domain.aggregate.OrderStatus;
 import com.conk.order.query.dto.response.SellerOrderListResponse;
+import com.conk.order.query.dto.response.SellerOrderOptionsResponse;
 import com.conk.order.query.dto.response.SellerOrderSummary;
 import com.conk.order.query.service.SellerOrderQueryService;
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ class SellerOrderListQueryControllerTest {
   @Test
   void getSellerOrders_returnsOkWithData() throws Exception {
     SellerOrderSummary summary = new SellerOrderSummary();
-    summary.setOrderNo("ORD-001");
+    summary.setOrderId("ORD-001");
     summary.setOrderedAt(LocalDateTime.of(2026, 4, 3, 10, 0));
     summary.setStatus(OrderStatus.RECEIVED);
     summary.setOrderChannel(OrderChannel.MANUAL);
@@ -51,11 +52,31 @@ class SellerOrderListQueryControllerTest {
             .header("X-User-Id", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
-        .andExpect(jsonPath("$.data.orders[0].orderNo").value("ORD-001"))
+        .andExpect(jsonPath("$.data.orders[0].orderId").value("ORD-001"))
         .andExpect(jsonPath("$.data.orders[0].status").value("RECEIVED"))
         .andExpect(jsonPath("$.data.totalCount").value(1))
         .andExpect(jsonPath("$.data.page").value(0))
         .andExpect(jsonPath("$.data.size").value(20));
+  }
+
+  @Test
+  void getSellerOrderOptions_returnsOkWithData() throws Exception {
+    SellerOrderOptionsResponse response = new SellerOrderOptionsResponse(
+        List.of(new SellerOrderOptionsResponse.ProductOption("SKU-001", "마스크팩 세트")),
+        List.of(new SellerOrderOptionsResponse.ChannelOption("SHOPIFY", "Shopify"))
+    );
+
+    given(sellerOrderQueryService.getOrderOptions("SELLER-001"))
+        .willReturn(response);
+
+    mockMvc.perform(get("/orders/seller/options")
+            .header("X-User-Id", "SELLER-001"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.products[0].sku").value("SKU-001"))
+        .andExpect(jsonPath("$.data.products[0].productName").value("마스크팩 세트"))
+        .andExpect(jsonPath("$.data.channels[0].value").value("SHOPIFY"))
+        .andExpect(jsonPath("$.data.channels[0].label").value("Shopify"));
   }
 
   /*
@@ -64,6 +85,12 @@ class SellerOrderListQueryControllerTest {
   @Test
   void getSellerOrders_returnsUnauthorized_whenUserIdHeaderMissing() throws Exception {
     mockMvc.perform(get("/orders/seller/list"))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void getSellerOrderOptions_returnsUnauthorized_whenUserIdHeaderMissing() throws Exception {
+    mockMvc.perform(get("/orders/seller/options"))
         .andExpect(status().isUnauthorized());
   }
 }

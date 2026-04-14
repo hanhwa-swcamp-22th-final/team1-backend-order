@@ -43,6 +43,8 @@ order:
   bulk-upload:
     max-row-limit: 5000
     flush-interval: 500
+wms:
+  base-url: ${WMS_SERVICE_URL:http://localhost:8083}
 management:
   endpoints:
     web:
@@ -51,4 +53,3 @@ management:
   endpoint:
     health:
       show-details: always
-

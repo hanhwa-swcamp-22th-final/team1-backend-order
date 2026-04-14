@@ -73,9 +73,9 @@ class WhmOrderListQueryServiceTest {
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
-  private WhmOrderSummary summary(String orderNo) {
+  private WhmOrderSummary summary(String orderId) {
     WhmOrderSummary s = new WhmOrderSummary();
-    s.setOrderNo(orderNo);
+    s.setOrderId(orderId);
     s.setOrderedAt(LocalDateTime.of(2026, 4, 5, 10, 0));
     s.setStatus(OrderStatus.RECEIVED);
     s.setOrderChannel(OrderChannel.MANUAL);

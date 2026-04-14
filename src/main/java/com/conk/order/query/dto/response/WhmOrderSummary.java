@@ -18,8 +18,8 @@ import lombok.Setter;
 @Setter
 public class WhmOrderSummary {
 
-  /** 주문번호. */
-  private String orderNo;
+  /** 주문 식별자. */
+  private String orderId;
 
   /** 주문 일시. */
   private LocalDateTime orderedAt;

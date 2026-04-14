@@ -31,7 +31,7 @@ class SellerOrderListQueryServiceTest {
     StubMapper stub = new StubMapper(List.of(
         summary("ORD-001"), summary("ORD-002")
     ), 2);
-    SellerOrderQueryService service = new SellerOrderQueryService(stub, null, null);
+    SellerOrderQueryService service = new SellerOrderQueryService(stub, null, null, sellerId -> List.of());
 
     SellerOrderListQuery query = new SellerOrderListQuery();
     query.setSellerId("SELLER-001");
@@ -46,7 +46,7 @@ class SellerOrderListQueryServiceTest {
   @Test
   void getSellerOrders_returnsEmptyList_whenNoOrders() {
     StubMapper stub = new StubMapper(List.of(), 0);
-    SellerOrderQueryService service = new SellerOrderQueryService(stub, null, null);
+    SellerOrderQueryService service = new SellerOrderQueryService(stub, null, null, sellerId -> List.of());
 
     SellerOrderListQuery query = new SellerOrderListQuery();
     query.setSellerId("SELLER-999");
@@ -65,7 +65,7 @@ class SellerOrderListQueryServiceTest {
      * 프론트에서 "현재 2페이지, 10개씩" 표시에 필요한 값이다.
      */
     StubMapper stub = new StubMapper(List.of(), 0);
-    SellerOrderQueryService service = new SellerOrderQueryService(stub, null, null);
+    SellerOrderQueryService service = new SellerOrderQueryService(stub, null, null, sellerId -> List.of());
 
     SellerOrderListQuery query = new SellerOrderListQuery();
     query.setSellerId("SELLER-001");
@@ -81,9 +81,9 @@ class SellerOrderListQueryServiceTest {
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
 
   /* 테스트용 주문 요약 객체를 생성한다. */
-  private SellerOrderSummary summary(String orderNo) {
+  private SellerOrderSummary summary(String orderId) {
     SellerOrderSummary s = new SellerOrderSummary();
-    s.setOrderNo(orderNo);
+    s.setOrderId(orderId);
     s.setOrderedAt(LocalDateTime.of(2026, 4, 3, 10, 0));
     s.setStatus(OrderStatus.RECEIVED);
     s.setOrderChannel(OrderChannel.MANUAL);

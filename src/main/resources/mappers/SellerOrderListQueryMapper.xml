@@ -38,7 +38,7 @@
 
       resultType = SellerOrderSummary FQCN.
       MyBatis 가 SELECT 컬럼명을 DTO 필드명에 자동 매핑한다.
-        order_no      → orderNo
+        order_id      → orderId
         ordered_at    → orderedAt
         status        → status  (String → OrderStatus 자동 변환)
         order_channel → orderChannel
@@ -47,7 +47,7 @@
     -->
     <select id="findOrders" resultType="com.conk.order.query.dto.response.SellerOrderSummary">
         SELECT
-            o.order_id           AS orderNo,
+            o.order_id           AS orderId,
             o.ordered_at         AS orderedAt,
             o.status             AS status,
             o.order_channel      AS orderChannel,

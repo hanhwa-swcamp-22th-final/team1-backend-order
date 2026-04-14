@@ -41,7 +41,7 @@
     -->
     <select id="findOrders" resultType="com.conk.order.query.dto.response.AdminOrderSummary">
         SELECT
-            o.order_id           AS orderNo,
+            o.order_id           AS orderId,
             o.ordered_at         AS orderedAt,
             o.status             AS status,
             o.order_channel      AS orderChannel,

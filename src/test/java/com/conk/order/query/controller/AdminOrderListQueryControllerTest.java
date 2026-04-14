@@ -46,7 +46,7 @@ class AdminOrderListQueryControllerTest {
   @Test
   void getAdminOrders_returnsOkWithData() throws Exception {
     AdminOrderSummary summary = new AdminOrderSummary();
-    summary.setOrderNo("ORD-001");
+    summary.setOrderId("ORD-001");
     summary.setOrderedAt(LocalDateTime.of(2026, 4, 5, 10, 0));
     summary.setStatus(OrderStatus.RECEIVED);
     summary.setOrderChannel(OrderChannel.MANUAL);
@@ -60,7 +60,7 @@ class AdminOrderListQueryControllerTest {
     mockMvc.perform(get("/orders/list"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
-        .andExpect(jsonPath("$.data.orders[0].orderNo").value("ORD-001"))
+        .andExpect(jsonPath("$.data.orders[0].orderId").value("ORD-001"))
         .andExpect(jsonPath("$.data.orders[0].sellerId").value("SELLER-001"))
         .andExpect(jsonPath("$.data.totalCount").value(1))
         .andExpect(jsonPath("$.data.page").value(0))

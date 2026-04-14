@@ -88,3 +88,26 @@
 - grouped controller와 grouped service를 맞추면 의존성 그래프와 테스트 구성이 단순해진다.
 - bulk create/validate는 입력 포맷과 정책이 같아 하나의 서비스로 묶는 편이 하드코딩 제거와 정책 일관성 측면에서 유리하다.
 - 반면 `OrderIdGenerator`는 유스케이스가 아니라 지원 컴포넌트이므로 독립 유지가 맞다.
+
+## 2026-04-14 주문 등록 옵션의 상품 소스
+
+### Decision
+- `GET /orders/seller/options`의 `products`는 order DB가 아니라 WMS의 seller 상품 목록 API에서 조회한다.
+- `channels`는 order 서비스의 `OrderChannel` 중 외부 연동 채널만 노출한다.
+  - 현재는 `SHOPIFY`만 내려준다.
+- order 서비스와 WMS 간 통신은 OpenFeign으로 처리하고, base URL은 `wms.base-url` 설정으로 분리한다.
+
+### Context
+- 주문 등록 화면은 `products[].sku`, `products[].productName`, `channels[].value`, `channels[].label`을 즉시 필요로 한다.
+- order 서비스의 전용 DB에는 상품 마스터가 없고, seller 상품 마스터는 WMS가 관리한다.
+- FE는 이미 `/orders/seller/options`를 호출하고 있어 프론트 계약을 뒤집는 것보다 backend proxy를 추가하는 편이 변경 폭이 작다.
+
+### Alternatives Considered
+- order 서비스 DB에 상품 마스터를 중복 저장한다.
+- FE가 WMS 상품 API와 order 채널 API를 각각 직접 호출한다.
+- 과거 주문 이력의 SKU/상품명 스냅샷으로 옵션을 구성한다.
+
+### Why
+- 상품 마스터의 단일 소스는 WMS이므로, order 서비스가 조회 시점에 가져오는 편이 데이터 소유권과 맞다.
+- FE 계약을 유지하면서도 수동 주문 등록 화면에 필요한 SKU 선택 목록을 안정적으로 제공할 수 있다.
+- 과거 주문 이력 기반 옵션은 신규 SKU 누락과 비활성 상품 혼입 가능성이 있어 등록 화면 품질이 떨어진다.

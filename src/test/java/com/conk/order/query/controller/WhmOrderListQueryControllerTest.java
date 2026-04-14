@@ -39,7 +39,7 @@ class WhmOrderListQueryControllerTest {
   @Test
   void getWhmOrders_returnsOkWithData() throws Exception {
     WhmOrderSummary summary = new WhmOrderSummary();
-    summary.setOrderNo("ORD-001");
+    summary.setOrderId("ORD-001");
     summary.setOrderedAt(LocalDateTime.of(2026, 4, 5, 10, 0));
     summary.setStatus(OrderStatus.RECEIVED);
     summary.setOrderChannel(OrderChannel.MANUAL);
@@ -53,7 +53,7 @@ class WhmOrderListQueryControllerTest {
             .param("warehouseId", "WH-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
-        .andExpect(jsonPath("$.data.orders[0].orderNo").value("ORD-001"))
+        .andExpect(jsonPath("$.data.orders[0].orderId").value("ORD-001"))
         .andExpect(jsonPath("$.data.totalCount").value(1))
         .andExpect(jsonPath("$.data.page").value(0))
         .andExpect(jsonPath("$.data.size").value(20));
