@@ -55,8 +55,9 @@ public class Order {
   @Column(name = "warehouse_id")
   private String warehouseId;
 
-  /** 송장번호. sales_order.invoice_no */
-  private String invoiceNo;
+  /** 운송장 코드. sales_order.tracking_code */
+  @Column(name = "tracking_code")
+  private String trackingCode;
 
   /** 소채널 주문번호. sales_order.channel_order_no */
   private String channelOrderNo;

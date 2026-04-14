@@ -42,8 +42,16 @@ class SellerOrderListQueryControllerTest {
     summary.setOrderedAt(LocalDateTime.of(2026, 4, 3, 10, 0));
     summary.setStatus(OrderStatus.RECEIVED);
     summary.setOrderChannel(OrderChannel.MANUAL);
+    summary.setChannel("Manual");
     summary.setReceiverName("홍길동");
+    summary.setRecipient("홍길동");
     summary.setItemCount(2);
+    summary.setItemsSummary("상품 2건");
+    summary.setStreet1("서울시 강남구 테헤란로 123");
+    summary.setStreet2("101동 202호");
+    summary.setAddress("서울시 강남구 테헤란로 123 101동 202호");
+    summary.setTrackingNo("");
+    summary.setCanCancel(true);
 
     given(sellerOrderQueryService.getSellerOrders(any()))
         .willReturn(new SellerOrderListResponse(List.of(summary), 1, 0, 20));
@@ -53,7 +61,18 @@ class SellerOrderListQueryControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.orders[0].orderId").value("ORD-001"))
+        .andExpect(jsonPath("$.data.orders[0].orderChannel").value("MANUAL"))
+        .andExpect(jsonPath("$.data.orders[0].channel").value("Manual"))
+        .andExpect(jsonPath("$.data.orders[0].receiverName").value("홍길동"))
+        .andExpect(jsonPath("$.data.orders[0].recipient").value("홍길동"))
+        .andExpect(jsonPath("$.data.orders[0].street1").value("서울시 강남구 테헤란로 123"))
+        .andExpect(jsonPath("$.data.orders[0].street2").value("101동 202호"))
+        .andExpect(jsonPath("$.data.orders[0].address").value("서울시 강남구 테헤란로 123 101동 202호"))
+        .andExpect(jsonPath("$.data.orders[0].itemCount").value(2))
+        .andExpect(jsonPath("$.data.orders[0].itemsSummary").value("상품 2건"))
         .andExpect(jsonPath("$.data.orders[0].status").value("RECEIVED"))
+        .andExpect(jsonPath("$.data.orders[0].trackingNo").value(""))
+        .andExpect(jsonPath("$.data.orders[0].canCancel").value(true))
         .andExpect(jsonPath("$.data.totalCount").value(1))
         .andExpect(jsonPath("$.data.page").value(0))
         .andExpect(jsonPath("$.data.size").value(20));

@@ -2,6 +2,7 @@ package com.conk.order.query.service;
 
 import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderChannel;
+import com.conk.order.command.domain.aggregate.OrderStatus;
 import com.conk.order.command.domain.aggregate.OrderStatusHistory;
 import com.conk.order.command.domain.repository.OrderRepository;
 import com.conk.order.command.domain.repository.OrderStatusHistoryRepository;
@@ -51,6 +52,7 @@ public class SellerOrderQueryService {
   /* 셀러 주문 목록을 조회해 페이징 응답으로 조립한다. */
   public SellerOrderListResponse getSellerOrders(SellerOrderListQuery query) {
     List<SellerOrderSummary> orders = sellerOrderListQueryMapper.findOrders(query);
+    orders.forEach(this::populateSellerOrderListDisplayFields);
     int totalCount = sellerOrderListQueryMapper.countOrders(query);
     return new SellerOrderListResponse(orders, totalCount, query.getPage(), query.getSize());
   }
@@ -103,8 +105,36 @@ public class SellerOrderQueryService {
     return channel != OrderChannel.MANUAL && channel != OrderChannel.EXCEL;
   }
 
+  private void populateSellerOrderListDisplayFields(SellerOrderSummary summary) {
+    summary.setChannel(toChannelLabel(summary.getOrderChannel()));
+    summary.setRecipient(summary.getReceiverName());
+    summary.setAddress(buildListAddress(summary));
+    summary.setItemsSummary("상품 " + summary.getItemCount() + "건");
+    summary.setTrackingNo(summary.getTrackingNo() == null ? "" : summary.getTrackingNo());
+    summary.setCanCancel(
+        summary.getStatus() == OrderStatus.RECEIVED || summary.getStatus() == OrderStatus.ALLOCATED);
+  }
+
+  private String buildListAddress(SellerOrderSummary summary) {
+    String street1 = summary.getStreet1() == null ? "" : summary.getStreet1().trim();
+    String street2 = summary.getStreet2() == null ? "" : summary.getStreet2().trim();
+
+    if (street1.isEmpty()) {
+      return street2;
+    }
+    if (street2.isEmpty()) {
+      return street1;
+    }
+    return street1 + " " + street2;
+  }
+
   private String toChannelLabel(OrderChannel channel) {
+    if (channel == null) {
+      return "";
+    }
     return switch (channel) {
+      case MANUAL -> "Manual";
+      case EXCEL -> "Excel";
       case SHOPIFY -> "Shopify";
       default -> channel.name();
     };

@@ -50,7 +50,7 @@ public class WhmOrderQueryService {
 
     for (ShipmentExportRow row : rows) {
       sb.append(escape(row.getOrderId())).append(",");
-      sb.append(escape(row.getInvoiceNo())).append(",");
+      sb.append(escape(row.getTrackingCode())).append(",");
       sb.append(escape(row.getOrderChannel())).append(",");
       sb.append(escape(row.getReceiverName())).append(",");
       sb.append(escape(row.getReceiverPhoneNo())).append(",");

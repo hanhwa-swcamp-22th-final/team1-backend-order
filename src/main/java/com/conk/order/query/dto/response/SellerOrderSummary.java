@@ -31,8 +31,14 @@ public class SellerOrderSummary {
   /** 판매 채널. SQL: o.order_channel */
   private OrderChannel orderChannel;
 
+  /** 화면 표시용 판매 채널명. orderChannel 기반 후처리 값 */
+  private String channel;
+
   /** 수령인 이름. SQL: o.receiver_name */
   private String receiverName;
+
+  /** 화면 표시용 수령인 이름. receiverName 기반 후처리 값 */
+  private String recipient;
 
   /*
    * 주문 항목 수.
@@ -41,11 +47,17 @@ public class SellerOrderSummary {
    */
   private int itemCount;
 
+  /** 화면 표시용 주문 품목 요약. itemCount 기반 후처리 값 */
+  private String itemsSummary;
+
   /** 배송지 기본 주소. SQL: o.ship_to_address1 AS street1 */
   private String street1;
 
   /** 배송지 상세 주소. SQL: o.ship_to_address2 AS street2 */
   private String street2;
+
+  /** 화면 표시용 주소. street1/street2 기반 후처리 값 */
+  private String address;
 
   /** 배송지 주/지역. SQL: o.ship_to_state AS state */
   private String state;
@@ -58,4 +70,10 @@ public class SellerOrderSummary {
 
   /** 수령인 연락처. SQL: o.receiver_phone_no AS phone */
   private String phone;
+
+  /** 운송장번호 응답값. SQL: o.tracking_code AS trackingNo */
+  private String trackingNo;
+
+  /** 취소 가능 여부. status 기반 후처리 값 */
+  private boolean canCancel;
 }

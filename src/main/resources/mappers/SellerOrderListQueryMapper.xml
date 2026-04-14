@@ -58,7 +58,8 @@
             o.ship_to_state      AS state,
             o.ship_to_zip_code   AS zip,
             o.ship_to_country    AS country,
-            o.receiver_phone_no  AS phone
+            o.receiver_phone_no  AS phone,
+            o.tracking_code      AS trackingNo
         FROM sales_order o
         LEFT JOIN sales_order_item i ON i.order_id = o.order_id
         <include refid="whereClause"/>
@@ -73,7 +74,8 @@
             o.ship_to_state,
             o.ship_to_zip_code,
             o.ship_to_country,
-            o.receiver_phone_no
+            o.receiver_phone_no,
+            o.tracking_code
         ORDER BY o.ordered_at DESC
         LIMIT #{size} OFFSET #{offset}
     </select>

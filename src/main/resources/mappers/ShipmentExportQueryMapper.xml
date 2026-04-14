@@ -11,7 +11,7 @@
   <select id="findShipmentExportRows"
           resultType="com.conk.order.query.dto.ShipmentExportRow">
     SELECT o.order_id       AS orderId,
-           o.invoice_no     AS invoiceNo,
+           o.tracking_code  AS trackingCode,
            o.order_channel  AS orderChannel,
            o.receiver_name  AS receiverName,
            o.receiver_phone_no AS receiverPhoneNo,

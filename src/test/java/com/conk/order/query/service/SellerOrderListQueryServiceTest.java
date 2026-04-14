@@ -40,6 +40,12 @@ class SellerOrderListQueryServiceTest {
 
     assertThat(response.getOrders()).hasSize(2);
     assertThat(response.getTotalCount()).isEqualTo(2);
+    assertThat(response.getOrders().get(0).getChannel()).isEqualTo("Manual");
+    assertThat(response.getOrders().get(0).getRecipient()).isEqualTo("홍길동");
+    assertThat(response.getOrders().get(0).getAddress()).isEqualTo("서울시 강남구 테헤란로 123 101동 202호");
+    assertThat(response.getOrders().get(0).getItemsSummary()).isEqualTo("상품 1건");
+    assertThat(response.getOrders().get(0).getTrackingNo()).isEmpty();
+    assertThat(response.getOrders().get(0).isCanCancel()).isTrue();
   }
 
   /* 빈 결과도 정상 응답한다. */
@@ -88,6 +94,8 @@ class SellerOrderListQueryServiceTest {
     s.setStatus(OrderStatus.RECEIVED);
     s.setOrderChannel(OrderChannel.MANUAL);
     s.setReceiverName("홍길동");
+    s.setStreet1("서울시 강남구 테헤란로 123");
+    s.setStreet2("101동 202호");
     s.setItemCount(1);
     return s;
   }
