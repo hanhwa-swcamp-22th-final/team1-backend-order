@@ -16,8 +16,8 @@ public class ShipmentExportRow {
   /** 주문번호. */
   private String orderId;
 
-  /** 송장번호. */
-  private String invoiceNo;
+  /** 운송장 코드. */
+  private String trackingCode;
 
   /** 주문 채널. */
   private String orderChannel;
