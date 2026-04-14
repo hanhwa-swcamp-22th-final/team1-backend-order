@@ -4,6 +4,8 @@ import com.conk.order.command.domain.aggregate.Order;
 import com.conk.order.command.domain.aggregate.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 /*
  * 주문 저장소.
  * JpaRepository 가 existsById, save 를 제공한다.
@@ -12,6 +14,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface OrderRepository extends JpaRepository<Order, String> {
 
   Long countByStatus(OrderStatus status);
+
+  List<Order> findAllByStatusOrderByOrderedAtDesc(OrderStatus status);
 
   default void saveOrder(Order order) {
     save(order);
