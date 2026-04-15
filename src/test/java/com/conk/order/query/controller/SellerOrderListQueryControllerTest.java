@@ -14,7 +14,10 @@ import com.conk.order.query.dto.request.SellerOrderListQuery;
 import com.conk.order.query.dto.response.SellerOrderListResponse;
 import com.conk.order.query.dto.response.SellerOrderOptionsResponse;
 import com.conk.order.query.dto.response.SellerOrderSummary;
+import com.conk.order.query.dto.response.SellerMarginPresetsResponse;
+import com.conk.order.query.service.SellerMarginPresetsQueryService;
 import com.conk.order.query.service.SellerOrderQueryService;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,9 @@ class SellerOrderListQueryControllerTest {
 
   @MockitoBean
   private SellerOrderQueryService sellerOrderQueryService;
+
+  @MockitoBean
+  private SellerMarginPresetsQueryService sellerMarginPresetsQueryService;
 
   /* 정상 요청 시 200 OK 와 success/data 형식으로 응답한다. */
   @Test
@@ -131,5 +137,33 @@ class SellerOrderListQueryControllerTest {
   void getSellerOrderOptions_returnsUnauthorized_whenUserIdHeaderMissing() throws Exception {
     mockMvc.perform(get("/orders/seller/options"))
         .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @org.junit.jupiter.api.DisplayName("X-Seller-Id 헤더가 있으면 마진 시뮬레이터 preset을 200으로 반환한다")
+  void getMarginPresets_whenSellerIdPresent_thenReturnOkWithPresetsData() throws Exception {
+    SellerMarginPresetsResponse response = new SellerMarginPresetsResponse(
+        List.of(new SellerMarginPresetsResponse.ProductPreset(
+            "SKU-001", "테스트 상품",
+            new BigDecimal("29.99"), new BigDecimal("12.00"),
+            new BigDecimal("2.50"), new BigDecimal("0.30"), new BigDecimal("28.50")
+        )),
+        List.of(new SellerMarginPresetsResponse.ChannelPreset("SHOPIFY", "Shopify", 15.0))
+    );
+    given(sellerMarginPresetsQueryService.getPresets("seller-1")).willReturn(response);
+
+    mockMvc.perform(get("/orders/seller/margin-presets")
+            .header("X-Seller-Id", "seller-1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.products[0].sku").value("SKU-001"))
+        .andExpect(jsonPath("$.data.channels[0].key").value("SHOPIFY"));
+  }
+
+  @Test
+  @org.junit.jupiter.api.DisplayName("X-Seller-Id 헤더가 없으면 마진 preset 조회 시 400을 반환한다")
+  void getMarginPresets_whenSellerIdMissing_thenReturnBadRequest() throws Exception {
+    mockMvc.perform(get("/orders/seller/margin-presets"))
+        .andExpect(status().isBadRequest());
   }
 }

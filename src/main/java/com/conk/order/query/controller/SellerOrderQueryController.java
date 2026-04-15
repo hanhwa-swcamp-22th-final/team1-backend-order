@@ -6,7 +6,9 @@ import com.conk.order.query.dto.request.SellerOrderListQuery;
 import com.conk.order.query.dto.response.OrderTrackingResponse;
 import com.conk.order.query.dto.response.SellerOrderDetailResponse;
 import com.conk.order.query.dto.response.SellerOrderListResponse;
+import com.conk.order.query.dto.response.SellerMarginPresetsResponse;
 import com.conk.order.query.dto.response.SellerOrderOptionsResponse;
+import com.conk.order.query.service.SellerMarginPresetsQueryService;
 import com.conk.order.query.service.SellerOrderQueryService;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -34,9 +36,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class SellerOrderQueryController {
 
   private final SellerOrderQueryService sellerOrderQueryService;
+  private final SellerMarginPresetsQueryService sellerMarginPresetsQueryService;
 
-  public SellerOrderQueryController(SellerOrderQueryService sellerOrderQueryService) {
+  public SellerOrderQueryController(
+      SellerOrderQueryService sellerOrderQueryService,
+      SellerMarginPresetsQueryService sellerMarginPresetsQueryService
+  ) {
     this.sellerOrderQueryService = sellerOrderQueryService;
+    this.sellerMarginPresetsQueryService = sellerMarginPresetsQueryService;
   }
 
   /* GET /orders/seller/list — 셀러 본인의 주문 목록을 조회한다. */
@@ -58,6 +65,14 @@ public class SellerOrderQueryController {
     query.setSize(size);
 
     return ResponseEntity.ok(ApiResponse.success(sellerOrderQueryService.getSellerOrders(query)));
+  }
+
+  /* GET /orders/seller/margin-presets — 셀러 마진 시뮬레이터 초기값을 조회한다. */
+  @GetMapping("/margin-presets")
+  public ResponseEntity<ApiResponse<SellerMarginPresetsResponse>> getMarginPresets(
+      @RequestHeader("X-Seller-Id") String sellerId) {
+    SellerMarginPresetsResponse response = sellerMarginPresetsQueryService.getPresets(sellerId);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   /* GET /orders/seller/options — 셀러 주문 등록 화면 옵션을 조회한다. */

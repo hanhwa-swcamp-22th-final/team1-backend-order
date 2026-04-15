@@ -41,6 +41,7 @@ public interface WmsSellerProductClient {
     private String sku;
     private String productName;
     private java.math.BigDecimal salePrice;
+    private java.math.BigDecimal costPrice;
     private Integer availableStock;
   }
 }
