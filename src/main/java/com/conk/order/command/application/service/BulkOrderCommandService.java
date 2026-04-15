@@ -50,11 +50,11 @@ public class BulkOrderCommandService {
       "상품명",
       "수령인",
       "수령인 연락처",
-      "기본주소",
-      "상세주소",
-      "도시",
-      "주/지역",
-      "우편번호",
+      "기본 배송지",
+      "상세 배송지",
+      "State",
+      "City",
+      "Zip Code",
       "메모"
   };
 
@@ -194,7 +194,8 @@ public class BulkOrderCommandService {
     String receiverName = cell(row, 4);
     String receiverPhone = cell(row, 5);
     String address1 = cell(row, 6);
-    String city = cell(row, 8);
+    String state = cell(row, 8);
+    String city = cell(row, 9);
     String zipCode = cell(row, 10);
 
     if (orderedAt.isBlank()) {
@@ -218,15 +219,19 @@ public class BulkOrderCommandService {
       return;
     }
     if (address1.isBlank()) {
-      errors.add(new RowError(rowNum, "기본주소가 비어있습니다."));
+      errors.add(new RowError(rowNum, "기본 배송지가 비어있습니다."));
+      return;
+    }
+    if (state.isBlank()) {
+      errors.add(new RowError(rowNum, "State가 비어있습니다."));
       return;
     }
     if (city.isBlank()) {
-      errors.add(new RowError(rowNum, "도시가 비어있습니다."));
+      errors.add(new RowError(rowNum, "City가 비어있습니다."));
       return;
     }
     if (zipCode.isBlank()) {
-      errors.add(new RowError(rowNum, "우편번호가 비어있습니다."));
+      errors.add(new RowError(rowNum, "Zip Code가 비어있습니다."));
       return;
     }
 
@@ -257,8 +262,8 @@ public class BulkOrderCommandService {
     String receiverPhone = cell(row, 5);
     String address1 = cell(row, 6);
     String address2 = cell(row, 7);
-    String city = cell(row, 8);
-    String state = cell(row, 9);
+    String state = cell(row, 8);
+    String city = cell(row, 9);
     String zipCode = cell(row, 10);
     String memo = cell(row, 11);
 
