@@ -25,12 +25,12 @@
                 AND o.status = #{status}
             </if>
             <!-- startDate 가 있으면 해당 날짜 이후 주문만 조회한다. -->
-            <if test="startDate != null">
-                AND DATE(o.ordered_at) &gt;= #{startDate}
+            <if test="startDateTime != null">
+                AND o.ordered_at &gt;= #{startDateTime}
             </if>
             <!-- endDate 가 있으면 해당 날짜 이전 주문만 조회한다. -->
-            <if test="endDate != null">
-                AND DATE(o.ordered_at) &lt;= #{endDate}
+            <if test="endDateExclusive != null">
+                AND o.ordered_at &lt; #{endDateExclusive}
             </if>
         </where>
     </sql>

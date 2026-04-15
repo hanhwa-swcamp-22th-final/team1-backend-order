@@ -2,6 +2,7 @@ package com.conk.order.common.dto;
 
 import com.conk.order.command.domain.aggregate.OrderStatus;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,5 +37,13 @@ public abstract class PageableOrderListQuery {
    */
   public int getOffset() {
     return page * size;
+  }
+
+  public LocalDateTime getStartDateTime() {
+    return startDate == null ? null : startDate.atStartOfDay();
+  }
+
+  public LocalDateTime getEndDateExclusive() {
+    return endDate == null ? null : endDate.plusDays(1).atStartOfDay();
   }
 }
