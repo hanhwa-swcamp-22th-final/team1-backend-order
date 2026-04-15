@@ -66,9 +66,9 @@ class BulkCreateOrderServiceTest {
   void create_savesAllValidRows() throws Exception {
     MultipartFile file = buildExcel(
         row("2026-04-05 10:00:00", "SKU-001", "2", "상품A", "홍길동", "010-1111-2222",
-            "서울시 강남구 1번지", "", "Seoul", "", "06236", ""),
+            "서울시 강남구 1번지", "", "KR", "Seoul", "06236", ""),
         row("2026-04-05 11:00:00", "SKU-002", "1", "", "김철수", "010-3333-4444",
-            "서울시 서초구 2번지", "", "Seoul", "", "06500", "메모")
+            "서울시 서초구 2번지", "", "KR", "Seoul", "06500", "메모")
     );
 
     BulkCreateOrderResponse response = service.create(file, "SELLER-001");
@@ -85,9 +85,9 @@ class BulkCreateOrderServiceTest {
   void create_collectsFailedRows_whenSomeRowsInvalid() throws Exception {
     MultipartFile file = buildExcel(
         row("2026-04-05 10:00:00", "SKU-001", "1", "", "홍길동", "010-1111-2222",
-            "서울시 강남구 1번지", "", "Seoul", "", "06236", ""),
+            "서울시 강남구 1번지", "", "KR", "Seoul", "06236", ""),
         row("2026-04-05 11:00:00", "",        "1", "", "김철수", "010-3333-4444",
-            "서울시 서초구 2번지", "", "Seoul", "", "06500", "")  // SKU 누락
+            "서울시 서초구 2번지", "", "KR", "Seoul", "06500", "")  // SKU 누락
     );
 
     BulkCreateOrderResponse response = service.create(file, "SELLER-001");
@@ -168,9 +168,9 @@ class BulkCreateOrderServiceTest {
   void validate_returnsRowSummary_whenFileContainsInvalidRows() throws Exception {
     MultipartFile file = buildExcel(
         row("2026-04-05 10:00:00", "SKU-001", "1", "", "홍길동", "010-1111-2222",
-            "서울시 강남구 1번지", "", "Seoul", "", "06236", ""),
+            "서울시 강남구 1번지", "", "KR", "Seoul", "06236", ""),
         row("2026-04-05 11:00:00", "", "1", "", "김철수", "010-3333-4444",
-            "서울시 서초구 2번지", "", "Seoul", "", "06500", "")
+            "서울시 서초구 2번지", "", "KR", "Seoul", "06500", "")
     );
 
     BulkValidateResponse response = service.validate(file);
@@ -208,8 +208,8 @@ class BulkCreateOrderServiceTest {
 
     /* 헤더 행 */
     Row header = sheet.createRow(0);
-    String[] headers = {"주문번호", "주문일시", "SKU", "수량", "상품명",
-        "수령인", "연락처", "주소1", "주소2", "도시", "주/지역", "우편번호", "메모"};
+    String[] headers = {"주문일시(yyyy-MM-dd HH:mm:ss)", "SKU", "수량", "상품명",
+        "수령인", "수령인 연락처", "기본 배송지", "상세 배송지", "State", "City", "Zip Code", "메모"};
     for (int i = 0; i < headers.length; i++) {
       header.createCell(i).setCellValue(headers[i]);
     }
@@ -244,8 +244,8 @@ class BulkCreateOrderServiceTest {
     Sheet sheet = wb.createSheet("orders");
 
     Row header = sheet.createRow(0);
-    String[] headers = {"주문번호", "주문일시", "SKU", "수량", "상품명",
-        "수령인", "연락처", "주소1", "주소2", "도시", "주/지역", "우편번호", "메모"};
+    String[] headers = {"주문일시(yyyy-MM-dd HH:mm:ss)", "SKU", "수량", "상품명",
+        "수령인", "수령인 연락처", "기본 배송지", "상세 배송지", "State", "City", "Zip Code", "메모"};
     for (int i = 0; i < headers.length; i++) {
       header.createCell(i).setCellValue(headers[i]);
     }
@@ -260,8 +260,8 @@ class BulkCreateOrderServiceTest {
       row.createCell(5).setCellValue("010-1111-2222");
       row.createCell(6).setCellValue("서울시 강남구 1번지");
       row.createCell(7).setCellValue("");
-      row.createCell(8).setCellValue("Seoul");
-      row.createCell(9).setCellValue("");
+      row.createCell(8).setCellValue("KR");
+      row.createCell(9).setCellValue("Seoul");
       row.createCell(10).setCellValue("06236");
       row.createCell(11).setCellValue("");
     }

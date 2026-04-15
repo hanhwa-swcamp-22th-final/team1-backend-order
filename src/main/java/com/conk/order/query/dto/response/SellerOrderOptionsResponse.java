@@ -23,10 +23,14 @@ public class SellerOrderOptionsResponse {
   public static class ProductOption {
     private final String sku;
     private final String productName;
+    private final Integer availableStock;
+    private final java.math.BigDecimal unitPrice;
 
-    public ProductOption(String sku, String productName) {
+    public ProductOption(String sku, String productName, Integer availableStock, java.math.BigDecimal unitPrice) {
       this.sku = sku;
       this.productName = productName;
+      this.availableStock = availableStock;
+      this.unitPrice = unitPrice;
     }
   }
 

@@ -46,7 +46,7 @@ class SellerOrderListQueryControllerTest {
     summary.setOrderedAt(LocalDateTime.of(2026, 4, 3, 10, 0));
     summary.setStatus(SellerOrderStatus.RECEIVED);
     summary.setOrderChannel(OrderChannel.MANUAL);
-    summary.setChannel("Manual");
+    summary.setChannel("MANUAL");
     summary.setReceiverName("홍길동");
     summary.setRecipient("홍길동");
     summary.setItemCount(2);
@@ -66,7 +66,7 @@ class SellerOrderListQueryControllerTest {
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.orders[0].orderId").value("ORD-001"))
         .andExpect(jsonPath("$.data.orders[0].orderChannel").value("MANUAL"))
-        .andExpect(jsonPath("$.data.orders[0].channel").value("Manual"))
+        .andExpect(jsonPath("$.data.orders[0].channel").value("MANUAL"))
         .andExpect(jsonPath("$.data.orders[0].receiverName").value("홍길동"))
         .andExpect(jsonPath("$.data.orders[0].recipient").value("홍길동"))
         .andExpect(jsonPath("$.data.orders[0].street1").value("서울시 강남구 테헤란로 123"))
@@ -101,7 +101,7 @@ class SellerOrderListQueryControllerTest {
   @Test
   void getSellerOrderOptions_returnsOkWithData() throws Exception {
     SellerOrderOptionsResponse response = new SellerOrderOptionsResponse(
-        List.of(new SellerOrderOptionsResponse.ProductOption("SKU-001", "마스크팩 세트")),
+        List.of(new SellerOrderOptionsResponse.ProductOption("SKU-001", "마스크팩 세트", 10, new java.math.BigDecimal("29.99"))),
         List.of(new SellerOrderOptionsResponse.ChannelOption("SHOPIFY", "Shopify"))
     );
 

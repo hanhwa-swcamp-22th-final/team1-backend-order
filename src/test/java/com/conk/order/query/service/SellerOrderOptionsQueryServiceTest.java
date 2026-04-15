@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
 import com.conk.order.query.dto.response.SellerOrderOptionsResponse;
+import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -18,19 +19,22 @@ class SellerOrderOptionsQueryServiceTest {
   @Test
   void getOrderOptions_returnsProductsAndSelectableChannels() {
     SellerProductOptionFetcher fetcher = sellerId -> List.of(
-        new SellerOrderOptionsResponse.ProductOption("SKU-001", "마스크팩 세트"),
-        new SellerOrderOptionsResponse.ProductOption("SKU-002", "앰플")
+        new SellerOrderOptionsResponse.ProductOption("SKU-001", "마스크팩 세트", 10, new BigDecimal("29.99")),
+        new SellerOrderOptionsResponse.ProductOption("SKU-002", "앰플", 50, new BigDecimal("15.00"))
     );
     SellerOrderQueryService service = new SellerOrderQueryService(null, null, null, fetcher);
 
     SellerOrderOptionsResponse response = service.getOrderOptions("SELLER-001");
 
     assertThat(response.getProducts())
-        .extracting(SellerOrderOptionsResponse.ProductOption::getSku,
-            SellerOrderOptionsResponse.ProductOption::getProductName)
+        .extracting(
+            SellerOrderOptionsResponse.ProductOption::getSku,
+            SellerOrderOptionsResponse.ProductOption::getProductName,
+            SellerOrderOptionsResponse.ProductOption::getAvailableStock,
+            SellerOrderOptionsResponse.ProductOption::getUnitPrice)
         .containsExactly(
-            tuple("SKU-001", "마스크팩 세트"),
-            tuple("SKU-002", "앰플")
+            tuple("SKU-001", "마스크팩 세트", 10, new BigDecimal("29.99")),
+            tuple("SKU-002", "앰플", 50, new BigDecimal("15.00"))
         );
     assertThat(response.getChannels())
         .extracting(SellerOrderOptionsResponse.ChannelOption::getValue,

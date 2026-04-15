@@ -109,7 +109,7 @@ public class SellerOrderQueryService {
   private void populateSellerOrderListDisplayFields(SellerOrderSummary summary) {
     OrderStatus rawStatus = summary.getRawStatus();
     summary.setStatus(SellerOrderStatus.from(rawStatus));
-    summary.setChannel(toChannelLabel(summary.getOrderChannel()));
+    summary.setChannel(summary.getOrderChannel() == null ? "" : summary.getOrderChannel().name());
     summary.setRecipient(summary.getReceiverName());
     summary.setAddress(buildListAddress(summary));
     summary.setItemsSummary("상품 " + summary.getItemCount() + "건");

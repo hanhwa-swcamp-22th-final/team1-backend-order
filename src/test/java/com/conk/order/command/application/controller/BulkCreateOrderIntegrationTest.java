@@ -44,9 +44,9 @@ class BulkCreateOrderIntegrationTest {
   void bulkCreate_savesAllOrders_whenAllRowsAreValid() throws Exception {
     MockMultipartFile file = excelFile(
         new String[]{"2026-04-07 10:00:00", "SKU-001", "2", "상품A",
-            "홍길동", "010-1234-5678", "서울시 강남구 테헤란로 123", "", "Seoul", "", "06236", ""},
+            "홍길동", "010-1234-5678", "서울시 강남구 테헤란로 123", "", "KR", "Seoul", "06236", ""},
         new String[]{"2026-04-07 11:00:00", "SKU-002", "1", "상품B",
-            "김철수", "010-9876-5432", "서울시 서초구 반포대로 456", "", "Seoul", "", "06500", ""}
+            "김철수", "010-9876-5432", "서울시 서초구 반포대로 456", "", "KR", "Seoul", "06500", ""}
     );
 
     mockMvc.perform(multipart("/orders/seller/bulk")
@@ -69,9 +69,9 @@ class BulkCreateOrderIntegrationTest {
   void bulkCreate_savesOnlyValidRows_whenSomeRowsFail() throws Exception {
     MockMultipartFile file = excelFile(
         new String[]{"2026-04-07 10:00:00", "SKU-001", "2", "",
-            "홍길동", "010-1234-5678", "서울시 강남구 테헤란로 123", "", "Seoul", "", "06236", ""},
+            "홍길동", "010-1234-5678", "서울시 강남구 테헤란로 123", "", "KR", "Seoul", "06236", ""},
         new String[]{"2026-04-07 11:00:00", "", "1", "",  /* SKU 없음 → 실패 */
-            "김철수", "010-9876-5432", "서울시 서초구 반포대로 456", "", "Seoul", "", "06500", ""}
+            "김철수", "010-9876-5432", "서울시 서초구 반포대로 456", "", "KR", "Seoul", "06500", ""}
     );
 
     mockMvc.perform(multipart("/orders/seller/bulk")
@@ -115,8 +115,8 @@ class BulkCreateOrderIntegrationTest {
 
       /* 헤더 행 */
       XSSFRow header = sheet.createRow(0);
-      String[] headers = {"주문번호", "주문일시", "SKU", "수량", "상품명",
-          "수령인", "연락처", "주소1", "주소2", "도시", "주/지역", "우편번호", "메모"};
+      String[] headers = {"주문일시(yyyy-MM-dd HH:mm:ss)", "SKU", "수량", "상품명",
+          "수령인", "수령인 연락처", "기본 배송지", "상세 배송지", "State", "City", "Zip Code", "메모"};
       for (int i = 0; i < headers.length; i++) {
         header.createCell(i).setCellValue(headers[i]);
       }

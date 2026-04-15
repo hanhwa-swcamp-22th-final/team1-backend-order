@@ -24,7 +24,7 @@ public class WmsSellerProductOptionFetcher implements SellerProductOptionFetcher
     WmsSellerProductClient.WmsApiResponse<List<WmsSellerProductClient.WmsSellerProductItem>> response;
 
     try {
-      response = wmsSellerProductClient.getSellerProducts(sellerId, sellerId, sellerId);
+      response = wmsSellerProductClient.getSellerProducts(sellerId, sellerId, sellerId, "true");
     } catch (Exception ex) {
       throw new BusinessException(ErrorCode.ORDER_OPTIONS_UNAVAILABLE);
     }
@@ -50,7 +50,12 @@ public class WmsSellerProductOptionFetcher implements SellerProductOptionFetcher
       String productName = normalizeText(product.getProductName());
       deduplicated.putIfAbsent(
           sku,
-          new ProductOption(sku, productName.isBlank() ? sku : productName)
+          new ProductOption(
+              sku,
+              productName.isBlank() ? sku : productName,
+              product.getAvailableStock() == null ? 0 : product.getAvailableStock(),
+              product.getSalePrice() == null ? java.math.BigDecimal.ZERO : product.getSalePrice()
+          )
       );
     }
 

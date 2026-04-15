@@ -19,7 +19,8 @@ public interface WmsSellerProductClient {
   WmsApiResponse<List<WmsSellerProductItem>> getSellerProducts(
       @RequestHeader("X-User-Id") String userId,
       @RequestHeader("X-Seller-Id") String sellerId,
-      @RequestHeader("X-Tenant-Id") String tenantId
+      @RequestHeader("X-Tenant-Id") String tenantId,
+      @RequestHeader("X-Internal-Call") String internalCall
   );
 
   @Getter
@@ -38,6 +39,7 @@ public interface WmsSellerProductClient {
   class WmsSellerProductItem {
     private String sku;
     private String productName;
-    private BigDecimal salePrice;
+    private java.math.BigDecimal salePrice;
+    private Integer availableStock;
   }
 }

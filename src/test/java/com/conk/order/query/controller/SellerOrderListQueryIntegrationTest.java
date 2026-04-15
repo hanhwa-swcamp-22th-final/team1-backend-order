@@ -50,7 +50,7 @@ class SellerOrderListQueryIntegrationTest {
         .andExpect(jsonPath("$.data.totalCount").value(1))
         .andExpect(jsonPath("$.data.orders[0].orderId").value("ORD-SL-001"))
         .andExpect(jsonPath("$.data.orders[0].orderChannel").value("MANUAL"))
-        .andExpect(jsonPath("$.data.orders[0].channel").value("Manual"))
+        .andExpect(jsonPath("$.data.orders[0].channel").value("MANUAL"))
         .andExpect(jsonPath("$.data.orders[0].receiverName").value("홍길동"))
         .andExpect(jsonPath("$.data.orders[0].recipient").value("홍길동"))
         .andExpect(jsonPath("$.data.orders[0].street1").value("서울시 강남구 테헤란로 123"))

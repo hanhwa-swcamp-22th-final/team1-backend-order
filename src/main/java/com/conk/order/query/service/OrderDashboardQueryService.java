@@ -244,7 +244,7 @@ public class OrderDashboardQueryService {
       List<String> requestedSkus = entry.getValue();
       try {
         WmsSellerProductClient.WmsApiResponse<List<WmsSellerProductClient.WmsSellerProductItem>> response =
-            wmsSellerProductClient.getSellerProducts(sellerId, sellerId, sellerId);
+            wmsSellerProductClient.getSellerProducts(sellerId, sellerId, sellerId, "true");
 
         if (response == null || !response.isSuccess() || response.getData() == null) {
           continue;
