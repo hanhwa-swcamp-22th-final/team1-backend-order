@@ -1,5 +1,6 @@
 package com.conk.order.query.service;
 
+import com.conk.order.common.config.FeignConfig;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 /*
  * WMS seller 상품 목록 API용 Feign client.
  */
-@FeignClient(name = "wmsSellerProductClient", url = "${wms.base-url}")
+@FeignClient(name = "wmsSellerProductClient", url = "${wms.base-url}", configuration = FeignConfig.class)
 public interface WmsSellerProductClient {
 
   @GetMapping("/wms/products/seller/list")
