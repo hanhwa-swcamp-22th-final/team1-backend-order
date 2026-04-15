@@ -43,6 +43,10 @@ public class UpdateOrderStatusService {
 
     OrderStatus fromStatus = order.getStatus();
 
+    if (request.getWarehouseId() != null && !request.getWarehouseId().isBlank()) {
+      order.assignWarehouse(request.getWarehouseId());
+    }
+
     try {
       order.changeStatus(request.getStatus());
     } catch (IllegalStateException e) {
