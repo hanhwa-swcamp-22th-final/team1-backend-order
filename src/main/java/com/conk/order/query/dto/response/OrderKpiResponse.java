@@ -14,29 +14,14 @@ import lombok.RequiredArgsConstructor;
 public class OrderKpiResponse {
 
   /** 기간 내 전체 주문 건수. */
-  private final int totalCount;
+  private final int todayTotal;
 
-  /** 접수(RECEIVED) 상태 주문 건수. */
-  private final int receivedCount;
+  /** 대기(Pending) 상태 주문 건수 (RECEIVED + ALLOCATED + OUTBOUND_INSTRUCTED). */
+  private final int pendingCount;
 
-  /** 재고 할당(ALLOCATED) 상태 주문 건수. */
-  private final int allocatedCount;
-
-  /** 출고 지시(OUTBOUND_INSTRUCTED) 상태 주문 건수. */
-  private final int outboundInstructedCount;
-
-  /** 피킹(PICKING) 상태 주문 건수. */
+  /** 작업 중(Working) 상태 주문 건수 (PICKING + PACKING + OUTBOUND_PENDING). */
   private final int pickingCount;
 
-  /** 패킹(PACKING) 상태 주문 건수. */
-  private final int packingCount;
-
-  /** 출고 보류(OUTBOUND_PENDING) 상태 주문 건수. */
-  private final int outboundPendingCount;
-
-  /** 출고 완료(OUTBOUND_COMPLETED) 상태 주문 건수. */
-  private final int outboundCompletedCount;
-
-  /** 취소(CANCELED) 상태 주문 건수. */
-  private final int canceledCount;
+  /** 출고 완료(Shipped) 상태 주문 건수 (OUTBOUND_COMPLETED). */
+  private final int shippedCount;
 }

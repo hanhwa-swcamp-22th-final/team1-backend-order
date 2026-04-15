@@ -38,32 +38,26 @@ class OrderKpiQueryControllerTest {
   @Test
   void getKpi_returnsOkWithKpiData() throws Exception {
     given(orderDashboardQueryService.getKpi(any()))
-        .willReturn(new OrderKpiResponse(10, 3, 2, 1, 1, 1, 0, 2, 1));
+        .willReturn(new OrderKpiResponse(10, 6, 2, 2));
 
     mockMvc.perform(get("/orders/kpi"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
-        .andExpect(jsonPath("$.data.totalCount").value(10))
-        .andExpect(jsonPath("$.data.receivedCount").value(3))
-        .andExpect(jsonPath("$.data.allocatedCount").value(2))
-        .andExpect(jsonPath("$.data.outboundInstructedCount").value(1))
-        .andExpect(jsonPath("$.data.pickingCount").value(1))
-        .andExpect(jsonPath("$.data.packingCount").value(1))
-        .andExpect(jsonPath("$.data.outboundPendingCount").value(0))
-        .andExpect(jsonPath("$.data.outboundCompletedCount").value(2))
-        .andExpect(jsonPath("$.data.canceledCount").value(1));
+        .andExpect(jsonPath("$.data.todayTotal").value(10))
+        .andExpect(jsonPath("$.data.pendingCount").value(6))
+        .andExpect(jsonPath("$.data.pickingCount").value(2))
+        .andExpect(jsonPath("$.data.shippedCount").value(2));
   }
 
-  /* 날짜 파라미터를 전달해도 200 OK 를 반환한다. */
   @Test
   void getKpi_returnsOk_withDateFilter() throws Exception {
     given(orderDashboardQueryService.getKpi(any()))
-        .willReturn(new OrderKpiResponse(5, 5, 0, 0, 0, 0, 0, 0, 0));
+        .willReturn(new OrderKpiResponse(5, 5, 0, 0));
 
     mockMvc.perform(get("/orders/kpi")
             .param("startDate", "2026-04-01")
             .param("endDate", "2026-04-05"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.totalCount").value(5));
+        .andExpect(jsonPath("$.data.todayTotal").value(5));
   }
 }

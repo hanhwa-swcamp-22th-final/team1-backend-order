@@ -96,16 +96,21 @@ public class OrderDashboardQueryService {
 
   /* 기간 내 주문 KPI 를 집계해 반환한다. */
   public OrderKpiResponse getKpi(OrderKpiQuery query) {
+    int totalCount = orderKpiQueryMapper.countTotal(query);
+    int receivedCount = orderKpiQueryMapper.countReceived(query);
+    int allocatedCount = orderKpiQueryMapper.countAllocated(query);
+    int outboundInstructedCount = orderKpiQueryMapper.countOutboundInstructed(query);
+    int pickingCount = orderKpiQueryMapper.countPicking(query);
+    int packingCount = orderKpiQueryMapper.countPacking(query);
+    int outboundPendingCount = orderKpiQueryMapper.countOutboundPending(query);
+    int outboundCompletedCount = orderKpiQueryMapper.countOutboundCompleted(query);
+
+    // FE 규격: todayTotal, pendingCount, pickingCount, shippedCount
     return new OrderKpiResponse(
-        orderKpiQueryMapper.countTotal(query),
-        orderKpiQueryMapper.countReceived(query),
-        orderKpiQueryMapper.countAllocated(query),
-        orderKpiQueryMapper.countOutboundInstructed(query),
-        orderKpiQueryMapper.countPicking(query),
-        orderKpiQueryMapper.countPacking(query),
-        orderKpiQueryMapper.countOutboundPending(query),
-        orderKpiQueryMapper.countOutboundCompleted(query),
-        orderKpiQueryMapper.countCanceled(query)
+        totalCount,
+        receivedCount + allocatedCount + outboundInstructedCount, // pendingCount
+        pickingCount + packingCount + outboundPendingCount, // pickingCount (현장 작업 중 + 인도 대기 포함)
+        outboundCompletedCount // shippedCount
     );
   }
 

@@ -47,10 +47,10 @@ class OrderKpiIntegrationTest {
     mockMvc.perform(get("/orders/kpi"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
-        .andExpect(jsonPath("$.data.totalCount").value(2))
-        .andExpect(jsonPath("$.data.receivedCount").value(2))
-        .andExpect(jsonPath("$.data.allocatedCount").value(0))
-        .andExpect(jsonPath("$.data.canceledCount").value(0));
+        .andExpect(jsonPath("$.data.todayTotal").value(2))
+        .andExpect(jsonPath("$.data.pendingCount").value(2))
+        .andExpect(jsonPath("$.data.pickingCount").value(0))
+        .andExpect(jsonPath("$.data.shippedCount").value(0));
   }
 
   /* 주문이 없으면 모든 건수가 0 으로 응답한다. */
@@ -58,13 +58,13 @@ class OrderKpiIntegrationTest {
   void getKpi_returnsAllZero_whenNoOrders() throws Exception {
     mockMvc.perform(get("/orders/kpi"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.totalCount").value(0))
-        .andExpect(jsonPath("$.data.receivedCount").value(0));
+        .andExpect(jsonPath("$.data.todayTotal").value(0))
+        .andExpect(jsonPath("$.data.pendingCount").value(0));
   }
 
   /*
    * 날짜 필터를 적용하면 해당 기간의 주문만 집계한다.
-   * 2026-04-05 주문 1건 삽입 후 startDate=2026-04-05 로 조회 → totalCount=1.
+   * 2026-04-05 주문 1건 삽입 후 startDate=2026-04-05 로 조회 → todayTotal=1.
    * 2026-04-04 이전 날짜는 포함되지 않는다.
    */
   @Test
@@ -78,7 +78,7 @@ class OrderKpiIntegrationTest {
             .param("startDate", "2026-04-05")
             .param("endDate", "2026-04-05"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data.totalCount").value(1));
+        .andExpect(jsonPath("$.data.todayTotal").value(1));
   }
 
   // ── 헬퍼 ──────────────────────────────────────────────────────────────────
