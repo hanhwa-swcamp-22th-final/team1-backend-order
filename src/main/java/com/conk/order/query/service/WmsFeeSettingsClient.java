@@ -1,7 +1,6 @@
 package com.conk.order.query.service;
 
 import java.math.BigDecimal;
-import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,16 +9,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 /*
- * WMS seller 상품 목록 API용 Feign client.
+ * WMS 내부 요금 조회 API용 Feign client.
+ * X-Internal-Call: true 헤더로 Nginx auth_request를 우회해 호출한다.
  */
-@FeignClient(name = "wmsSellerProductClient", url = "${wms.base-url}")
-public interface WmsSellerProductClient {
+@FeignClient(name = "wmsFeeSettingsClient", url = "${wms.base-url}")
+public interface WmsFeeSettingsClient {
 
-  @GetMapping("/wms/products/seller/list")
-  WmsApiResponse<List<WmsSellerProductItem>> getSellerProducts(
-      @RequestHeader("X-User-Id") String userId,
+  @GetMapping("/wms/fee-settings/internal")
+  WmsApiResponse<FeeSettingRawItem> getFeeSettings(
       @RequestHeader("X-Seller-Id") String sellerId,
-      @RequestHeader("X-Tenant-Id") String tenantId,
       @RequestHeader("X-Internal-Call") String internalCall
   );
 
@@ -28,7 +26,6 @@ public interface WmsSellerProductClient {
   @NoArgsConstructor
   class WmsApiResponse<T> {
     private boolean success;
-    private String code;
     private String message;
     private T data;
   }
@@ -36,11 +33,9 @@ public interface WmsSellerProductClient {
   @Getter
   @Setter
   @NoArgsConstructor
-  class WmsSellerProductItem {
-    private String sku;
-    private String productName;
-    private java.math.BigDecimal salePrice;
-    private java.math.BigDecimal costPrice;
-    private Integer availableStock;
+  class FeeSettingRawItem {
+    private BigDecimal fulfillmentFee;
+    private BigDecimal packagingCost;
+    private BigDecimal storageUnitCost;
   }
 }
