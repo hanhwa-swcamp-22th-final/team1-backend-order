@@ -15,11 +15,11 @@
       startDate/endDate 가 null 이면 해당 조건이 생략된다.
     -->
     <sql id="dateFilter">
-        <if test="startDate != null">
-            AND DATE(ordered_at) &gt;= #{startDate}
+        <if test="startDateTime != null">
+            AND ordered_at &gt;= #{startDateTime}
         </if>
-        <if test="endDate != null">
-            AND DATE(ordered_at) &lt;= #{endDate}
+        <if test="endDateExclusive != null">
+            AND ordered_at &lt; #{endDateExclusive}
         </if>
     </sql>
 

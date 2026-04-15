@@ -1,6 +1,7 @@
 package com.conk.order.query.dto.request;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,4 +20,12 @@ public class OrderKpiQuery {
 
   /** 집계 종료일 (선택). null 이면 종료일 조건 미적용. */
   private LocalDate endDate;
+
+  public LocalDateTime getStartDateTime() {
+    return startDate == null ? null : startDate.atStartOfDay();
+  }
+
+  public LocalDateTime getEndDateExclusive() {
+    return endDate == null ? null : endDate.plusDays(1).atStartOfDay();
+  }
 }
