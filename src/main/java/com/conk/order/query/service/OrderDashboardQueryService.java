@@ -67,7 +67,7 @@ public class OrderDashboardQueryService {
   /* 출고 통계를 조회한다. */
   public OutboundStatsResponse getOutboundStats() {
     LocalDate today = LocalDate.now(clock);
-    int todayCount = outboundStatsQueryMapper.countPendingOutboundOrdersByDate(today);
+    int todayCount = countPendingOutboundOrdersByDate(today);
 
     DayOfWeek dayOfWeek = today.getDayOfWeek();
     if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
@@ -80,7 +80,7 @@ public class OrderDashboardQueryService {
         ? today.minusDays(3)
         : today.minusDays(1);
 
-    int prevCount = outboundStatsQueryMapper.countPendingOutboundOrdersByDate(prevWorkday);
+    int prevCount = countPendingOutboundOrdersByDate(prevWorkday);
     int delta = todayCount - prevCount;
 
     String trend = delta > 0 ? "+" + delta : String.valueOf(delta);
@@ -92,6 +92,12 @@ public class OrderDashboardQueryService {
         .trendLabel("전 영업일 대비")
         .trendType(trendType)
         .build();
+  }
+
+  private int countPendingOutboundOrdersByDate(LocalDate date) {
+    LocalDateTime dateStart = date.atStartOfDay();
+    LocalDateTime dateEndExclusive = date.plusDays(1).atStartOfDay();
+    return outboundStatsQueryMapper.countPendingOutboundOrdersByDate(dateStart, dateEndExclusive);
   }
 
   /* 기간 내 주문 KPI 를 집계해 반환한다. */

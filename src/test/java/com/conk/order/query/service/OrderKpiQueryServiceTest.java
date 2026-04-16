@@ -8,6 +8,7 @@ import com.conk.order.query.mapper.OrderKpiQueryMapper;
 import com.conk.order.query.mapper.OutboundStatsQueryMapper;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 
@@ -103,7 +104,7 @@ class OrderKpiQueryServiceTest {
   }
 
   private OutboundStatsQueryMapper ignoredOutboundStatsMapper() {
-    return date -> 0;
+    return (dateStart, dateEndExclusive) -> 0;
   }
 
   private Clock fixedClock() {

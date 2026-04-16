@@ -8,6 +8,7 @@ import com.conk.order.query.mapper.OrderKpiQueryMapper;
 import com.conk.order.query.mapper.OutboundStatsQueryMapper;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -153,8 +154,8 @@ public class OutboundStatsQueryServiceTest {
     }
 
     @Override
-    public int countPendingOutboundOrdersByDate(LocalDate date) {
-      return countsByDate.getOrDefault(date, 0);
+    public int countPendingOutboundOrdersByDate(LocalDateTime dateStart, LocalDateTime dateEndExclusive) {
+      return countsByDate.getOrDefault(dateStart.toLocalDate(), 0);
     }
   }
 

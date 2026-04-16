@@ -8,6 +8,7 @@
         SELECT COUNT(*)
         FROM sales_order
         WHERE status = 'RECEIVED'
-          AND DATE(ordered_at) = #{date}
+          AND ordered_at &gt;= #{dateStart}
+          AND ordered_at &lt; #{dateEndExclusive}
     </select>
 </mapper>
