@@ -24,22 +24,33 @@ public class InternalOrderQueryService {
     this.orderRepository = orderRepository;
   }
 
-  public List<InternalOrderSummaryResponse> getPendingOrders() {
-    return orderRepository.findAllByStatusOrderByOrderedAtDesc(OrderStatus.RECEIVED).stream()
+  public List<InternalOrderSummaryResponse> getPendingOrders(String tenantId) {
+    return findPendingOrders(tenantId).stream()
         .map(InternalOrderSummaryResponse::from)
         .toList();
   }
 
-  public InternalOrderSummaryResponse getOrder(String orderId) {
-    return InternalOrderSummaryResponse.from(getOrderEntity(orderId));
+  public InternalOrderSummaryResponse getOrder(String tenantId, String orderId) {
+    return InternalOrderSummaryResponse.from(getOrderEntity(tenantId, orderId));
   }
 
-  public InternalOrderShipmentResponse getShipment(String orderId) {
-    return InternalOrderShipmentResponse.from(getOrderEntity(orderId));
+  public InternalOrderShipmentResponse getShipment(String tenantId, String orderId) {
+    return InternalOrderShipmentResponse.from(getOrderEntity(tenantId, orderId));
   }
 
-  private Order getOrderEntity(String orderId) {
-    return orderRepository.findById(orderId)
+  private List<Order> findPendingOrders(String tenantId) {
+    if (tenantId == null || tenantId.isBlank()) {
+      return orderRepository.findAllByStatusOrderByOrderedAtDesc(OrderStatus.RECEIVED);
+    }
+    return orderRepository.findAllByStatusAndSellerIdOrderByOrderedAtDesc(OrderStatus.RECEIVED, tenantId);
+  }
+
+  private Order getOrderEntity(String tenantId, String orderId) {
+    if (tenantId == null || tenantId.isBlank()) {
+      return orderRepository.findById(orderId)
+          .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+    }
+    return orderRepository.findByOrderIdAndSellerId(orderId, tenantId)
         .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
   }
 }

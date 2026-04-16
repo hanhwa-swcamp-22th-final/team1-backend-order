@@ -17,6 +17,10 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
   List<Order> findAllByStatusOrderByOrderedAtDesc(OrderStatus status);
 
+  List<Order> findAllByStatusAndSellerIdOrderByOrderedAtDesc(OrderStatus status, String sellerId);
+
+  java.util.Optional<Order> findByOrderIdAndSellerId(String orderId, String sellerId);
+
   default void saveOrder(Order order) {
     save(order);
   }
