@@ -42,7 +42,7 @@ public class SellerMarginPresetsQueryService {
   private List<ProductPreset> fetchProducts(String sellerId, WmsFeeSettingsClient.FeeSettingRawItem fees) {
     WmsSellerProductClient.WmsApiResponse<List<WmsSellerProductClient.WmsSellerProductItem>> response;
     try {
-      response = wmsSellerProductClient.getSellerProducts(sellerId, sellerId, sellerId, "true");
+      response = wmsSellerProductClient.getSellerProducts(sellerId, sellerId, sellerId);
     } catch (Exception ex) {
       throw new BusinessException(ErrorCode.ORDER_OPTIONS_UNAVAILABLE);
     }
@@ -74,7 +74,7 @@ public class SellerMarginPresetsQueryService {
   private WmsFeeSettingsClient.FeeSettingRawItem fetchFeeSettings(String sellerId) {
     try {
       WmsFeeSettingsClient.WmsApiResponse<WmsFeeSettingsClient.FeeSettingRawItem> response =
-          wmsFeeSettingsClient.getFeeSettings(sellerId, "true");
+          wmsFeeSettingsClient.getFeeSettings(sellerId);
 
       if (response != null && response.isSuccess() && response.getData() != null) {
         return response.getData();

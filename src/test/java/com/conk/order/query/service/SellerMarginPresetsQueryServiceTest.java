@@ -2,7 +2,6 @@ package com.conk.order.query.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 import com.conk.order.query.dto.response.SellerMarginPresetsResponse;
@@ -49,7 +48,7 @@ class SellerMarginPresetsQueryServiceTest {
     productResponse.setSuccess(true);
     productResponse.setData(List.of(item));
 
-    given(wmsSellerProductClient.getSellerProducts(anyString(), anyString(), anyString(), eq("true")))
+    given(wmsSellerProductClient.getSellerProducts(anyString(), anyString(), anyString()))
         .willReturn(productResponse);
 
     // 요금 stub
@@ -63,7 +62,7 @@ class SellerMarginPresetsQueryServiceTest {
     feeResponse.setSuccess(true);
     feeResponse.setData(feeItem);
 
-    given(wmsFeeSettingsClient.getFeeSettings(anyString(), eq("true"))).willReturn(feeResponse);
+    given(wmsFeeSettingsClient.getFeeSettings(anyString())).willReturn(feeResponse);
 
     // 실행
     SellerMarginPresetsResponse result = service.getPresets("seller-1");
@@ -108,10 +107,10 @@ class SellerMarginPresetsQueryServiceTest {
     productResponse.setSuccess(true);
     productResponse.setData(List.of(item));
 
-    given(wmsSellerProductClient.getSellerProducts(anyString(), anyString(), anyString(), eq("true")))
+    given(wmsSellerProductClient.getSellerProducts(anyString(), anyString(), anyString()))
         .willReturn(productResponse);
 
-    given(wmsFeeSettingsClient.getFeeSettings(anyString(), eq("true")))
+    given(wmsFeeSettingsClient.getFeeSettings(anyString()))
         .willThrow(new RuntimeException("WMS 연결 실패"));
 
     SellerMarginPresetsResponse result = service.getPresets("seller-1");
@@ -131,7 +130,7 @@ class SellerMarginPresetsQueryServiceTest {
     productResponse.setSuccess(true);
     productResponse.setData(List.of());
 
-    given(wmsSellerProductClient.getSellerProducts(anyString(), anyString(), anyString(), eq("true")))
+    given(wmsSellerProductClient.getSellerProducts(anyString(), anyString(), anyString()))
         .willReturn(productResponse);
 
     WmsFeeSettingsClient.WmsApiResponse<WmsFeeSettingsClient.FeeSettingRawItem> feeResponse =
@@ -139,7 +138,7 @@ class SellerMarginPresetsQueryServiceTest {
     feeResponse.setSuccess(true);
     feeResponse.setData(new WmsFeeSettingsClient.FeeSettingRawItem());
 
-    given(wmsFeeSettingsClient.getFeeSettings(anyString(), eq("true"))).willReturn(feeResponse);
+    given(wmsFeeSettingsClient.getFeeSettings(anyString())).willReturn(feeResponse);
 
     SellerMarginPresetsResponse result = service.getPresets("seller-1");
 

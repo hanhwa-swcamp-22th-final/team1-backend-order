@@ -24,7 +24,7 @@ public class WmsSellerProductOptionFetcher implements SellerProductOptionFetcher
     WmsSellerProductClient.WmsApiResponse<List<WmsSellerProductClient.WmsSellerProductItem>> response;
 
     try {
-      response = wmsSellerProductClient.getSellerProducts(sellerId, sellerId, sellerId, "true");
+      response = wmsSellerProductClient.getSellerProducts(sellerId, sellerId, sellerId);
     } catch (Exception ex) {
       throw new BusinessException(ErrorCode.ORDER_OPTIONS_UNAVAILABLE);
     }

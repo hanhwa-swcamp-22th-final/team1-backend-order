@@ -35,7 +35,7 @@ class WmsSellerProductOptionFetcherTest {
     response.setSuccess(true);
     response.setData(List.of(item1, item2));
 
-    given(client.getSellerProducts("SELLER-001", "SELLER-001", "SELLER-001", "true"))
+    given(client.getSellerProducts("SELLER-001", "SELLER-001", "SELLER-001"))
         .willReturn(response);
 
     WmsSellerProductOptionFetcher fetcher = new WmsSellerProductOptionFetcher(client);
@@ -52,6 +52,6 @@ class WmsSellerProductOptionFetcherTest {
             org.assertj.core.groups.Tuple.tuple("SKU-001", "마스크팩 세트", 10, new BigDecimal("29.99")),
             org.assertj.core.groups.Tuple.tuple("SKU-002", "앰플", 50, new BigDecimal("15.00"))
         );
-    verify(client).getSellerProducts("SELLER-001", "SELLER-001", "SELLER-001", "true");
+    verify(client).getSellerProducts("SELLER-001", "SELLER-001", "SELLER-001");
   }
 }

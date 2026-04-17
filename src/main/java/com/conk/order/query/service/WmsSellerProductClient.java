@@ -20,8 +20,7 @@ public interface WmsSellerProductClient {
   WmsApiResponse<List<WmsSellerProductItem>> getSellerProducts(
       @RequestHeader("X-User-Id") String userId,
       @RequestHeader("X-Seller-Id") String sellerId,
-      @RequestHeader("X-Tenant-Id") String tenantId,
-      @RequestHeader("X-Internal-Call") String internalCall
+      @RequestHeader("X-Tenant-Id") String tenantId
   );
 
   @Getter

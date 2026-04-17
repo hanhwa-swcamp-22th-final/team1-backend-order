@@ -10,15 +10,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 /*
  * WMS 내부 요금 조회 API용 Feign client.
- * X-Internal-Call: true 헤더로 Nginx auth_request를 우회해 호출한다.
  */
 @FeignClient(name = "wmsFeeSettingsClient", url = "${wms.base-url}")
 public interface WmsFeeSettingsClient {
 
   @GetMapping("/wms/fee-settings/internal")
   WmsApiResponse<FeeSettingRawItem> getFeeSettings(
-      @RequestHeader("X-Seller-Id") String sellerId,
-      @RequestHeader("X-Internal-Call") String internalCall
+      @RequestHeader("X-Seller-Id") String sellerId
   );
 
   @Getter
