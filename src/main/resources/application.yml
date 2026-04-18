@@ -2,6 +2,9 @@ spring:
   application:
     name: team1-backend-order
 
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
   datasource:
     # Docker: SPRING_DATASOURCE_URL 환경변수로 주입 (order-db:3306)
     # 로컬 직접 실행: 기본값 localhost:3308 사용
@@ -35,6 +38,9 @@ spring:
       hibernate:
         format_sql: true
 
+server:
+  shutdown: graceful
+
 mybatis:
   mapper-locations: classpath:mappers/*.xml
   configuration:
@@ -45,8 +51,10 @@ order:
   bulk-upload:
     max-row-limit: 5000
     flush-interval: 500
+
 wms:
   base-url: ${WMS_SERVICE_URL:http://localhost:8083}
+
 management:
   endpoints:
     web:
