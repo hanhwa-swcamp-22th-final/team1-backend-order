@@ -42,4 +42,7 @@ public class CreateOrderRequest {
 
   /** 메모 (선택). */
   private String memo;
+
+  /** 채널 주문번호 (선택 — Shopify 등 외부채널 동기화 시 중복 방지에 사용). */
+  private String channelOrderNo;
 }

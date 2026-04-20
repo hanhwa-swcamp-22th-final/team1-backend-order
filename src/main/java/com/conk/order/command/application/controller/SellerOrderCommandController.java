@@ -45,6 +45,16 @@ public class SellerOrderCommandController {
         .body(ApiResponse.created("주문이 등록되었습니다.", response));
   }
 
+  /* POST /orders/seller/shopify — Shopify 채널 주문을 sales_order 에 동기화한다. */
+  @PostMapping("/shopify")
+  public ResponseEntity<ApiResponse<CreateOrderResponse>> createShopifyOrder(
+      @RequestHeader("X-Seller-Id") String sellerId,
+      @Valid @RequestBody CreateOrderRequest request) {
+    CreateOrderResponse response = sellerOrderCommandService.createFromShopify(request, sellerId);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ApiResponse.created("Shopify 주문이 동기화되었습니다.", response));
+  }
+
   /* PATCH /orders/seller/{orderId}/cancel — 셀러 본인의 주문을 취소한다. */
   @PatchMapping("/{orderId}/cancel")
   public ResponseEntity<ApiResponse<Void>> cancel(

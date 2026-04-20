@@ -226,6 +226,10 @@ public class Order {
     this.warehouseId = warehouseId;
   }
 
+  public void assignChannelOrderNo(String channelOrderNo) {
+    this.channelOrderNo = channelOrderNo;
+  }
+
   private void addItem(OrderItem item) {
     item.assignOrder(this);
     this.items.add(item);

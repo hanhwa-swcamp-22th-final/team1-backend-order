@@ -21,6 +21,8 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
   java.util.Optional<Order> findByOrderIdAndSellerId(String orderId, String sellerId);
 
+  boolean existsBySellerIdAndChannelOrderNo(String sellerId, String channelOrderNo);
+
   default void saveOrder(Order order) {
     save(order);
   }
