@@ -24,12 +24,10 @@ public class CreateOrderRequest {
 
   /** 주문 항목 목록 (필수, 1개 이상). */
   @NotEmpty
-  @Valid
   private List<CreateOrderItemRequest> items;
 
   /** 배송지 정보 (필수). */
   @NotNull
-  @Valid
   private CreateShippingAddressRequest shippingAddress;
 
   /** 수령인 이름 (필수). */

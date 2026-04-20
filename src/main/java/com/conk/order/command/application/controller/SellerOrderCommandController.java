@@ -49,7 +49,7 @@ public class SellerOrderCommandController {
   @PostMapping("/shopify")
   public ResponseEntity<ApiResponse<CreateOrderResponse>> createShopifyOrder(
       @RequestHeader("X-Seller-Id") String sellerId,
-      @Valid @RequestBody CreateOrderRequest request) {
+      @RequestBody CreateOrderRequest request) {
     CreateOrderResponse response = sellerOrderCommandService.createFromShopify(request, sellerId);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(ApiResponse.created("Shopify 주문이 동기화되었습니다.", response));
