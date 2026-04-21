@@ -21,6 +21,8 @@ public interface OrderRepository extends JpaRepository<Order, String> {
 
   List<Order> findAllByStatusAndTenantIdOrderByOrderedAtDesc(OrderStatus status, String tenantId);
 
+  boolean existsBySellerIdAndChannelOrderNo(String sellerId, String channelOrderNo);
+
   java.util.Optional<Order> findByOrderIdAndSellerId(String orderId, String sellerId);
 
   java.util.Optional<Order> findByOrderIdAndTenantId(String orderId, String tenantId);

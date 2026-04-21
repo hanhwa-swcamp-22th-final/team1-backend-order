@@ -109,7 +109,8 @@ public class SellerOrderCommandService {
    * 동일 sellerId + channelOrderNo 가 이미 존재하면 중복으로 간주해 skip 한다.
    */
   @Transactional
-  public CreateOrderResponse createFromShopify(CreateOrderRequest request, String sellerId) {
+  public CreateOrderResponse createFromShopify(
+      CreateOrderRequest request, String sellerId, String tenantId) {
     if (request.getChannelOrderNo() != null
         && orderRepository.existsBySellerIdAndChannelOrderNo(sellerId, request.getChannelOrderNo())) {
       log.info("Shopify 주문 중복 skip: sellerId={}, channelOrderNo={}", sellerId, request.getChannelOrderNo());
@@ -121,6 +122,7 @@ public class SellerOrderCommandService {
         orderId,
         request.getOrderedAt(),
         sellerId,
+        tenantId,
         OrderChannel.SHOPIFY,
         toOrderItems(request.getItems()),
         toShippingAddress(request.getShippingAddress()),
