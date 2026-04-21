@@ -15,6 +15,7 @@ import com.conk.order.command.domain.repository.OrderStatusHistoryRepository;
 import com.conk.order.common.exception.BusinessException;
 import com.conk.order.common.exception.ErrorCode;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 같은 도메인 컨텍스트를 다루기 때문에 한 서비스로 묶는다.
  * cancel 은 취소 이력 기록을 위해 OrderStatusHistoryRepository 도 함께 사용한다.
  */
+@Slf4j
 @Service
 public class SellerOrderCommandService {
 
@@ -100,6 +102,36 @@ public class SellerOrderCommandService {
 
     historyRepository.save(
         OrderStatusHistory.create(orderId, fromStatus, OrderStatus.CANCELED, sellerId));
+  }
+
+  /*
+   * Shopify 채널 주문을 sales_order 에 저장한다.
+   * 동일 sellerId + channelOrderNo 가 이미 존재하면 중복으로 간주해 skip 한다.
+   */
+  @Transactional
+  public CreateOrderResponse createFromShopify(CreateOrderRequest request, String sellerId) {
+    if (request.getChannelOrderNo() != null
+        && orderRepository.existsBySellerIdAndChannelOrderNo(sellerId, request.getChannelOrderNo())) {
+      log.info("Shopify 주문 중복 skip: sellerId={}, channelOrderNo={}", sellerId, request.getChannelOrderNo());
+      return new CreateOrderResponse(null);
+    }
+
+    String orderId = orderIdGenerator.generate();
+    Order order = Order.create(
+        orderId,
+        request.getOrderedAt(),
+        sellerId,
+        OrderChannel.SHOPIFY,
+        toOrderItems(request.getItems()),
+        toShippingAddress(request.getShippingAddress()),
+        request.getReceiverName(),
+        request.getReceiverPhoneNo(),
+        request.getMemo()
+    );
+    order.assignChannelOrderNo(request.getChannelOrderNo());
+    orderRepository.saveOrder(order);
+    log.info("Shopify 주문 저장 완료: orderId={}, channelOrderNo={}", orderId, request.getChannelOrderNo());
+    return new CreateOrderResponse(orderId);
   }
 
   /* 요청 항목 목록을 도메인 OrderItem 으로 변환한다. */

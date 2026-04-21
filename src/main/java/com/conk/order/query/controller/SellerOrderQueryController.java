@@ -49,7 +49,7 @@ public class SellerOrderQueryController {
   /* GET /orders/seller/list — 셀러 본인의 주문 목록을 조회한다. */
   @GetMapping("/list")
   public ResponseEntity<ApiResponse<SellerOrderListResponse>> getSellerOrders(
-      @RequestHeader("X-User-Id") String sellerId,
+      @RequestHeader("X-Seller-Id") String sellerId,
       @RequestParam(required = false) SellerOrderStatus status,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
