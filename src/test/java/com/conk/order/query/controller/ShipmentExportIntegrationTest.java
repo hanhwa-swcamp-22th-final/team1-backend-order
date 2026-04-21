@@ -80,7 +80,7 @@ class ShipmentExportIntegrationTest {
 
   private Order createOrder(String orderId, OrderChannel channel) {
     return Order.create(
-        orderId, LocalDateTime.of(2026, 4, 9, 10, 0), "SELLER-001",
+        orderId, LocalDateTime.of(2026, 4, 9, 10, 0), "SELLER-001", "TENANT-001",
         channel,
         List.of(OrderItem.create("SKU-001", 1, "상품A")),
         ShippingAddress.create("123 Main St", null, "LA", "CA", "90001"),

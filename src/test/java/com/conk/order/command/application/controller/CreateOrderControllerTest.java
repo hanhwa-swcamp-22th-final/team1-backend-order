@@ -36,13 +36,14 @@ class CreateOrderControllerTest {
   /* 정상 요청 시 201 Created 와 success/message/data 형식으로 응답한다. */
   @Test
   void createOrder_returnsCreatedWithOrderNo() throws Exception {
-    given(sellerOrderCommandService.create(any(), eq("SELLER-001")))
+    given(sellerOrderCommandService.create(any(), eq("SELLER-001"), eq("TENANT-001")))
         .willReturn(new CreateOrderResponse("ORD-UUID-001"));
 
     String requestBody = objectMapper.writeValueAsString(buildRequestBody());
 
     mockMvc.perform(post("/orders/seller/manual")
             .header("X-User-Id", "SELLER-001")
+            .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.APPLICATION_JSON)
             .content(requestBody))
         .andExpect(status().isCreated())
@@ -71,6 +72,7 @@ class CreateOrderControllerTest {
 
     mockMvc.perform(post("/orders/seller/manual")
             .header("X-User-Id", "SELLER-001")
+            .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(body)))
         .andExpect(status().isBadRequest());
@@ -88,6 +90,7 @@ class CreateOrderControllerTest {
 
     mockMvc.perform(post("/orders/seller/manual")
             .header("X-User-Id", "SELLER-001")
+            .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(body)))
         .andExpect(status().isBadRequest());

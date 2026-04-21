@@ -78,8 +78,9 @@ public class BulkOrderCommandController {
   @PostMapping
   public ResponseEntity<ApiResponse<BulkCreateOrderResponse>> bulkCreate(
       @RequestHeader("X-User-Id") String sellerId,
+      @RequestHeader("X-Tenant-Id") String tenantId,
       @RequestParam MultipartFile file) {
-    BulkCreateOrderResponse response = bulkOrderCommandService.create(file, sellerId);
+    BulkCreateOrderResponse response = bulkOrderCommandService.create(file, sellerId, tenantId);
     return ResponseEntity.ok(ApiResponse.created("일괄 주문이 등록되었습니다.", response));
   }
 }

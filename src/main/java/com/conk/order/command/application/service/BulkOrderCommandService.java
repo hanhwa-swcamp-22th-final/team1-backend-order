@@ -114,7 +114,7 @@ public class BulkOrderCommandService {
    * 엑셀 파일을 파싱해 행별로 주문을 등록한다.
    * 성공/실패 건수를 집계해 반환한다.
    */
-  public BulkCreateOrderResponse create(MultipartFile file, String sellerId) {
+  public BulkCreateOrderResponse create(MultipartFile file, String sellerId, String tenantId) {
     validateFileBasics(file);
 
     int successCount = 0;
@@ -133,7 +133,7 @@ public class BulkOrderCommandService {
 
         int rowNumber = i + 1;
         try {
-          Order order = buildOrder(row, sellerId);
+          Order order = buildOrder(row, sellerId, tenantId);
           orderRepository.saveOrder(order);
           successCount++;
           savedSinceLastClear++;
@@ -253,7 +253,7 @@ public class BulkOrderCommandService {
   }
 
   /* 엑셀 행을 Order 도메인 객체로 변환한다. 주문 ID 는 채번 서비스가 생성한다. */
-  private Order buildOrder(Row row, String sellerId) {
+  private Order buildOrder(Row row, String sellerId, String tenantId) {
     String orderedAtStr = cell(row, 0);
     String sku = cell(row, 1);
     String quantityStr = cell(row, 2);
@@ -274,6 +274,7 @@ public class BulkOrderCommandService {
         orderIdGenerator.generate(),
         orderedAt,
         sellerId,
+        tenantId,
         OrderChannel.EXCEL,
         List.of(OrderItem.create(sku, quantity, productName.isBlank() ? null : productName)),
         ShippingAddress.create(

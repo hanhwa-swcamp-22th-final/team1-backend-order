@@ -75,7 +75,7 @@ class SellerOrderDetailQueryIntegrationTest {
 
   private Order createOrder(String orderId, String sellerId) {
     return Order.create(
-        orderId, LocalDateTime.of(2026, 4, 9, 10, 0), sellerId,
+        orderId, LocalDateTime.of(2026, 4, 9, 10, 0), sellerId, "TENANT-001",
         OrderChannel.MANUAL,
         List.of(OrderItem.create("SKU-001", 2, "상품A")),
         ShippingAddress.create("123 Main St", "Apt 4", "LA", "CA", "90001"),

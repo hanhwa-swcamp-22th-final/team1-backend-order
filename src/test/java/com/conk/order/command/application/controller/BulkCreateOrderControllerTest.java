@@ -40,7 +40,7 @@ class BulkCreateOrderControllerTest {
     BulkCreateOrderResponse mockResponse =
         new BulkCreateOrderResponse(2, List.of());
 
-    given(bulkOrderCommandService.create(any(), eq("SELLER-001")))
+    given(bulkOrderCommandService.create(any(), eq("SELLER-001"), eq("TENANT-001")))
         .willReturn(mockResponse);
 
     MockMultipartFile file = new MockMultipartFile(
@@ -52,6 +52,7 @@ class BulkCreateOrderControllerTest {
     mockMvc.perform(multipart("/orders/seller/bulk")
             .file(file)
             .header("X-User-Id", "SELLER-001")
+            .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
@@ -66,7 +67,7 @@ class BulkCreateOrderControllerTest {
     BulkCreateOrderResponse mockResponse =
         new BulkCreateOrderResponse(1, List.of(new FailedRow(3, "SKU는 필수입니다.")));
 
-    given(bulkOrderCommandService.create(any(), eq("SELLER-001")))
+    given(bulkOrderCommandService.create(any(), eq("SELLER-001"), eq("TENANT-001")))
         .willReturn(mockResponse);
 
     MockMultipartFile file = new MockMultipartFile(
@@ -78,6 +79,7 @@ class BulkCreateOrderControllerTest {
     mockMvc.perform(multipart("/orders/seller/bulk")
             .file(file)
             .header("X-User-Id", "SELLER-001")
+            .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.successCount").value(1))
@@ -107,6 +109,7 @@ class BulkCreateOrderControllerTest {
   void bulkCreate_returnsBadRequest_whenFileMissing() throws Exception {
     mockMvc.perform(multipart("/orders/seller/bulk")
             .header("X-User-Id", "SELLER-001")
+            .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isBadRequest());
   }

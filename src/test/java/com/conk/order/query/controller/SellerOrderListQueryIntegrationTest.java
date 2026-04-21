@@ -88,6 +88,7 @@ class SellerOrderListQueryIntegrationTest {
         orderId,
         LocalDateTime.of(2026, 4, 5, 10, 0),
         sellerId,
+        "TENANT-001",
         OrderChannel.MANUAL,
         List.of(
             OrderItem.create("SKU-001", 1, "상품A"),

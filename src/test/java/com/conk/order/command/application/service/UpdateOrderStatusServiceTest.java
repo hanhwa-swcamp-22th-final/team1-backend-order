@@ -97,6 +97,7 @@ class UpdateOrderStatusServiceTest {
         orderId,
         LocalDateTime.of(2026, 4, 9, 10, 0),
         "SELLER-001",
+        "TENANT-001",
         OrderChannel.MANUAL,
         List.of(OrderItem.create("SKU-001", 1, null)),
         ShippingAddress.create("123 Main St", null, "LA", "CA", "90001"),

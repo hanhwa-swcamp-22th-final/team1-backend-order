@@ -47,6 +47,10 @@ public class Order {
   /** 셀러 식별자. sales_order.seller_id */
   private String sellerId;
 
+  /** 테넌트 식별자. sales_order.tenant_id */
+  @Column(name = "tenant_id")
+  private String tenantId;
+
   /*
    * 창고 식별자. sales_order.warehouse_id
    * Warehouse 도메인 소유권 확인 전까지 참조값(String) 으로 관리한다.
@@ -99,6 +103,7 @@ public class Order {
       String orderId,
       LocalDateTime orderedAt,
       String sellerId,
+      String tenantId,
       OrderChannel orderChannel,
       List<OrderItem> items,
       ShippingAddress shippingAddress,
@@ -110,11 +115,13 @@ public class Order {
     validateOrderId(orderId);
     validateOrderedAt(orderedAt);
     validateSellerId(sellerId);
+    validateTenantId(tenantId);
     validateItems(items);
     validateShippingAddress(shippingAddress);
     this.orderId = orderId;
     this.orderedAt = orderedAt;
     this.sellerId = sellerId;
+    this.tenantId = tenantId;
     this.orderChannel = orderChannel;
     this.shippingAddress = shippingAddress;
     this.receiverName = receiverName;
@@ -146,6 +153,7 @@ public class Order {
       String orderId,
       LocalDateTime orderedAt,
       String sellerId,
+      String tenantId,
       OrderChannel orderChannel,
       List<OrderItem> items,
       ShippingAddress shippingAddress,
@@ -157,6 +165,7 @@ public class Order {
         orderId,
         orderedAt,
         sellerId,
+        tenantId,
         orderChannel,
         items,
         shippingAddress,
@@ -261,6 +270,17 @@ public class Order {
   private void validateSellerId(String sellerId) {
     if (sellerId == null || sellerId.isBlank()) {
       throw new IllegalArgumentException("Seller ID is required.");
+    }
+  }
+
+  /**
+   * 테넌트 식별자 필수값 검증.
+   *
+   * @param tenantId 테넌트 식별자
+   */
+  private void validateTenantId(String tenantId) {
+    if (tenantId == null || tenantId.isBlank()) {
+      throw new IllegalArgumentException("Tenant ID is required.");
     }
   }
 

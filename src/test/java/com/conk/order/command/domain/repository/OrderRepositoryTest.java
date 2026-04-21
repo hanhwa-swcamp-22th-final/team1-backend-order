@@ -60,6 +60,7 @@ public class OrderRepositoryTest {
         orderNo,
         LocalDateTime.of(2026, 3, 30, 0, 0),
         "SELLER-001",
+        "TENANT-001",
         OrderChannel.MANUAL,
         List.of(OrderItem.create("SKU-001", 2, null)),
         ShippingAddress.create(

@@ -71,7 +71,7 @@ class BulkCreateOrderServiceTest {
             "서울시 서초구 2번지", "", "KR", "Seoul", "06500", "메모")
     );
 
-    BulkCreateOrderResponse response = service.create(file, "SELLER-001");
+    BulkCreateOrderResponse response = service.create(file, "SELLER-001", "TENANT-001");
 
     assertThat(response.getSuccessCount()).isEqualTo(2);
     assertThat(response.getFailedRows()).isEmpty();
@@ -90,7 +90,7 @@ class BulkCreateOrderServiceTest {
             "서울시 서초구 2번지", "", "KR", "Seoul", "06500", "")  // SKU 누락
     );
 
-    BulkCreateOrderResponse response = service.create(file, "SELLER-001");
+    BulkCreateOrderResponse response = service.create(file, "SELLER-001", "TENANT-001");
 
     assertThat(response.getSuccessCount()).isEqualTo(1);
     assertThat(response.getFailedRows()).hasSize(1);
@@ -105,7 +105,7 @@ class BulkCreateOrderServiceTest {
   void create_returnsZero_whenNoDataRows() throws Exception {
     MultipartFile file = buildExcel(); // 헤더만
 
-    BulkCreateOrderResponse response = service.create(file, "SELLER-001");
+    BulkCreateOrderResponse response = service.create(file, "SELLER-001", "TENANT-001");
 
     assertThat(response.getSuccessCount()).isZero();
     assertThat(response.getFailedRows()).isEmpty();
@@ -124,7 +124,7 @@ class BulkCreateOrderServiceTest {
     );
     MultipartFile file = buildExcelWithRepeatedRows(3);
 
-    BulkCreateOrderResponse response = service.create(file, "SELLER-001");
+    BulkCreateOrderResponse response = service.create(file, "SELLER-001", "TENANT-001");
 
     assertThat(response.getSuccessCount()).isEqualTo(3);
     assertThat(response.getFailedRows()).isEmpty();
@@ -140,7 +140,7 @@ class BulkCreateOrderServiceTest {
         "file", "test.txt", "text/plain", "not excel".getBytes()
     );
 
-    assertThatThrownBy(() -> service.create(file, "SELLER-001"))
+    assertThatThrownBy(() -> service.create(file, "SELLER-001", "TENANT-001"))
         .isInstanceOf(BusinessException.class);
   }
 
@@ -155,7 +155,7 @@ class BulkCreateOrderServiceTest {
     );
     MultipartFile file = buildExcelWithRepeatedRows(3);
 
-    assertThatThrownBy(() -> service.create(file, "SELLER-001"))
+    assertThatThrownBy(() -> service.create(file, "SELLER-001", "TENANT-001"))
         .isInstanceOf(BusinessException.class);
 
     verify(orderRepository, never()).saveOrder(any());

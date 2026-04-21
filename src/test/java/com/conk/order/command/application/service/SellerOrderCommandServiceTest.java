@@ -67,7 +67,7 @@ class SellerOrderCommandServiceTest {
       when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
       CreateOrderRequest request = buildRequest();
 
-      CreateOrderResponse response = service.create(request, "SELLER-001");
+      CreateOrderResponse response = service.create(request, "SELLER-001", "TENANT-001");
 
       assertThat(response.getOrderId()).isEqualTo("ORD-2026-0408-00001");
       ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
@@ -80,7 +80,7 @@ class SellerOrderCommandServiceTest {
     void create_savesOrderWithReceivedStatus() {
       when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
 
-      service.create(buildRequest(), "SELLER-001");
+      service.create(buildRequest(), "SELLER-001", "TENANT-001");
 
       ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
       verify(orderRepository).saveOrder(captor.capture());
@@ -92,7 +92,7 @@ class SellerOrderCommandServiceTest {
     void create_savesCorrectItemCount() {
       when(orderIdGenerator.generate()).thenReturn("ORD-2026-0408-00001");
 
-      service.create(buildRequest(), "SELLER-001");
+      service.create(buildRequest(), "SELLER-001", "TENANT-001");
 
       ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
       verify(orderRepository).saveOrder(captor.capture());
@@ -190,7 +190,7 @@ class SellerOrderCommandServiceTest {
 
   private Order createOrder(String orderId, String sellerId) {
     return Order.create(
-        orderId, LocalDateTime.of(2026, 4, 9, 10, 0), sellerId,
+        orderId, LocalDateTime.of(2026, 4, 9, 10, 0), sellerId, "TENANT-001",
         OrderChannel.MANUAL,
         List.of(OrderItem.create("SKU-001", 1, null)),
         ShippingAddress.create("123 Main St", null, "LA", "CA", "90001"),

@@ -42,7 +42,7 @@ public class InternalOrderQueryService {
     if (tenantId == null || tenantId.isBlank()) {
       return orderRepository.findAllByStatusOrderByOrderedAtDesc(OrderStatus.RECEIVED);
     }
-    return orderRepository.findAllByStatusAndSellerIdOrderByOrderedAtDesc(OrderStatus.RECEIVED, tenantId);
+    return orderRepository.findAllByStatusAndTenantIdOrderByOrderedAtDesc(OrderStatus.RECEIVED, tenantId);
   }
 
   private Order getOrderEntity(String tenantId, String orderId) {
@@ -50,7 +50,7 @@ public class InternalOrderQueryService {
       return orderRepository.findById(orderId)
           .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
     }
-    return orderRepository.findByOrderIdAndSellerId(orderId, tenantId)
+    return orderRepository.findByOrderIdAndTenantId(orderId, tenantId)
         .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
   }
 }

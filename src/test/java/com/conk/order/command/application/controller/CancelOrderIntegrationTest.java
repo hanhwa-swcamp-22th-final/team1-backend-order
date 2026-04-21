@@ -84,7 +84,7 @@ class CancelOrderIntegrationTest {
 
   private Order createOrder(String orderId, String sellerId) {
     return Order.create(
-        orderId, LocalDateTime.of(2026, 4, 9, 10, 0), sellerId,
+        orderId, LocalDateTime.of(2026, 4, 9, 10, 0), sellerId, "TENANT-001",
         OrderChannel.MANUAL,
         List.of(OrderItem.create("SKU-001", 1, null)),
         ShippingAddress.create("123 Main St", null, "LA", "CA", "90001"),

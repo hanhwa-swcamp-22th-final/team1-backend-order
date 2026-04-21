@@ -96,6 +96,7 @@ class WhmOrderListIntegrationTest {
         orderId,
         orderedAt,
         "SELLER-001",
+        "TENANT-001",
         OrderChannel.MANUAL,
         List.of(OrderItem.create("SKU-001", 1, null)),
         ShippingAddress.create("서울시 강남구 테헤란로 123", null, "Seoul", null, "06236"),

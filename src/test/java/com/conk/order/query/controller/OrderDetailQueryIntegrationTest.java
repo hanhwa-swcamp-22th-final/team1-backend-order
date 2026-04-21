@@ -38,7 +38,7 @@ class OrderDetailQueryIntegrationTest {
   @Test
   void getOrderDetail_returnsFullDetail() throws Exception {
     Order order = Order.create(
-        "ORD-DETAIL-001", LocalDateTime.of(2026, 4, 9, 10, 0), "SELLER-001",
+        "ORD-DETAIL-001", LocalDateTime.of(2026, 4, 9, 10, 0), "SELLER-001", "TENANT-001",
         OrderChannel.MANUAL,
         List.of(
             OrderItem.create("SKU-001", 2, "상품A"),

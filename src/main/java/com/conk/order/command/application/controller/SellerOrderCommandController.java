@@ -39,8 +39,9 @@ public class SellerOrderCommandController {
   @PostMapping("/manual")
   public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(
       @RequestHeader("X-User-Id") String sellerId,
+      @RequestHeader("X-Tenant-Id") String tenantId,
       @Valid @RequestBody CreateOrderRequest request) {
-    CreateOrderResponse response = sellerOrderCommandService.create(request, sellerId);
+    CreateOrderResponse response = sellerOrderCommandService.create(request, sellerId, tenantId);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(ApiResponse.created("주문이 등록되었습니다.", response));
   }

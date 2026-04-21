@@ -52,13 +52,14 @@ public class SellerOrderCommandService {
    * sellerId 는 NGINX 가 주입한 X-User-Id 헤더 값을 컨트롤러가 전달한다.
    */
   @Transactional
-  public CreateOrderResponse create(CreateOrderRequest request, String sellerId) {
+  public CreateOrderResponse create(CreateOrderRequest request, String sellerId, String tenantId) {
     String orderId = orderIdGenerator.generate();
 
     Order order = Order.create(
         orderId,
         request.getOrderedAt(),
         sellerId,
+        tenantId,
         OrderChannel.MANUAL,
         toOrderItems(request.getItems()),
         toShippingAddress(request.getShippingAddress()),

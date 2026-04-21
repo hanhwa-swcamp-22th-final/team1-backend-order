@@ -42,7 +42,7 @@ class OrderDetailQueryControllerTest {
   @Test
   void getOrderDetail_returnsOk() throws Exception {
     Order order = Order.create(
-        "ORD-001", LocalDateTime.of(2026, 4, 9, 10, 0), "SELLER-001",
+        "ORD-001", LocalDateTime.of(2026, 4, 9, 10, 0), "SELLER-001", "TENANT-001",
         OrderChannel.MANUAL,
         List.of(OrderItem.create("SKU-001", 2, "상품A")),
         ShippingAddress.create("123 Main St", "Apt 4", "LA", "CA", "90001"),
