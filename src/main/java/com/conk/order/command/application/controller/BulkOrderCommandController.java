@@ -77,7 +77,7 @@ public class BulkOrderCommandController {
   /* POST /orders/seller/bulk — 엑셀 파일을 부분 저장 정책으로 일괄 등록한다. */
   @PostMapping
   public ResponseEntity<ApiResponse<BulkCreateOrderResponse>> bulkCreate(
-      @RequestHeader("X-User-Id") String sellerId,
+      @RequestHeader("X-Seller-Id") String sellerId,
       @RequestHeader("X-Tenant-Id") String tenantId,
       @RequestParam MultipartFile file) {
     BulkCreateOrderResponse response = bulkOrderCommandService.create(file, sellerId, tenantId);

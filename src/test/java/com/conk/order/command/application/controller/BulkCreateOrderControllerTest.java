@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 /*
  * ORD-003 엑셀 일괄 주문 등록 컨트롤러 단위 테스트.
  *
- * sellerId 는 X-User-Id 헤더에서 추출한다.
+ * sellerId 는 X-Seller-Id 헤더에서 추출한다.
  */
 @WebMvcTest(BulkOrderCommandController.class)
 class BulkCreateOrderControllerTest {
@@ -51,7 +51,7 @@ class BulkCreateOrderControllerTest {
 
     mockMvc.perform(multipart("/orders/seller/bulk")
             .file(file)
-            .header("X-User-Id", "SELLER-001")
+            .header("X-Seller-Id", "SELLER-001")
             .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isOk())
@@ -78,7 +78,7 @@ class BulkCreateOrderControllerTest {
 
     mockMvc.perform(multipart("/orders/seller/bulk")
             .file(file)
-            .header("X-User-Id", "SELLER-001")
+            .header("X-Seller-Id", "SELLER-001")
             .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isOk())
@@ -88,7 +88,7 @@ class BulkCreateOrderControllerTest {
   }
 
   /*
-   * X-User-Id 헤더가 없으면 GlobalExceptionHandler 가 401 Unauthorized 를 반환한다.
+   * X-Seller-Id 헤더가 없으면 GlobalExceptionHandler 가 401 Unauthorized 를 반환한다.
    */
   @Test
   void bulkCreate_returnsUnauthorized_whenUserIdHeaderMissing() throws Exception {
@@ -108,7 +108,7 @@ class BulkCreateOrderControllerTest {
   @Test
   void bulkCreate_returnsBadRequest_whenFileMissing() throws Exception {
     mockMvc.perform(multipart("/orders/seller/bulk")
-            .header("X-User-Id", "SELLER-001")
+            .header("X-Seller-Id", "SELLER-001")
             .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.MULTIPART_FORM_DATA))
         .andExpect(status().isBadRequest());

@@ -42,7 +42,7 @@ class CreateOrderControllerTest {
     String requestBody = objectMapper.writeValueAsString(buildRequestBody());
 
     mockMvc.perform(post("/orders/seller/manual")
-            .header("X-User-Id", "SELLER-001")
+            .header("X-Seller-Id", "SELLER-001")
             .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.APPLICATION_JSON)
             .content(requestBody))
@@ -53,7 +53,7 @@ class CreateOrderControllerTest {
   }
 
   /*
-   * X-User-Id 헤더가 없으면 GlobalExceptionHandler 가 401 Unauthorized 를 반환한다.
+   * X-Seller-Id 헤더가 없으면 GlobalExceptionHandler 가 401 Unauthorized 를 반환한다.
    * 운영에서는 NGINX 가 항상 헤더를 주입하므로 발생하지 않는 케이스.
    */
   @Test
@@ -71,7 +71,7 @@ class CreateOrderControllerTest {
     body.remove("items");
 
     mockMvc.perform(post("/orders/seller/manual")
-            .header("X-User-Id", "SELLER-001")
+            .header("X-Seller-Id", "SELLER-001")
             .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(body)))
@@ -89,7 +89,7 @@ class CreateOrderControllerTest {
     body.put("shippingAddress", shippingAddress);
 
     mockMvc.perform(post("/orders/seller/manual")
-            .header("X-User-Id", "SELLER-001")
+            .header("X-Seller-Id", "SELLER-001")
             .header("X-Tenant-Id", "TENANT-001")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(body)))

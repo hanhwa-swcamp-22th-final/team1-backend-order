@@ -44,7 +44,7 @@ class SellerOrderListQueryIntegrationTest {
     orderRepository.save(order);
 
     mockMvc.perform(get("/orders/seller/list")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.totalCount").value(1))
@@ -73,7 +73,7 @@ class SellerOrderListQueryIntegrationTest {
     orderRepository.save(receivedOrder);
 
     mockMvc.perform(get("/orders/seller/list")
-            .header("X-User-Id", "SELLER-001")
+            .header("X-Seller-Id", "SELLER-001")
             .param("status", "DISPATCHED"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))

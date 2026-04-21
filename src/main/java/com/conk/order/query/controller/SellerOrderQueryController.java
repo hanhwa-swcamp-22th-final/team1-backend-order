@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  *   - GET /orders/seller/{orderId}        : 주문 상세 (canCancel 포함)
  *   - GET /orders/seller/{orderId}/tracking : 주문 상태 변경 이력
  *
- * sellerId 는 NGINX 가 JWT 검증 후 주입하는 X-User-Id 헤더에서 추출한다.
+ * sellerId 는 NGINX 가 JWT 검증 후 주입하는 X-Seller-Id 헤더에서 추출한다.
  */
 @RestController
 @RequestMapping("/orders/seller")
@@ -78,7 +78,7 @@ public class SellerOrderQueryController {
   /* GET /orders/seller/options — 셀러 주문 등록 화면 옵션을 조회한다. */
   @GetMapping("/options")
   public ResponseEntity<ApiResponse<SellerOrderOptionsResponse>> getOptions(
-      @RequestHeader("X-User-Id") String sellerId) {
+      @RequestHeader("X-Seller-Id") String sellerId) {
     SellerOrderOptionsResponse response = sellerOrderQueryService.getOrderOptions(sellerId);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
@@ -87,7 +87,7 @@ public class SellerOrderQueryController {
   @GetMapping("/{orderId}")
   public ResponseEntity<ApiResponse<SellerOrderDetailResponse>> getDetail(
       @PathVariable String orderId,
-      @RequestHeader("X-User-Id") String sellerId) {
+      @RequestHeader("X-Seller-Id") String sellerId) {
     SellerOrderDetailResponse response = sellerOrderQueryService.getDetail(orderId, sellerId);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
@@ -96,7 +96,7 @@ public class SellerOrderQueryController {
   @GetMapping("/{orderId}/tracking")
   public ResponseEntity<ApiResponse<OrderTrackingResponse>> getTracking(
       @PathVariable String orderId,
-      @RequestHeader("X-User-Id") String sellerId) {
+      @RequestHeader("X-Seller-Id") String sellerId) {
     OrderTrackingResponse response = sellerOrderQueryService.getTracking(orderId, sellerId);
     return ResponseEntity.ok(ApiResponse.success(response));
   }

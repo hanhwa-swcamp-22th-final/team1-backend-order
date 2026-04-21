@@ -44,7 +44,7 @@ class SellerOrderDetailQueryIntegrationTest {
     orderRepository.save(order);
 
     mockMvc.perform(get("/orders/seller/ORD-SD-001")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.orderId").value("ORD-SD-001"))
         .andExpect(jsonPath("$.data.status").value("RECEIVED"))
@@ -59,7 +59,7 @@ class SellerOrderDetailQueryIntegrationTest {
     orderRepository.save(order);
 
     mockMvc.perform(get("/orders/seller/ORD-SD-002")
-            .header("X-User-Id", "SELLER-OTHER"))
+            .header("X-Seller-Id", "SELLER-OTHER"))
         .andExpect(status().isNotFound());
   }
 
@@ -67,7 +67,7 @@ class SellerOrderDetailQueryIntegrationTest {
   @Test
   void getDetail_returns404_whenNotFound() throws Exception {
     mockMvc.perform(get("/orders/seller/NONEXISTENT")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isNotFound());
   }
 

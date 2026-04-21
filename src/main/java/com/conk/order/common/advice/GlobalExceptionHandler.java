@@ -20,12 +20,13 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  /* X-User-Id 헤더 누락 → 401 Unauthorized. 그 외 헤더 누락 → 400. */
+  /* 인증용 X-User-Id / X-Seller-Id 헤더 누락 → 401 Unauthorized. 그 외 헤더 누락 → 400. */
   @ExceptionHandler(MissingRequestHeaderException.class)
   public ResponseEntity<ApiResponse<Void>> handleMissingHeader(MissingRequestHeaderException ex) {
-    if ("X-User-Id".equals(ex.getHeaderName())) {
+    if ("X-User-Id".equals(ex.getHeaderName()) || "X-Seller-Id".equals(ex.getHeaderName())) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-          .body(ApiResponse.failure("UNAUTHORIZED", "인증 정보가 없습니다. X-User-Id 헤더가 필요합니다."));
+          .body(ApiResponse.failure("UNAUTHORIZED",
+              "인증 정보가 없습니다. X-User-Id 또는 X-Seller-Id 헤더가 필요합니다."));
     }
     return ResponseEntity.badRequest()
         .body(ApiResponse.failure(ErrorCode.INVALID_INPUT.getCode(),

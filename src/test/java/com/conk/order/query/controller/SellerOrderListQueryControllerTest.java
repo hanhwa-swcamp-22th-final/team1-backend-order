@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 /*
  * ORD-004 셀러 주문 목록 조회 컨트롤러 단위 테스트.
  *
- * sellerId 는 X-User-Id 헤더에서 추출한다.
+ * sellerId 는 X-Seller-Id 헤더에서 추출한다.
  */
 @WebMvcTest(SellerOrderQueryController.class)
 class SellerOrderListQueryControllerTest {
@@ -67,7 +67,7 @@ class SellerOrderListQueryControllerTest {
         .willReturn(new SellerOrderListResponse(List.of(summary), 1, 0, 20));
 
     mockMvc.perform(get("/orders/seller/list")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.orders[0].orderId").value("ORD-001"))
@@ -94,7 +94,7 @@ class SellerOrderListQueryControllerTest {
         .willReturn(new SellerOrderListResponse(List.of(), 0, 0, 20));
 
     mockMvc.perform(get("/orders/seller/list")
-            .header("X-User-Id", "SELLER-001")
+            .header("X-Seller-Id", "SELLER-001")
             .param("status", "DISPATCHED"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true));
@@ -115,7 +115,7 @@ class SellerOrderListQueryControllerTest {
         .willReturn(response);
 
     mockMvc.perform(get("/orders/seller/options")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.products[0].sku").value("SKU-001"))
@@ -125,16 +125,16 @@ class SellerOrderListQueryControllerTest {
   }
 
   /*
-   * X-User-Id 헤더가 없으면 GlobalExceptionHandler 가 401 Unauthorized 를 반환한다.
+   * X-Seller-Id 헤더가 없으면 GlobalExceptionHandler 가 401 Unauthorized 를 반환한다.
    */
   @Test
-  void getSellerOrders_returnsUnauthorized_whenUserIdHeaderMissing() throws Exception {
+  void getSellerOrders_returnsUnauthorized_whenSellerIdHeaderMissing() throws Exception {
     mockMvc.perform(get("/orders/seller/list"))
         .andExpect(status().isUnauthorized());
   }
 
   @Test
-  void getSellerOrderOptions_returnsUnauthorized_whenUserIdHeaderMissing() throws Exception {
+  void getSellerOrderOptions_returnsUnauthorized_whenSellerIdHeaderMissing() throws Exception {
     mockMvc.perform(get("/orders/seller/options"))
         .andExpect(status().isUnauthorized());
   }
@@ -161,9 +161,9 @@ class SellerOrderListQueryControllerTest {
   }
 
   @Test
-  @org.junit.jupiter.api.DisplayName("X-Seller-Id 헤더가 없으면 마진 preset 조회 시 400을 반환한다")
-  void getMarginPresets_whenSellerIdMissing_thenReturnBadRequest() throws Exception {
+  @org.junit.jupiter.api.DisplayName("X-Seller-Id 헤더가 없으면 마진 preset 조회 시 401을 반환한다")
+  void getMarginPresets_whenSellerIdMissing_thenReturnUnauthorized() throws Exception {
     mockMvc.perform(get("/orders/seller/margin-presets"))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isUnauthorized());
   }
 }

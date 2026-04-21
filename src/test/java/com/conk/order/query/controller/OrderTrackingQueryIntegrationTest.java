@@ -59,7 +59,7 @@ class OrderTrackingQueryIntegrationTest {
 
     // 트래킹 조회
     mockMvc.perform(get("/orders/seller/ORD-TRACK-001/tracking")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.orderId").value("ORD-TRACK-001"))
         .andExpect(jsonPath("$.data.currentStatus").value("ALLOCATED"))
@@ -76,12 +76,12 @@ class OrderTrackingQueryIntegrationTest {
 
     // 주문 취소
     mockMvc.perform(patch("/orders/seller/ORD-TRACK-002/cancel")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isOk());
 
     // 트래킹 조회
     mockMvc.perform(get("/orders/seller/ORD-TRACK-002/tracking")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.currentStatus").value("CANCELED"))
         .andExpect(jsonPath("$.data.history[0].fromStatus").value("RECEIVED"))
@@ -95,7 +95,7 @@ class OrderTrackingQueryIntegrationTest {
     orderRepository.save(order);
 
     mockMvc.perform(get("/orders/seller/ORD-TRACK-003/tracking")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.currentStatus").value("RECEIVED"))
         .andExpect(jsonPath("$.data.history.length()").value(0));
@@ -108,7 +108,7 @@ class OrderTrackingQueryIntegrationTest {
     orderRepository.save(order);
 
     mockMvc.perform(get("/orders/seller/ORD-TRACK-004/tracking")
-            .header("X-User-Id", "SELLER-OTHER"))
+            .header("X-Seller-Id", "SELLER-OTHER"))
         .andExpect(status().isNotFound());
   }
 

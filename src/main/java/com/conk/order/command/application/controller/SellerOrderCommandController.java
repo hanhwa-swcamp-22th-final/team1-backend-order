@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  *   - POST  /orders/seller/manual         : 단건 주문 등록 (ORD-002)
  *   - PATCH /orders/seller/{orderId}/cancel : 주문 취소
  *
- * sellerId 는 NGINX 가 JWT 검증 후 주입하는 X-User-Id 헤더에서 추출한다.
+ * sellerId 는 NGINX 가 JWT 검증 후 주입하는 X-Seller-Id 헤더에서 추출한다.
  * 클라이언트가 body 에 sellerId 를 직접 보내는 방식은 위조 가능하므로 사용하지 않는다.
  */
 @RestController
@@ -38,7 +38,7 @@ public class SellerOrderCommandController {
   /* POST /orders/seller/manual — 셀러 단건 주문을 등록한다. */
   @PostMapping("/manual")
   public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(
-      @RequestHeader("X-User-Id") String sellerId,
+      @RequestHeader("X-Seller-Id") String sellerId,
       @RequestHeader("X-Tenant-Id") String tenantId,
       @Valid @RequestBody CreateOrderRequest request) {
     CreateOrderResponse response = sellerOrderCommandService.create(request, sellerId, tenantId);
@@ -50,7 +50,7 @@ public class SellerOrderCommandController {
   @PatchMapping("/{orderId}/cancel")
   public ResponseEntity<ApiResponse<Void>> cancel(
       @PathVariable String orderId,
-      @RequestHeader("X-User-Id") String sellerId) {
+      @RequestHeader("X-Seller-Id") String sellerId) {
     sellerOrderCommandService.cancel(orderId, sellerId);
     return ResponseEntity.ok(ApiResponse.created("주문이 취소되었습니다.", null));
   }

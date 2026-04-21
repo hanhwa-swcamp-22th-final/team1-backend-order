@@ -12,7 +12,7 @@ import lombok.Getter;
  * 셀러 단건 주문 등록 요청 DTO.
  *
  * 주문 ID 는 서버가 채번하므로 요청에 포함하지 않는다.
- * sellerId 는 NGINX 가 주입하는 X-User-Id 헤더에서 추출하므로 body 에 포함하지 않는다.
+ * sellerId 는 NGINX 가 주입하는 X-Seller-Id 헤더에서 추출하므로 body 에 포함하지 않는다.
  * orderChannel 은 이 엔드포인트 전용으로 MANUAL 로 고정된다.
  */
 @Getter

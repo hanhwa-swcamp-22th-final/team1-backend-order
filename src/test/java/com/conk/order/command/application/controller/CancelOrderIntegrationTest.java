@@ -43,7 +43,7 @@ class CancelOrderIntegrationTest {
     orderRepository.save(order);
 
     mockMvc.perform(patch("/orders/seller/ORD-CANCEL-001/cancel")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true));
 
@@ -58,7 +58,7 @@ class CancelOrderIntegrationTest {
     orderRepository.save(order);
 
     mockMvc.perform(patch("/orders/seller/ORD-CANCEL-002/cancel")
-            .header("X-User-Id", "SELLER-OTHER"))
+            .header("X-Seller-Id", "SELLER-OTHER"))
         .andExpect(status().isNotFound());
 
     // 원래 상태 유지 확인
@@ -76,7 +76,7 @@ class CancelOrderIntegrationTest {
     orderRepository.save(order);
 
     mockMvc.perform(patch("/orders/seller/ORD-CANCEL-003/cancel")
-            .header("X-User-Id", "SELLER-001"))
+            .header("X-Seller-Id", "SELLER-001"))
         .andExpect(status().isConflict());
   }
 
