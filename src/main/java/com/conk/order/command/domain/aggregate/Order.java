@@ -2,6 +2,7 @@ package com.conk.order.command.domain.aggregate;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -19,6 +20,7 @@ import java.util.List;
  * 물리 테이블: sales_order
  */
 @Getter
+@Setter
 @Entity
 @Table(name = "sales_order")
 @EntityListeners(AuditingEntityListener.class)

@@ -69,7 +69,7 @@ public class SellerOrderCommandService {
         request.getReceiverPhoneNo(),
         request.getMemo()
     );
-
+    order.setWarehouseId("WH-001");
     orderRepository.saveOrder(order);
     return new CreateOrderResponse(orderId);
   }
